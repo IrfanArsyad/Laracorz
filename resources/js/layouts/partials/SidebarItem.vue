@@ -39,7 +39,7 @@ const padLeft = computed(() => (props.depth ?? 0) * 12);
             :prefetch="'hover'"
             :class="
                 cn(
-                    'group relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium',
+                    'group relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium',
                     'transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-out)]',
                     isActive
                         ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)] before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-full before:bg-[var(--brand-bg)]'
@@ -56,7 +56,7 @@ const padLeft = computed(() => (props.depth ?? 0) * 12);
             type="button"
             :class="
                 cn(
-                    'group flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-[var(--sidebar-fg)]',
+                    'group flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-[var(--sidebar-fg)]',
                     'transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-out)]',
                     'hover:bg-[var(--sidebar-item-hover)] hover:text-[var(--text-strong)]',
                 )

@@ -37,6 +37,8 @@ class RoleController extends Controller
                 'sort' => $dto->sort,
                 'direction' => $dto->direction,
             ],
+            // matrix dipakai modal Create/Edit di index page (deferred biar load cepat)
+            'matrix' => Inertia::defer(fn () => $this->matrix()),
         ]);
     }
 

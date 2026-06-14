@@ -94,19 +94,19 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
                 <div v-if="detail.data.value" class="space-y-4 text-sm">
                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Waktu</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">Waktu</p>
                             <p class="mt-0.5">{{ detail.data.value.created_at }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">User</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">User</p>
                             <p class="mt-0.5">{{ detail.data.value.user_name ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">IP</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">IP</p>
                             <p class="mt-0.5 font-mono text-xs">{{ detail.data.value.ip_address ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Aksi</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">Aksi</p>
                             <Badge :variant="((ADMIN_LOG_ACTIONS as any)[detail.data.value.action]?.color ?? 'muted')">
                                 {{ (ADMIN_LOG_ACTIONS as any)[detail.data.value.action]?.label ?? detail.data.value.action }}
                             </Badge>
@@ -115,11 +115,11 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Sebelum</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Sebelum</p>
                             <pre class="bg-[var(--surface-sunken)] border border-[var(--border-subtle)] rounded-md p-3 text-xs font-mono whitespace-pre-wrap overflow-auto max-h-64">{{ JSON.stringify(detail.data.value.old_values ?? {}, null, 2) }}</pre>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Sesudah</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Sesudah</p>
                             <pre class="bg-[var(--surface-sunken)] border border-[var(--border-subtle)] rounded-md p-3 text-xs font-mono whitespace-pre-wrap overflow-auto max-h-64">{{ JSON.stringify(detail.data.value.new_values ?? {}, null, 2) }}</pre>
                         </div>
                     </div>

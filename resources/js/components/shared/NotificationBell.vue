@@ -20,7 +20,7 @@ const items = ref<Array<{ id: string; title: string; message: string; url?: stri
                 <Badge
                     v-if="unreadCount > 0"
                     variant="destructive"
-                    class="absolute -top-1 -right-1 px-1.5 min-w-[1.25rem] h-5 text-[10px]"
+                    class="absolute -top-1 -right-1 px-1.5 min-w-[1.25rem] h-5 text-xs"
                 >
                     {{ unreadCount > 99 ? '99+' : unreadCount }}
                 </Badge>

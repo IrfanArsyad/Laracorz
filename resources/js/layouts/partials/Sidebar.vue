@@ -50,7 +50,7 @@ const initial = computed(() => appName.value.charAt(0).toUpperCase());
             <div v-for="group in menu" :key="group.id" class="mb-3">
                 <div
                     v-if="!collapsed"
-                    class="px-3 mb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--text-muted)]"
+                    class="px-3 mb-1 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--text-muted)]"
                 >
                     {{ group.label }}
                 </div>

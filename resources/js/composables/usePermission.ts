@@ -4,11 +4,15 @@ import type { ModuleMap, Permissions } from '@/types';
 
 type Action = 'read' | 'create' | 'update' | 'delete';
 
+function asArray<T>(v: unknown): T[] {
+    return Array.isArray(v) ? (v as T[]) : [];
+}
+
 export function usePermission() {
     const page = usePage();
 
     const permissions = computed<Permissions | null>(() => page.props.auth?.permissions ?? null);
-    const modules = computed<ModuleMap[]>(() => page.props.modules ?? []);
+    const modules = computed<ModuleMap[]>(() => asArray<ModuleMap>(page.props.modules));
 
     function resolveId(module: number | string): number | null {
         if (typeof module === 'number') return module;
@@ -19,7 +23,7 @@ export function usePermission() {
     function can(action: Action, module: number | string): boolean {
         const perms = permissions.value;
         if (!perms) return false;
-        const list = perms[action] ?? [];
+        const list = asArray<number | string>(perms[action]);
         if (list.includes('*')) return true;
 
         const id = resolveId(module);
@@ -30,18 +34,17 @@ export function usePermission() {
 
     function canExtra(moduleName: string, action: string): boolean {
         if (isSuperAdmin.value) return true;
-        // extra not yet wired in props; placeholder false
-        const _ = `${moduleName}:${action}`;
+        void `${moduleName}:${action}`;
         return false;
     }
 
     const isSuperAdmin = computed(() => {
-        const list = permissions.value?.read ?? [];
+        const list = asArray<number | string>(permissions.value?.read);
         return list.includes('*');
     });
 
-    function canAny(action: Action, modules: Array<number | string>): boolean {
-        return modules.some((m) => can(action, m));
+    function canAny(action: Action, mods: Array<number | string>): boolean {
+        return asArray<number | string>(mods).some((m) => can(action, m));
     }
 
     return { can, canAny, canExtra, isSuperAdmin };

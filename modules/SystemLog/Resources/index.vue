@@ -83,24 +83,24 @@ const levelOptions = Object.entries(LOG_LEVELS).map(([k, v]) => ({ label: v.labe
                 <div v-if="detail.data.value" class="space-y-4 text-sm">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Waktu</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">Waktu</p>
                             <p class="mt-0.5">{{ detail.data.value.created_at }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Channel</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">Channel</p>
                             <p class="mt-0.5 font-mono text-xs">{{ detail.data.value.channel }}</p>
                         </div>
                     </div>
                     <div>
-                        <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Pesan</p>
+                        <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Pesan</p>
                         <p>{{ detail.data.value.message }}</p>
                     </div>
                     <div v-if="detail.data.value.context">
-                        <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Context</p>
+                        <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Context</p>
                         <pre class="bg-[var(--surface-sunken)] border border-[var(--border-subtle)] rounded-md p-3 text-xs font-mono whitespace-pre-wrap overflow-auto max-h-64">{{ JSON.stringify(detail.data.value.context, null, 2) }}</pre>
                     </div>
                     <div v-if="detail.data.value.exception">
-                        <p class="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Trace</p>
+                        <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Trace</p>
                         <pre class="bg-[var(--surface-sunken)] border border-[var(--border-subtle)] rounded-md p-3 text-xs font-mono whitespace-pre-wrap overflow-auto max-h-64">{{ detail.data.value.exception }}</pre>
                     </div>
                 </div>

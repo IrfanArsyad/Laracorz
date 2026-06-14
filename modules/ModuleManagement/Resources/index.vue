@@ -173,7 +173,7 @@ async function hapus(id: number, label: string): Promise<void> {
                     <Card>
                         <CardContent class="space-y-5">
                             <div v-for="group in tree" :key="group.id">
-                                <h3 class="text-[10px] uppercase tracking-[0.06em] text-[var(--text-muted)] mb-2 font-semibold">
+                                <h3 class="text-xs uppercase tracking-[0.06em] text-[var(--text-muted)] mb-2 font-semibold">
                                     {{ group.label }}
                                 </h3>
                                 <ul class="space-y-0.5">
@@ -191,11 +191,11 @@ async function hapus(id: number, label: string): Promise<void> {
                                                 </button>
                                                 <FolderOpen v-else class="h-4 w-4 text-[var(--text-muted)] shrink-0" />
                                                 <span class="font-medium text-sm truncate">{{ node.label }}</span>
-                                                <Badge variant="muted" class="font-mono text-[10px]">{{ node.name }}</Badge>
+                                                <Badge variant="muted" class="font-mono text-xs">{{ node.name }}</Badge>
                                                 <span v-if="node.url" class="text-xs text-[var(--text-muted)] truncate hidden sm:inline">{{ node.url }}</span>
                                             </span>
                                             <div class="flex items-center gap-1 shrink-0">
-                                                <Badge :variant="node.active ? 'success' : 'muted'" class="text-[10px]">
+                                                <Badge :variant="node.active ? 'success' : 'muted'" class="text-xs">
                                                     {{ node.active ? 'Aktif' : 'Nonaktif' }}
                                                 </Badge>
                                                 <Button size="icon-xs" variant="ghost" aria-label="Detail" @click="openDetail(node)">
@@ -226,7 +226,7 @@ async function hapus(id: number, label: string): Promise<void> {
                                             >
                                                 <span class="flex items-center gap-2 min-w-0">
                                                     <span class="text-[var(--text-default)] truncate">{{ child.label }}</span>
-                                                    <Badge variant="muted" class="font-mono text-[10px]">{{ child.name }}</Badge>
+                                                    <Badge variant="muted" class="font-mono text-xs">{{ child.name }}</Badge>
                                                     <span class="text-xs text-[var(--text-muted)] truncate hidden sm:inline">{{ child.url }}</span>
                                                 </span>
                                                 <div class="flex items-center gap-1 shrink-0">

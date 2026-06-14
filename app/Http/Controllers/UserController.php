@@ -52,6 +52,12 @@ class UserController extends Controller
             'roles' => Role::query()->orderBy('display_name')->get(['id', 'name', 'display_name']),
             'filters' => array_merge(['search' => $dto->search, 'sort' => $dto->sort, 'direction' => $dto->direction], (array) $filters),
             'trashed' => $trashed,
+            'stats' => Inertia::defer(fn (): array => [
+                'total' => User::query()->count(),
+                'active' => User::query()->where('status', User::STATUS_ACTIVE)->count(),
+                'inactive' => User::query()->where('status', User::STATUS_INACTIVE)->count(),
+                'banned' => User::query()->where('status', User::STATUS_BANNED)->count(),
+            ]),
         ]);
     }
 

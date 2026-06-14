@@ -7,7 +7,7 @@ defineProps<{ class?: string }>();
     <kbd
         :class="
             cn(
-                'inline-flex items-center gap-1 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground',
+                'inline-flex items-center gap-1 rounded border border-border bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground',
                 $props.class,
             )
         "

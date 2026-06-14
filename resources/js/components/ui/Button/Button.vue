@@ -55,7 +55,7 @@ const buttonVariants = cva(
             },
             size: {
                 default: 'h-10 px-4 text-sm',            // CTA standar
-                sm: 'h-9 px-3.5 text-[13px] gap-1.5',    // secondary action
+                sm: 'h-9 px-3.5 text-sm gap-1.5',    // secondary action
                 xs: 'h-8 px-2.5 text-xs gap-1',          // inline action di tabel
                 lg: 'h-11 px-5 text-sm',                 // primary banner/hero
                 icon: 'h-10 w-10',

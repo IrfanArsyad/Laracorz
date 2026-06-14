@@ -50,24 +50,29 @@ const emit = defineEmits<{
     'row-click': [row: Record<string, unknown>];
 }>();
 
+const rows = computed(() => props.data?.data ?? []);
+const safeSelected = computed<Array<string | number>>(() =>
+    Array.isArray(props.selected) ? props.selected : [],
+);
+
 const allSelected = computed(() => {
-    if (props.data.data.length === 0) return false;
-    return props.data.data.every((r) => props.selected.includes(r[props.rowKey] as string | number));
+    if (rows.value.length === 0) return false;
+    return rows.value.every((r) => safeSelected.value.includes(r[props.rowKey] as string | number));
 });
 
-const someSelected = computed(() => !allSelected.value && props.selected.length > 0);
+const someSelected = computed(() => !allSelected.value && safeSelected.value.length > 0);
 
 function toggleAll(): void {
     if (allSelected.value) {
         emit('update:selected', []);
     } else {
-        emit('update:selected', props.data.data.map((r) => r[props.rowKey] as string | number));
+        emit('update:selected', rows.value.map((r) => r[props.rowKey] as string | number));
     }
 }
 
 function toggleRow(row: Record<string, unknown>): void {
     const key = row[props.rowKey] as string | number;
-    const set = new Set(props.selected);
+    const set = new Set(safeSelected.value);
     if (set.has(key)) set.delete(key);
     else set.add(key);
     emit('update:selected', Array.from(set));
@@ -108,7 +113,7 @@ function sortBy(col: Column): void {
                             :key="col.key"
                             :class="
                                 cn(
-                                    'px-3 py-2 text-[11px] font-medium tracking-tight',
+                                    'px-3 py-2 text-xs font-medium tracking-tight',
                                     col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
                                     col.sortable ? 'cursor-pointer select-none hover:text-[var(--text-default)] transition-colors' : '',
                                     col.class,
@@ -140,13 +145,13 @@ function sortBy(col: Column): void {
                             <Skeleton class="h-5 w-full" />
                         </td>
                     </tr>
-                    <tr v-else-if="data.data.length === 0">
+                    <tr v-else-if="rows.length === 0">
                         <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)" class="px-3 py-10">
                             <EmptyState :title="emptyTitle" :description="emptyDescription" />
                         </td>
                     </tr>
                     <tr
-                        v-for="row in data.data"
+                        v-for="row in rows"
                         v-else
                         :key="row[rowKey] as string | number"
                         class="transition-colors hover:bg-[var(--state-hover)]"
@@ -154,7 +159,7 @@ function sortBy(col: Column): void {
                     >
                         <td v-if="selectable" class="w-9 px-3 py-2.5" @click.stop>
                             <Checkbox
-                                :model-value="selected.includes(row[rowKey] as string | number)"
+                                :model-value="safeSelected.includes(row[rowKey] as string | number)"
                                 @update:model-value="toggleRow(row)"
                             />
                         </td>
@@ -163,7 +168,7 @@ function sortBy(col: Column): void {
                             :key="col.key"
                             :class="
                                 cn(
-                                    'px-3 py-2.5 text-[13px] text-[var(--text-default)]',
+                                    'px-3 py-2.5 text-sm text-[var(--text-default)]',
                                     col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
                                     col.class,
                                 )

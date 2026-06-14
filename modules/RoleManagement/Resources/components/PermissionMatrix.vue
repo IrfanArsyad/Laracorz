@@ -53,13 +53,14 @@ const leaves = computed<Node[]>(() => {
 });
 
 function getList(action: Action): Array<number | string> {
-    return action === 'read'
+    const v = action === 'read'
         ? props.modelRead
         : action === 'create'
           ? props.modelCreate
           : action === 'update'
             ? props.modelUpdate
             : props.modelDelete;
+    return Array.isArray(v) ? v : [];
 }
 
 function setList(action: Action, v: Array<number | string>): void {

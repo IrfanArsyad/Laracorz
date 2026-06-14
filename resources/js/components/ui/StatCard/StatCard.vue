@@ -32,16 +32,16 @@ const trendDown = computed(() => (props.trend ?? 0) < 0);
         "
     >
         <div class="flex items-center justify-between gap-2">
-            <p class="text-xs font-medium text-[var(--text-muted)]">{{ label }}</p>
+            <p class="text-sm font-medium text-[var(--text-muted)]">{{ label }}</p>
             <div
                 v-if="icon"
-                class="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)]"
+                class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)]"
             >
-                <component :is="icon" class="h-3.5 w-3.5" />
+                <component :is="icon" class="h-4 w-4" />
             </div>
         </div>
-        <p v-if="loading" class="mt-2.5 h-7 w-24 animate-pulse rounded bg-[var(--surface-sunken)]" />
-        <p v-else class="mt-2 text-[26px] font-semibold leading-tight tracking-tight tabular-nums text-[var(--text-strong)]">
+        <p v-if="loading" class="mt-3 h-8 w-24 animate-pulse rounded bg-[var(--surface-sunken)]" />
+        <p v-else class="mt-2 text-3xl font-semibold leading-tight tracking-tight tabular-nums text-[var(--text-strong)]">
             {{ value }}
         </p>
         <div v-if="(trend !== undefined || hint) && !loading" class="mt-1.5 flex items-center gap-2 text-xs">

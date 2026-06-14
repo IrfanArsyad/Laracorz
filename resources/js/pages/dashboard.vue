@@ -71,7 +71,7 @@ const quickActions = [
                         style="background-image: linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px); background-size: 24px 24px; color: var(--brand-soft-fg);"
                     />
                     <div class="relative p-5">
-                        <div class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-200)] bg-[var(--surface-raised)]/70 px-2 py-0.5 text-[11px] font-medium text-[var(--brand-soft-fg)]">
+                        <div class="inline-flex items-center gap-1.5 rounded-full border border-[var(--brand-200)] bg-[var(--surface-raised)]/70 px-2 py-0.5 text-xs font-medium text-[var(--brand-soft-fg)]">
                             <Sparkles class="h-3 w-3" /> LaraCorz Core
                         </div>
                         <h2 class="mt-2.5 text-lg font-semibold tracking-tight text-[var(--text-strong)]">
@@ -79,7 +79,7 @@ const quickActions = [
                         </h2>
                         <p class="mt-1 text-sm text-[var(--text-muted)] max-w-md text-pretty">
                             Tekan
-                            <kbd class="rounded border border-[var(--border-default)] bg-[var(--surface-raised)] px-1 py-px text-[10px] font-mono text-[var(--text-default)]">Ctrl+K</kbd>
+                            <kbd class="rounded border border-[var(--border-default)] bg-[var(--surface-raised)] px-1 py-px text-xs font-mono text-[var(--text-default)]">Ctrl+K</kbd>
                             untuk pencarian cepat, atau lompat langsung ke modul lewat sidebar.
                         </p>
                     </div>
@@ -100,7 +100,7 @@ const quickActions = [
                                 </span>
                                 <span class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-[var(--text-default)]">{{ a.label }}</p>
-                                    <p class="text-[11px] text-[var(--text-muted)] truncate">{{ a.hint }}</p>
+                                    <p class="text-xs text-[var(--text-muted)] truncate">{{ a.hint }}</p>
                                 </span>
                                 <ArrowUpRight class="h-3.5 w-3.5 text-[var(--text-muted)] group-hover:text-[var(--text-default)] transition-colors" />
                             </Link>

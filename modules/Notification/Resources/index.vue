@@ -49,7 +49,7 @@ function markAllRead(): void {
                         <div class="flex-1">
                             <p class="text-sm font-medium">{{ n.data.title }}</p>
                             <p class="text-xs text-muted-foreground">{{ n.data.message }}</p>
-                            <p class="text-[10px] text-muted-foreground mt-1">{{ n.created_at }}</p>
+                            <p class="text-xs text-muted-foreground mt-1">{{ n.created_at }}</p>
                         </div>
                         <Button v-if="!n.read_at" variant="ghost" size="sm" @click="markRead(n.id)">
                             <Check class="h-3.5 w-3.5" />
