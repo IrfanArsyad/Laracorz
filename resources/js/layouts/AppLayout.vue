@@ -55,9 +55,9 @@ watch(
 <template>
     <div class="min-h-screen bg-[var(--surface-base)] text-[var(--text-default)]">
         <Sidebar :collapsed="sidebarCollapsed" :mobile-open="mobileOpen" @close="mobileOpen = false" />
-        <div :class="['transition-[padding] duration-[var(--duration-base)] ease-[var(--ease-out)]', sidebarCollapsed ? 'md:pl-16' : 'md:pl-60']">
+        <div :class="['transition-[padding] duration-[var(--duration-base)] ease-[var(--ease-out)]', sidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-64']">
             <Topbar @toggle-mobile="mobileOpen = !mobileOpen" @toggle-collapsed="toggleCollapsed" />
-            <main class="px-4 py-5 md:px-6 md:py-6">
+            <main class="px-4 py-5 md:px-8 md:py-6 lg:px-10">
                 <ErrorBoundary>
                     <slot />
                 </ErrorBoundary>

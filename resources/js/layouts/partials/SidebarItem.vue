@@ -28,7 +28,7 @@ const Icon = computed(() => {
 });
 
 const isLeaf = computed(() => !!props.node.url);
-const padLeft = computed(() => (props.depth ?? 0) * 12);
+const padLeft = computed(() => (props.depth ?? 0) * 16);
 </script>
 
 <template>
@@ -39,16 +39,16 @@ const padLeft = computed(() => (props.depth ?? 0) * 12);
             :prefetch="'hover'"
             :class="
                 cn(
-                    'group relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium',
+                    'group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium',
                     'transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-out)]',
                     isActive
-                        ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)] before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-full before:bg-[var(--brand-bg)]'
+                        ? 'bg-[var(--sidebar-item-active-bg)] text-[var(--sidebar-item-active-fg)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r-full before:bg-[var(--brand-bg)]'
                         : 'text-[var(--sidebar-fg)] hover:bg-[var(--sidebar-item-hover)] hover:text-[var(--text-strong)]',
                 )
             "
-            :style="{ paddingLeft: padLeft + 10 + 'px' }"
+            :style="{ paddingLeft: padLeft + 12 + 'px' }"
         >
-            <component :is="Icon" class="h-4 w-4 shrink-0" />
+            <component :is="Icon" class="h-[18px] w-[18px] shrink-0" />
             <span v-if="!collapsed" class="truncate">{{ node.label }}</span>
         </Link>
         <button
@@ -56,15 +56,15 @@ const padLeft = computed(() => (props.depth ?? 0) * 12);
             type="button"
             :class="
                 cn(
-                    'group flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-[var(--sidebar-fg)]',
+                    'group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[var(--sidebar-fg)]',
                     'transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-out)]',
                     'hover:bg-[var(--sidebar-item-hover)] hover:text-[var(--text-strong)]',
                 )
             "
-            :style="{ paddingLeft: padLeft + 10 + 'px' }"
+            :style="{ paddingLeft: padLeft + 12 + 'px' }"
             @click="open = !open"
         >
-            <component :is="Icon" class="h-4 w-4 shrink-0" />
+            <component :is="Icon" class="h-[18px] w-[18px] shrink-0" />
             <span v-if="!collapsed" class="truncate flex-1 text-left">{{ node.label }}</span>
             <ChevronRight
                 v-if="!collapsed"
