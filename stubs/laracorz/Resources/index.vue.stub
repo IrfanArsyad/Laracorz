@@ -1,0 +1,53 @@
+<script setup lang="ts">
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import FilterBar from '@/components/shared/FilterBar.vue';
+import { Button } from '@/components/ui/Button';
+import { DataTable, type Column } from '@/components/ui/DataTable';
+import { useDataTable } from '@/composables/useDataTable';
+import { useConfirm } from '@/composables/useConfirm';
+import type { Paginated } from '@/types';
+
+defineProps<{ data: Paginated<{ id: number; name: string }> }>();
+
+const { state, sortBy } = useDataTable({ only: ['data'] });
+const { confirm } = useConfirm();
+
+const columns: Column[] = [
+    { key: 'name', label: 'Nama', sortable: true },
+];
+
+async function hapus(row: { id: number; name: string }): Promise<void> {
+    const ok = await confirm({ message: `Hapus "${row.name}"?`, variant: 'destructive' });
+    if (!ok) return;
+    router.delete(`/{{plural}}/${row.id}`, { preserveScroll: true });
+}
+</script>
+
+<template>
+    <Head title="{{module}}" />
+    <AppLayout>
+        <PageHeader title="{{module}}">
+            <template #actions>
+                <Button as="link" href="/{{plural}}/create">
+                    <Plus class="h-4 w-4" /> Tambah
+                </Button>
+            </template>
+        </PageHeader>
+        <FilterBar v-model:search="state.search" />
+        <DataTable :data="data" :columns="columns" :sort="state.sort" :direction="state.direction" @sort="sortBy">
+            <template #actions="{ row }">
+                <div class="flex justify-end gap-1">
+                    <Link :href="`/{{plural}}/${row.id}/edit`" class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent">
+                        <Pencil class="h-3.5 w-3.5" />
+                    </Link>
+                    <button class="inline-flex h-8 w-8 items-center justify-center rounded-md text-destructive hover:bg-destructive/10" @click="hapus(row)">
+                        <Trash2 class="h-3.5 w-3.5" />
+                    </button>
+                </div>
+            </template>
+        </DataTable>
+    </AppLayout>
+</template>

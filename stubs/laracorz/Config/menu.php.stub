@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'groups' => [
+        // tambahkan group baru bila perlu (root only)
+    ],
+    'modules' => [
+        [
+            'group' => 'main',
+            'parent' => null,
+            'name' => '{{slug}}',
+            'label' => '{{module}}',
+            'icon' => 'square',
+            'url' => '/{{plural}}',
+            'route_name' => '{{plural}}.index',
+            'order' => 99,
+            'active' => true,
+        ],
+    ],
+];

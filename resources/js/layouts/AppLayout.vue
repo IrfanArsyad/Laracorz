@@ -1,0 +1,71 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import Sidebar from './partials/Sidebar.vue';
+import Topbar from './partials/Topbar.vue';
+import ToastContainer from '@/components/ui/Toast/ToastContainer.vue';
+import ConfirmDialog from '@/components/ui/ConfirmDialog/ConfirmDialog.vue';
+import CommandPalette from '@/components/ui/CommandPalette/CommandPalette.vue';
+import ErrorBoundary from '@/components/shared/ErrorBoundary.vue';
+import { useTheme } from '@/composables/useTheme';
+import { useShortcut } from '@/composables/useShortcut';
+import { useToast } from '@/composables/useToast';
+import { watch } from 'vue';
+
+defineProps<{ title?: string }>();
+
+useTheme();
+const toast = useToast();
+const page = usePage();
+
+const sidebarCollapsed = ref<boolean>(
+    (typeof localStorage !== 'undefined' && localStorage.getItem('sidebar:collapsed') === '1') || false,
+);
+const mobileOpen = ref(false);
+const paletteOpen = ref(false);
+
+useShortcut('ctrl+k', (e) => {
+    e.preventDefault();
+    paletteOpen.value = true;
+});
+
+function toggleCollapsed(): void {
+    sidebarCollapsed.value = !sidebarCollapsed.value;
+    try {
+        localStorage.setItem('sidebar:collapsed', sidebarCollapsed.value ? '1' : '0');
+    } catch {
+        /* noop */
+    }
+}
+
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (!flash) return;
+        const f = flash as Record<string, string | null>;
+        if (f.success) toast.success(f.success);
+        if (f.error) toast.error(f.error);
+        if (f.warning) toast.warning(f.warning);
+        if (f.info) toast.info(f.info);
+    },
+    { deep: true, immediate: true },
+);
+</script>
+
+<template>
+    <div class="min-h-screen bg-[var(--surface-base)] text-[var(--text-default)]">
+        <Sidebar :collapsed="sidebarCollapsed" :mobile-open="mobileOpen" @close="mobileOpen = false" />
+        <div :class="['transition-[padding] duration-[var(--duration-base)] ease-[var(--ease-out)]', sidebarCollapsed ? 'md:pl-16' : 'md:pl-60']">
+            <Topbar @toggle-mobile="mobileOpen = !mobileOpen" @toggle-collapsed="toggleCollapsed" />
+            <main class="px-4 py-5 md:px-6 md:py-6 max-w-[1400px] mx-auto">
+                <ErrorBoundary>
+                    <slot />
+                </ErrorBoundary>
+            </main>
+        </div>
+
+        <ToastContainer />
+        <ConfirmDialog />
+        <CommandPalette v-model="paletteOpen" />
+    </div>
+</template>

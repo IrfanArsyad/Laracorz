@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+use Modules\{{module}}\App\Http\Controllers\{{model}}Controller;
+
+Route::middleware(['auth', 'module.permission:{{slug}},read'])
+    ->prefix('{{plural}}')
+    ->name('{{plural}}.')
+    ->group(function (): void {
+        Route::get('/', [{{model}}Controller::class, 'index'])->name('index');
+        Route::get('/create', [{{model}}Controller::class, 'create'])->middleware('module.permission:{{slug}},create')->name('create');
+        Route::post('/', [{{model}}Controller::class, 'store'])->middleware('module.permission:{{slug}},create')->name('store');
+        Route::get('/{{{snake}}}/edit', [{{model}}Controller::class, 'edit'])->middleware('module.permission:{{slug}},update')->name('edit');
+        Route::put('/{{{snake}}}', [{{model}}Controller::class, 'update'])->middleware('module.permission:{{slug}},update')->name('update');
+        Route::delete('/{{{snake}}}', [{{model}}Controller::class, 'destroy'])->middleware('module.permission:{{slug}},delete')->name('destroy');
+    });

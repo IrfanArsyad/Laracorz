@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\{{module}}\App\Models;
+
+use App\Support\Traits\HasActiveScope;
+use App\Support\Traits\Searchable;
+use App\Support\Traits\Sortable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class {{model}} extends Model
+{
+    use HasActiveScope, Searchable, SoftDeletes, Sortable;
+
+    protected array $searchable = ['name'];
+
+    protected array $sortable = ['name', 'created_at'];
+
+    protected $fillable = ['name', 'is_active'];
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
+    }
+}

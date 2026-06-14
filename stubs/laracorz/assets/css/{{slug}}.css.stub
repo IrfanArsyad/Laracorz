@@ -1,0 +1,10 @@
+/* Custom styles untuk modul {{module}}.
+ * Class Tailwind dari template Vue otomatis diambil via @source di app.css.
+ * Pakai file ini untuk:
+ * - selector kompleks (mis. nested table, print)
+ * - keyframes spesifik modul
+ * - override style halaman publik / cetak
+ */
+.{{slug}}-page {
+    /* taruh style spesifik modul di sini */
+}

@@ -1,0 +1,36 @@
+<script setup lang="ts">
+import { Head, useForm } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import { FormField } from '@/components/ui/FormField';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { FormActions } from '@/components/ui/FormActions';
+import { Card, CardContent } from '@/components/ui/Card';
+
+const form = useForm({ name: '' });
+
+function submit(): void {
+    form.post('/{{plural}}');
+}
+</script>
+
+<template>
+    <Head title="Tambah {{module}}" />
+    <AppLayout>
+        <PageHeader title="Tambah {{module}}" />
+        <Card class="mt-6">
+            <CardContent class="pt-6">
+                <form @submit.prevent="submit">
+                    <FormField label="Nama" :error="form.errors.name" required>
+                        <Input v-model="form.name" />
+                    </FormField>
+                    <FormActions>
+                        <Button as="link" href="/{{plural}}" variant="ghost">Batal</Button>
+                        <Button type="submit" :loading="form.processing">Simpan</Button>
+                    </FormActions>
+                </form>
+            </CardContent>
+        </Card>
+    </AppLayout>
+</template>
