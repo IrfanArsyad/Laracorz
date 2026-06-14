@@ -94,7 +94,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
 </script>
 
 <template>
-    <div ref="containerRef" class="relative w-full">
+    <div ref="containerRef" class="relative">
         <button
             type="button"
             :disabled="disabled"

@@ -91,7 +91,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
 </script>
 
 <template>
-    <div ref="containerRef" class="relative w-full" @keydown="onKey">
+    <div ref="containerRef" class="relative" @keydown="onKey">
         <button
             :id="id"
             type="button"
