@@ -1,68 +1,176 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import type { PaginationMeta } from '@/types';
 
-const props = defineProps<{
-    meta?: PaginationMeta | null;
-    only?: string[];
-    class?: string;
-}>();
+/**
+ * Pagination v2 — custom input page number.
+ *
+ *   Menampilkan 11–20 dari 250    [‹‹] [‹] [ 2 ] dari 25 [›] [››]    [10 ▾] / hal
+ *
+ * - Klik prev/next/first/last untuk navigasi
+ * - Input page langsung, dibatasi [1, lastPage]
+ * - Auto-clamp kalau user input di luar range
+ * - Per-page selector di kanan (opsional)
+ */
+const props = withDefaults(
+    defineProps<{
+        meta?: PaginationMeta | null;
+        only?: string[];
+        showPerPage?: boolean;
+        class?: string;
+    }>(),
+    { showPerPage: true },
+);
 
 const safeMeta = computed(() => ({
+    current_page: props.meta?.current_page ?? 1,
+    last_page: props.meta?.last_page ?? 1,
     from: props.meta?.from ?? 0,
     to: props.meta?.to ?? 0,
     total: props.meta?.total ?? 0,
-    links: props.meta?.links ?? [],
+    per_page: props.meta?.per_page ?? 10,
+    path: props.meta?.path ?? '',
 }));
 
-function go(url: string | null): void {
-    if (!url) return;
-    router.get(url, {}, { preserveState: true, preserveScroll: true, replace: true, only: props.only });
+const pageInput = ref<number>(safeMeta.value.current_page);
+
+watch(
+    () => safeMeta.value.current_page,
+    (v) => (pageInput.value = v),
+);
+
+function goTo(page: number): void {
+    const clamped = Math.max(1, Math.min(safeMeta.value.last_page, Math.floor(page) || 1));
+    if (clamped === safeMeta.value.current_page) return;
+    router.get(
+        window.location.pathname,
+        { ...routeQuery(), page: clamped },
+        { preserveState: true, preserveScroll: true, replace: true, only: props.only },
+    );
 }
 
-function isPrev(label: string): boolean {
-    return label.includes('Previous') || label.includes('Sebelumnya') || label.includes('&laquo;');
+function onInputBlur(): void {
+    const v = Number(pageInput.value);
+    const clamped = Math.max(1, Math.min(safeMeta.value.last_page, Math.floor(v) || 1));
+    pageInput.value = clamped;
+    if (clamped !== safeMeta.value.current_page) goTo(clamped);
 }
-function isNext(label: string): boolean {
-    return label.includes('Next') || label.includes('Berikutnya') || label.includes('&raquo;');
+
+function onInputEnter(e: KeyboardEvent): void {
+    if (e.key === 'Enter') {
+        (e.target as HTMLInputElement).blur();
+    }
 }
+
+function changePerPage(v: string): void {
+    const perPage = Number(v) || 10;
+    router.get(
+        window.location.pathname,
+        { ...routeQuery(), per_page: perPage, page: 1 },
+        { preserveState: true, preserveScroll: true, replace: true, only: props.only },
+    );
+}
+
+function routeQuery(): Record<string, string> {
+    const url = new URL(window.location.href);
+    const q: Record<string, string> = {};
+    url.searchParams.forEach((v, k) => {
+        q[k] = v;
+    });
+    delete q.page;
+    return q;
+}
+
+const isFirst = computed(() => safeMeta.value.current_page <= 1);
+const isLast = computed(() => safeMeta.value.current_page >= safeMeta.value.last_page);
+
+const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-default)] transition-colors hover:border-[var(--border-default)] hover:bg-[var(--state-hover)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--border-subtle)] disabled:hover:bg-[var(--surface-raised)]';
 </script>
 
 <template>
-    <div :class="cn('flex items-center justify-between gap-4 flex-wrap py-2', $props.class)">
-        <p class="text-xs text-[var(--text-muted)]">
+    <div :class="cn('flex items-center justify-between gap-4 flex-wrap', $props.class)">
+        <!-- Total info -->
+        <p class="text-sm text-[var(--text-muted)] order-1">
             Menampilkan
-            <span class="font-medium text-[var(--text-default)] tabular-nums">{{ safeMeta.from }}</span>
-            -
-            <span class="font-medium text-[var(--text-default)] tabular-nums">{{ safeMeta.to }}</span>
+            <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.from }}</span>
+            <span class="text-[var(--text-muted)]">–</span>
+            <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.to }}</span>
             dari
-            <span class="font-medium text-[var(--text-default)] tabular-nums">{{ safeMeta.total }}</span>
+            <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.total }}</span>
             data
         </p>
-        <nav v-if="safeMeta.links.length > 0" class="flex items-center gap-1">
+
+        <!-- Page navigation: ‹‹ ‹ [input] dari M › ›› -->
+        <div class="flex items-center gap-1.5 order-3 sm:order-2 sm:ml-auto">
             <button
-                v-for="(link, idx) in safeMeta.links"
-                :key="idx"
                 type="button"
-                :disabled="!link.url"
-                :class="
-                    cn(
-                        'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-medium border transition-colors',
-                        link.active
-                            ? 'bg-[var(--brand-bg)] text-[var(--brand-fg)] border-[var(--brand-bg)]'
-                            : 'bg-[var(--surface-raised)] text-[var(--text-default)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--state-hover)]',
-                        !link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
-                    )
-                "
-                @click="go(link.url)"
+                :class="navBtn"
+                :disabled="isFirst"
+                aria-label="Halaman pertama"
+                @click="goTo(1)"
             >
-                <ChevronLeft v-if="isPrev(link.label)" class="h-3.5 w-3.5" />
-                <ChevronRight v-else-if="isNext(link.label)" class="h-3.5 w-3.5" />
-                <span v-else v-html="link.label" />
+                <ChevronsLeft class="h-4 w-4" />
             </button>
-        </nav>
+            <button
+                type="button"
+                :class="navBtn"
+                :disabled="isFirst"
+                aria-label="Sebelumnya"
+                @click="goTo(safeMeta.current_page - 1)"
+            >
+                <ChevronLeft class="h-4 w-4" />
+            </button>
+
+            <div class="flex items-center gap-1.5 px-1 text-sm">
+                <input
+                    v-model.number="pageInput"
+                    type="number"
+                    :min="1"
+                    :max="safeMeta.last_page"
+                    class="h-9 w-14 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] px-2 text-center text-sm font-medium tabular-nums text-[var(--text-default)] transition-colors focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    aria-label="Halaman saat ini"
+                    @blur="onInputBlur"
+                    @keydown="onInputEnter"
+                />
+                <span class="text-[var(--text-muted)] whitespace-nowrap">
+                    dari <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.last_page }}</span>
+                </span>
+            </div>
+
+            <button
+                type="button"
+                :class="navBtn"
+                :disabled="isLast"
+                aria-label="Berikutnya"
+                @click="goTo(safeMeta.current_page + 1)"
+            >
+                <ChevronRight class="h-4 w-4" />
+            </button>
+            <button
+                type="button"
+                :class="navBtn"
+                :disabled="isLast"
+                aria-label="Halaman terakhir"
+                @click="goTo(safeMeta.last_page)"
+            >
+                <ChevronsRight class="h-4 w-4" />
+            </button>
+        </div>
+
+        <!-- Per-page selector -->
+        <div v-if="showPerPage" class="flex items-center gap-2 text-sm text-[var(--text-muted)] order-2 sm:order-3">
+            <span class="whitespace-nowrap">Tampil</span>
+            <select
+                :value="safeMeta.per_page"
+                class="h-9 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] pl-2 pr-7 text-sm font-medium text-[var(--text-default)] cursor-pointer transition-colors hover:border-[var(--border-strong)] focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]"
+                @change="changePerPage(($event.target as HTMLSelectElement).value)"
+            >
+                <option v-for="opt in [10, 25, 50, 100]" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+            <span class="whitespace-nowrap">per hal.</span>
+        </div>
     </div>
 </template>

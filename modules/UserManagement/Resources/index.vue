@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
+import { FormField } from '@/components/ui/FormField';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { FormModal } from '@/components/ui/Modal';
@@ -55,9 +56,12 @@ const selected = ref<Array<number | string>>([]);
 const { confirm } = useConfirm();
 const { can } = usePermission();
 
-const hasFilters = computed(
-    () => !!state.filters.role_id || !!state.filters.status,
-);
+const filtersCount = computed(() => {
+    let n = 0;
+    if (state.filters.role_id) n++;
+    if (state.filters.status) n++;
+    return n;
+});
 
 const columns: Column[] = [
     { key: 'name', label: 'Nama', sortable: true },
@@ -194,28 +198,30 @@ function resetFilters(): void {
                 <StatCard label="Diblokir" :value="stats?.banned ?? '—'" :icon="UserX" :loading="!stats" />
             </div>
 
-            <!-- Filter toolbar -->
+            <!-- Filter toolbar — search inline, filter collapsed in panel -->
             <FilterBar
                 v-model:search="state.search"
                 placeholder="Cari nama, username, atau email..."
-                :has-filters="hasFilters"
+                :filters-count="filtersCount"
                 @reset="resetFilters"
             >
-                <Select
-                    v-model="state.filters.role_id"
-                    :options="roleOptions"
-                    placeholder="Semua role"
-                    clearable
-                    searchable
-                    class="w-40"
-                />
-                <Select
-                    v-model="state.filters.status"
-                    :options="statusOptions"
-                    placeholder="Semua status"
-                    clearable
-                    class="w-36"
-                />
+                <FormField label="Role">
+                    <Select
+                        v-model="state.filters.role_id"
+                        :options="roleOptions"
+                        placeholder="Semua role"
+                        clearable
+                        searchable
+                    />
+                </FormField>
+                <FormField label="Status">
+                    <Select
+                        v-model="state.filters.status"
+                        :options="statusOptions"
+                        placeholder="Semua status"
+                        clearable
+                    />
+                </FormField>
             </FilterBar>
 
             <DataTable

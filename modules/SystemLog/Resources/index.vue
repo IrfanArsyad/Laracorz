@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import FilterBar from '@/components/shared/FilterBar.vue';
 import { Select } from '@/components/ui/Select';
+import { FormField } from '@/components/ui/FormField';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -56,8 +57,15 @@ const levelOptions = Object.entries(LOG_LEVELS).map(([k, v]) => ({ label: v.labe
                 :breadcrumbs="[{ label: 'System' }, { label: 'System Log' }]"
             />
 
-            <FilterBar v-model:search="state.search" placeholder="Cari pesan/event...">
-                <Select v-model="state.filters.level" :options="levelOptions" placeholder="Level" clearable class="w-32" />
+            <FilterBar
+                v-model:search="state.search"
+                placeholder="Cari pesan/event..."
+                :filters-count="state.filters.level ? 1 : 0"
+                @reset="state.filters.level = undefined; state.search = ''"
+            >
+                <FormField label="Level">
+                    <Select v-model="state.filters.level" :options="levelOptions" placeholder="Semua level" clearable />
+                </FormField>
             </FilterBar>
 
             <DataTable :data="data" :columns="columns" @sort="sortBy">

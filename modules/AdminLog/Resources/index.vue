@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import FilterBar from '@/components/shared/FilterBar.vue';
 import { Select } from '@/components/ui/Select';
+import { FormField } from '@/components/ui/FormField';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -64,8 +65,15 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
                 :breadcrumbs="[{ label: 'System' }, { label: 'Admin Log' }]"
             />
 
-            <FilterBar v-model:search="state.search" placeholder="Cari deskripsi/user/module...">
-                <Select v-model="state.filters.action" :options="actionOptions" placeholder="Aksi" clearable class="w-40" />
+            <FilterBar
+                v-model:search="state.search"
+                placeholder="Cari deskripsi/user/module..."
+                :filters-count="state.filters.action ? 1 : 0"
+                @reset="state.filters.action = undefined; state.search = ''"
+            >
+                <FormField label="Aksi">
+                    <Select v-model="state.filters.action" :options="actionOptions" placeholder="Semua aksi" clearable />
+                </FormField>
             </FilterBar>
 
             <DataTable :data="data" :columns="columns" @sort="sortBy">
