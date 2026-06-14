@@ -109,37 +109,52 @@ class RoleController extends Controller
     }
 
     /**
+     * Bangun struktur grup → root modules → child modules untuk matrix permission.
+     *
+     * Tree dibangun manual dari flat collection (grouped by parent_id) supaya
+     * tidak memicu lazy-load children pada model.
+     *
      * @return array<int, array<string, mixed>>
      */
     private function matrix(): array
     {
         $groups = ModuleGroup::query()->active()->orderBy('order')->get();
-        $modules = Module::query()->active()->orderBy('order')->get()->groupBy('module_group_id');
+        $allModules = Module::query()->active()->orderBy('order')->get();
+        $byParent = $allModules->groupBy('parent_id');
 
-        return $groups->map(function (ModuleGroup $g) use ($modules) {
-            $roots = $modules->get($g->id, collect())->where('parent_id', null);
+        return $groups->map(function (ModuleGroup $g) use ($allModules, $byParent) {
+            $roots = $allModules->where('module_group_id', $g->id)->where('parent_id', null);
 
             return [
                 'id' => $g->id,
                 'name' => $g->name,
                 'label' => $g->label,
-                'modules' => $roots->map(fn (Module $m) => $this->mapNode($m))->values()->all(),
+                'modules' => $roots
+                    ->map(fn (Module $m) => $this->buildNode($m, $byParent))
+                    ->values()
+                    ->all(),
             ];
         })->all();
     }
 
     /**
+     * @param  \Illuminate\Support\Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, Module>>  $byParent
      * @return array<string, mixed>
      */
-    private function mapNode(Module $m): array
+    private function buildNode(Module $m, $byParent): array
     {
+        $children = $byParent->get($m->id, collect());
+
         return [
             'id' => $m->id,
             'name' => $m->name,
             'label' => $m->label,
             'is_leaf' => $m->isLeaf(),
             'extra_actions' => $m->extra_actions ?? [],
-            'children' => $m->children->map(fn (Module $c) => $this->mapNode($c))->values()->all(),
+            'children' => $children
+                ->map(fn (Module $c) => $this->buildNode($c, $byParent))
+                ->values()
+                ->all(),
         ];
     }
 }

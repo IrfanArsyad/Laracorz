@@ -36,23 +36,18 @@ class MenuService
             ->orderBy('order')
             ->get();
 
-        $roots = Module::query()
+        $allModules = Module::query()
             ->active()
-            ->whereNull('parent_id')
-            ->with(['children' => function ($q) {
-                $q->with(['children' => fn ($q2) => $q2->where('active', true)->orderBy('order')])
-                    ->where('active', true)
-                    ->orderBy('order');
-            }])
             ->orderBy('order')
-            ->get()
-            ->groupBy('module_group_id');
+            ->get();
+
+        $byParent = $allModules->groupBy('parent_id');
 
         $result = [];
 
         foreach ($groups as $group) {
-            $rootList = $roots->get($group->id, collect());
-            $filtered = $this->filterTree($rootList, $user);
+            $roots = $allModules->where('module_group_id', $group->id)->where('parent_id', null);
+            $filtered = $this->filterTree($roots, $byParent, $user);
 
             if ($filtered->isEmpty()) {
                 continue;
@@ -72,20 +67,22 @@ class MenuService
 
     /**
      * @param  Collection<int, Module>  $nodes
+     * @param  Collection<int|string, Collection<int, Module>>  $byParent
      * @return Collection<int, array<string, mixed>>
      */
-    private function filterTree(Collection $nodes, User $user): Collection
+    private function filterTree(Collection $nodes, Collection $byParent, User $user): Collection
     {
         return $nodes
-            ->map(fn (Module $node): ?array => $this->mapNode($node, $user))
+            ->map(fn (Module $node): ?array => $this->mapNode($node, $byParent, $user))
             ->filter()
             ->values();
     }
 
     /**
+     * @param  Collection<int|string, Collection<int, Module>>  $byParent
      * @return array<string, mixed>|null
      */
-    private function mapNode(Module $node, User $user): ?array
+    private function mapNode(Module $node, Collection $byParent, User $user): ?array
     {
         if ($node->isLeaf()) {
             if (! $user->hasPermission('read', (int) $node->id)) {
@@ -95,13 +92,14 @@ class MenuService
             return $this->toArray($node, []);
         }
 
-        $children = $this->filterTree($node->children, $user);
+        $children = $byParent->get($node->id, collect());
+        $filtered = $this->filterTree($children, $byParent, $user);
 
-        if ($children->isEmpty()) {
+        if ($filtered->isEmpty()) {
             return null;
         }
 
-        return $this->toArray($node, $children->all());
+        return $this->toArray($node, $filtered->all());
     }
 
     /**

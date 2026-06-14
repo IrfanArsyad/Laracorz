@@ -20,14 +20,11 @@ class ModuleController extends Controller
     public function index(): Response
     {
         $groups = ModuleGroup::query()->orderBy('order')->get();
-        $modules = Module::query()
-            ->with(['children' => fn ($q) => $q->orderBy('order')->with(['children' => fn ($qq) => $qq->orderBy('order')])])
-            ->orderBy('order')
-            ->get()
-            ->groupBy('module_group_id');
+        $allModules = Module::query()->orderBy('order')->get();
+        $byParent = $allModules->groupBy('parent_id');
 
-        $tree = $groups->map(function (ModuleGroup $g) use ($modules) {
-            $roots = ($modules->get($g->id, collect()))->where('parent_id', null);
+        $tree = $groups->map(function (ModuleGroup $g) use ($allModules, $byParent) {
+            $roots = $allModules->where('module_group_id', $g->id)->where('parent_id', null);
 
             return [
                 'id' => $g->id,
@@ -36,14 +33,17 @@ class ModuleController extends Controller
                 'icon' => $g->icon,
                 'order' => $g->order,
                 'active' => (bool) $g->active,
-                'modules' => $roots->map(fn (Module $m) => $this->mapNode($m))->values()->all(),
+                'modules' => $roots
+                    ->map(fn (Module $m) => $this->mapNode($m, $byParent))
+                    ->values()
+                    ->all(),
             ];
         })->all();
 
         return Inertia::render('module-management::index', [
             'tree' => $tree,
             'groups' => $groups,
-            'modules' => Module::query()->orderBy('order')->get(),
+            'modules' => $allModules,
         ]);
     }
 
@@ -168,10 +168,13 @@ class ModuleController extends Controller
     }
 
     /**
+     * @param  \Illuminate\Support\Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, Module>>  $byParent
      * @return array<string, mixed>
      */
-    private function mapNode(Module $m): array
+    private function mapNode(Module $m, $byParent): array
     {
+        $children = $byParent->get($m->id, collect());
+
         return [
             'id' => $m->id,
             'name' => $m->name,
@@ -182,7 +185,10 @@ class ModuleController extends Controller
             'order' => $m->order,
             'active' => (bool) $m->active,
             'is_leaf' => $m->isLeaf(),
-            'children' => $m->children->map(fn (Module $c) => $this->mapNode($c))->values()->all(),
+            'children' => $children
+                ->map(fn (Module $c) => $this->mapNode($c, $byParent))
+                ->values()
+                ->all(),
         ];
     }
 }
