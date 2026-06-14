@@ -57,7 +57,7 @@ watch(
         <Sidebar :collapsed="sidebarCollapsed" :mobile-open="mobileOpen" @close="mobileOpen = false" />
         <div :class="['transition-[padding] duration-[var(--duration-base)] ease-[var(--ease-out)]', sidebarCollapsed ? 'md:pl-16' : 'md:pl-60']">
             <Topbar @toggle-mobile="mobileOpen = !mobileOpen" @toggle-collapsed="toggleCollapsed" />
-            <main class="px-4 py-5 md:px-6 md:py-6 max-w-[1400px] mx-auto">
+            <main class="px-4 py-5 md:px-6 md:py-6">
                 <ErrorBoundary>
                     <slot />
                 </ErrorBoundary>

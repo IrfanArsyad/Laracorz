@@ -25,7 +25,7 @@ function logout(): void {
 </script>
 
 <template>
-    <header class="sticky top-0 z-30 flex h-12 items-center gap-1.5 border-b border-[var(--border-subtle)] bg-[var(--surface-base)]/85 backdrop-blur-md px-3 md:px-4">
+    <header class="sticky top-0 z-30 flex h-14 items-center gap-1.5 bg-[var(--surface-base)]/85 backdrop-blur-md px-3 md:px-4">
         <button
             type="button"
             class="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-[var(--state-hover)] text-[var(--text-default)]"

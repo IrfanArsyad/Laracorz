@@ -19,7 +19,7 @@ const initial = computed(() => appName.value.charAt(0).toUpperCase());
     <aside
         :class="
             cn(
-                'fixed inset-y-0 left-0 z-40 bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)] border-r border-[var(--sidebar-border)]',
+                'fixed inset-y-0 left-0 z-40 bg-[var(--sidebar-bg)] text-[var(--sidebar-fg)]',
                 'transition-[width] duration-[var(--duration-base)] ease-[var(--ease-out)]',
                 collapsed ? 'md:w-16' : 'md:w-60',
                 'w-60',
@@ -27,7 +27,7 @@ const initial = computed(() => appName.value.charAt(0).toUpperCase());
             )
         "
     >
-        <div class="flex h-14 items-center justify-between border-b border-[var(--sidebar-border)] px-3">
+        <div class="flex h-14 items-center justify-between px-3">
             <Link href="/" class="flex items-center gap-2 truncate font-semibold">
                 <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--brand-bg)] text-[var(--brand-fg)] text-xs font-bold shrink-0">
                     {{ initial }}

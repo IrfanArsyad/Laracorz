@@ -93,9 +93,9 @@
      * Component-facing. Pakai ini, jangan langsung tier 1.
      * ======================================================================== */
 
-    --surface-base:    var(--neutral-50);
-    --surface-raised:  oklch(1 0 0);
-    --surface-sunken:  var(--neutral-100);
+    --surface-base:    oklch(1 0 0);              /* page bg = putih bersih */
+    --surface-raised:  oklch(1 0 0);              /* card/modal */
+    --surface-sunken:  var(--neutral-100);        /* alternate row, input bg */
     --surface-overlay: oklch(1 0 0);
     --surface-inverse: var(--neutral-900);
 
@@ -152,10 +152,10 @@
     --brand-soft-bg:     var(--brand-50);
     --brand-soft-fg:     var(--brand-700);
 
-    --sidebar-bg:           var(--surface-raised);
+    --sidebar-bg:           var(--neutral-50);            /* slightly off-white — beda dari page */
     --sidebar-fg:           var(--text-default);
-    --sidebar-border:       var(--border-subtle);
-    --sidebar-item-hover:   var(--neutral-100);
+    --sidebar-border:       transparent;                  /* no visible border, rely on bg differentiation */
+    --sidebar-item-hover:   oklch(0 0 0 / 0.04);
     --sidebar-item-active-bg: var(--brand-50);
     --sidebar-item-active-fg: var(--brand-700);
 
@@ -226,9 +226,9 @@
  * DARK MODE — dual-tuned (bukan invert)
  * ======================================================================== */
 .dark {
-    --surface-base:    var(--neutral-950);
-    --surface-raised:  var(--neutral-900);
-    --surface-sunken:  oklch(0.105 0.020 264);
+    --surface-base:    var(--neutral-900);             /* page bg */
+    --surface-raised:  oklch(0.235 0.018 260);         /* card sedikit lebih terang dari page */
+    --surface-sunken:  var(--neutral-950);             /* alternate row */
     --surface-overlay: var(--neutral-900);
     --surface-inverse: var(--neutral-50);
 
@@ -278,10 +278,10 @@
     --brand-soft-bg:     oklch(0.402 0.187 261 / 0.18);
     --brand-soft-fg:     var(--brand-300);
 
-    --sidebar-bg:           var(--surface-raised);
+    --sidebar-bg:           oklch(0.165 0.018 264);   /* sedikit lebih gelap dari surface-base */
     --sidebar-fg:           var(--text-default);
-    --sidebar-border:       var(--border-subtle);
-    --sidebar-item-hover:   oklch(1 0 0 / 0.06);
+    --sidebar-border:       transparent;              /* no visible border */
+    --sidebar-item-hover:   oklch(1 0 0 / 0.05);
     --sidebar-item-active-bg: oklch(0.402 0.187 261 / 0.22);
     --sidebar-item-active-fg: var(--brand-300);
 

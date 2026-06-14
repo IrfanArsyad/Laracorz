@@ -54,13 +54,13 @@ const buttonVariants = cva(
                 ].join(' '),
             },
             size: {
-                default: 'h-10 px-4 text-sm',         // CTA standar — visible, klikable
-                sm: 'h-8 px-3 text-[13px] gap-1.5',   // secondary action
-                xs: 'h-7 px-2 text-xs gap-1',         // inline action (di tabel, dst)
-                lg: 'h-11 px-5 text-sm',              // primary di banner/hero
+                default: 'h-10 px-4 text-sm',            // CTA standar
+                sm: 'h-9 px-3.5 text-[13px] gap-1.5',    // secondary action
+                xs: 'h-8 px-2.5 text-xs gap-1',          // inline action di tabel
+                lg: 'h-11 px-5 text-sm',                 // primary banner/hero
                 icon: 'h-10 w-10',
-                'icon-sm': 'h-8 w-8',
-                'icon-xs': 'h-7 w-7',
+                'icon-sm': 'h-9 w-9',
+                'icon-xs': 'h-8 w-8',
             },
         },
         defaultVariants: { variant: 'default', size: 'default' },
