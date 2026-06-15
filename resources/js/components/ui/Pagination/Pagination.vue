@@ -22,10 +22,15 @@ const props = withDefaults(
     defineProps<{
         meta?: PaginationMeta | null;
         only?: string[];
+        /** Tampilkan kolom "Showing X–Y of Z" */
+        showCount?: boolean;
+        /** Tampilkan selector rows-per-page */
         showPerPage?: boolean;
+        /** Tampilkan tombol navigasi halaman */
+        showNav?: boolean;
         class?: string;
     }>(),
-    { showPerPage: true },
+    { showCount: true, showPerPage: true, showNav: true },
 );
 
 const safeMeta = computed(() => ({
@@ -96,7 +101,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
 <template>
     <div :class="cn('flex items-center justify-between gap-4 flex-wrap', $props.class)">
         <!-- Total info -->
-        <p class="text-sm text-[var(--text-muted)] order-1">
+        <p v-if="showCount" class="text-sm text-[var(--text-muted)] order-1">
             {{ t('common.showing') }}
             <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.from }}</span>
             <span class="text-[var(--text-muted)]">–</span>
@@ -106,8 +111,8 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
             {{ t('common.items') }}
         </p>
 
-        <!-- Page navigation: ‹‹ ‹ [input] dari M › ›› -->
-        <div class="flex items-center gap-1.5 order-3 sm:order-2 sm:ml-auto">
+        <!-- Page navigation: ‹‹ ‹ [input] of M › ›› -->
+        <div v-if="showNav" class="flex items-center gap-1.5 order-3 sm:order-2 sm:ml-auto">
             <button
                 type="button"
                 :class="navBtn"
