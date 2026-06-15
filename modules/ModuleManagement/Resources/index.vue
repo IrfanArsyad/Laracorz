@@ -33,6 +33,7 @@ import ModuleForm from './components/ModuleForm.vue';
 import GroupForm from './components/GroupForm.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useModal } from '@/composables/useModal';
+import { resolveIcon } from '@/lib/icon';
 
 interface Node {
     id: number;
@@ -285,7 +286,7 @@ async function deleteModule(id: number, label: string): Promise<void> {
                     <!-- Group header -->
                     <div class="flex items-center gap-3 px-5 py-3.5 bg-[var(--surface-sunken)]/40 border-b border-[var(--border-subtle)]">
                         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)]">
-                            <FolderTree class="h-4 w-4" />
+                            <component :is="resolveIcon(group.icon, FolderTree)" class="h-4 w-4" />
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
@@ -347,8 +348,13 @@ async function deleteModule(id: number, label: string): Promise<void> {
                                     </button>
                                     <span v-else class="w-5 shrink-0" />
 
-                                    <FolderOpen v-if="!node.is_leaf" class="h-4 w-4 text-[var(--text-muted)] shrink-0" />
-                                    <Hash v-else class="h-4 w-4 text-[var(--brand-soft-fg)] shrink-0" />
+                                    <component
+                                        :is="resolveIcon(node.icon, node.is_leaf ? Hash : FolderOpen)"
+                                        :class="[
+                                            'h-4 w-4 shrink-0',
+                                            node.is_leaf ? 'text-[var(--brand-soft-fg)]' : 'text-[var(--text-muted)]',
+                                        ]"
+                                    />
 
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 flex-wrap">
@@ -402,7 +408,10 @@ async function deleteModule(id: number, label: string): Promise<void> {
                                         :key="child.id"
                                         class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-[var(--state-hover)] transition-colors"
                                     >
-                                        <Hash class="h-3.5 w-3.5 text-[var(--brand-soft-fg)] shrink-0" />
+                                        <component
+                                            :is="resolveIcon(child.icon, Hash)"
+                                            class="h-3.5 w-3.5 text-[var(--brand-soft-fg)] shrink-0"
+                                        />
                                         <span class="text-sm font-medium text-[var(--text-strong)]">{{ child.label }}</span>
                                         <Badge variant="muted" class="font-mono text-xs">{{ child.name }}</Badge>
                                         <span v-if="child.url" class="text-xs text-[var(--text-muted)] truncate ml-auto font-mono">
