@@ -68,6 +68,18 @@ interface Group {
 }
 
 const props = defineProps<{ tree: Group[] }>();
+
+const totals = computed(() => {
+    let modules = 0;
+    function walk(nodes: Node[]): void {
+        for (const n of nodes) {
+            modules++;
+            if (n.children?.length) walk(n.children);
+        }
+    }
+    for (const g of props.tree) walk(g.modules);
+    return { groups: props.tree.length, modules };
+});
 const emit = defineEmits<{
     edit: [node: Node];
     detail: [node: Node];
@@ -404,6 +416,18 @@ async function deleteModule(node: Node): Promise<void> {
 
 <template>
     <div class="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-xs)] overflow-hidden">
+        <!-- Info bar (count) — konsisten dengan DataTable -->
+        <div class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-1.5">
+            <p class="text-xs text-[var(--text-muted)] tabular-nums">
+                {{ t('common.showing') }}
+                <span class="font-semibold text-[var(--text-default)]">{{ totals.groups }}</span>
+                {{ t('modules.statsGroups').toLowerCase() }}
+                ·
+                <span class="font-semibold text-[var(--text-default)]">{{ totals.modules }}</span>
+                {{ t('modules.statsModules').toLowerCase() }}
+            </p>
+        </div>
+
         <!-- Table header -->
         <div class="grid grid-cols-[28px_minmax(0,1fr)_120px_90px_80px_60px_40px] gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] bg-[var(--surface-sunken)] border-b border-[var(--border-subtle)]">
             <div class="text-center"><GripVertical class="h-3 w-3 inline opacity-50" /></div>
