@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Http\Resources\AuthUserResource;
 use App\Models\Module;
 use App\Services\MenuService;
+use App\Services\UserSessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -31,11 +32,27 @@ class HandleInertiaRequests extends Middleware
                 'user' => fn () => $request->user()
                     ? AuthUserResource::make($request->user()->load('role'))
                     : null,
-                'permissions' => fn () => $request->user()?->role
-                    ? collect($request->user()->role->only(['read', 'create', 'update', 'delete']))
-                        ->map(fn ($v) => $v ?? [])
-                        ->all()
-                    : null,
+                'permissions' => function () use ($request) {
+                    $snapshot = app(UserSessionService::class)->get($request->session());
+                    if ($snapshot !== null) {
+                        return $snapshot['permissions'];
+                    }
+
+                    return $request->user()?->role
+                        ? collect($request->user()->role->only(['read', 'create', 'update', 'delete']))
+                            ->map(fn ($v) => $v ?? [])
+                            ->all()
+                        : null;
+                },
+                'snapshot' => function () use ($request) {
+                    $snapshot = app(UserSessionService::class)->get($request->session());
+
+                    return $snapshot ? [
+                        'role' => $snapshot['role'] ?? null,
+                        'is_super_admin' => $snapshot['is_super_admin'] ?? false,
+                        'accessible_modules' => $snapshot['modules'] ?? [],
+                    ] : null;
+                },
             ],
             'menu' => fn () => app(MenuService::class)->forUser($request->user()),
             'modules' => fn () => Cache::rememberForever(

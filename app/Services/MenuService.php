@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Module;
 use App\Models\ModuleGroup;
 use App\Models\User;
+use App\Services\UserSessionService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -19,6 +20,14 @@ class MenuService
     {
         if (! $user || ! $user->role) {
             return [];
+        }
+
+        // Snapshot session menang: menu sudah dipersonalisasi & locked saat login.
+        if (app()->bound('session.store') && session()->has(UserSessionService::SESSION_KEY)) {
+            $snapshot = app(UserSessionService::class)->get();
+            if ($snapshot !== null) {
+                return $snapshot['menu'] ?? [];
+            }
         }
 
         $cacheKey = "menu.role.{$user->role_id}";
