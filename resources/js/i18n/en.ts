@@ -102,6 +102,18 @@ export default {
     table: {
         selected: '{count} selected',
         empty: 'No data yet',
+        noResults: 'No matching results',
+        noResultsHint: 'Try clearing or changing your filters.',
+    },
+    palette: {
+        placeholder: 'Search pages, actions...',
+        recent: 'Recent',
+        pages: 'Pages',
+        actions: 'Actions',
+        empty: 'No matching command',
+        hintNavigate: 'navigate',
+        hintSelect: 'select',
+        poweredBy: 'Quick search',
     },
     nav: {
         // Module groups (kunci = ModuleGroup.name slug)

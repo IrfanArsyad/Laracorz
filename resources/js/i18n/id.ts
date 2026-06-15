@@ -102,6 +102,18 @@ export default {
     table: {
         selected: '{count} terpilih',
         empty: 'Belum ada data',
+        noResults: 'Tidak ada hasil yang cocok',
+        noResultsHint: 'Coba bersihkan atau ubah filter Anda.',
+    },
+    palette: {
+        placeholder: 'Cari halaman, aksi...',
+        recent: 'Terakhir',
+        pages: 'Halaman',
+        actions: 'Aksi',
+        empty: 'Tidak ada perintah yang cocok',
+        hintNavigate: 'navigasi',
+        hintSelect: 'pilih',
+        poweredBy: 'Pencarian cepat',
     },
     nav: {
         groups: {

@@ -129,7 +129,13 @@ async function copyDetail(row: LogRow): Promise<void> {
                 </div>
             </FilterBar>
 
-            <DataTable :data="data" :columns="columns" @sort="sortBy" @row-click="(r) => detail.open(r as LogRow)">
+            <DataTable
+                :data="data"
+                :columns="columns"
+                :has-active-filter="!!(state.search || state.filters.level || state.filters.date)"
+                @sort="sortBy"
+                @row-click="(r) => detail.open(r as LogRow)"
+            >
                 <template #cell-created_at="{ value }">
                     <span class="text-xs text-[var(--text-muted)] tabular-nums whitespace-nowrap">{{ shortTime(value as string) }}</span>
                 </template>

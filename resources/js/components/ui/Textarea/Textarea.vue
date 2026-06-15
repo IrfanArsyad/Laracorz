@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject, type Ref } from 'vue';
 import { cn } from '@/lib/utils';
 
 const props = withDefaults(
@@ -18,12 +18,21 @@ const props = withDefaults(
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 
+const injectedError = inject<Ref<string | undefined>>('formFieldError', undefined);
+const injectedId = inject<Ref<string>>('formFieldId', undefined);
+const isError = computed(() => Boolean(props.error || injectedError?.value));
+
 const classes = computed(() =>
     cn(
-        'flex min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-sm',
-        'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        props.error ? 'border-destructive' : 'border-input',
+        'flex min-h-[80px] w-full rounded-md border bg-[var(--surface-raised)] px-3 py-2 text-sm text-[var(--text-default)]',
+        'transition-[border-color,box-shadow,background-color] duration-[var(--duration-fast)] ease-[var(--ease-out)]',
+        'placeholder:text-[var(--text-muted)]',
+        'hover:border-[var(--border-strong)]',
+        'focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]',
+        'disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-[var(--surface-sunken)]',
+        isError.value
+            ? 'border-[var(--status-danger-border)] focus-visible:border-[var(--focus-ring-error)] focus-visible:ring-[color-mix(in_oklab,var(--focus-ring-error),transparent_82%)]'
+            : 'border-[var(--border-default)]',
         props.class,
     ),
 );
@@ -40,11 +49,12 @@ function onInput(e: Event): void {
 
 <template>
     <textarea
-        :id="id"
+        :id="id ?? injectedId?.value"
         :value="modelValue ?? ''"
         :placeholder="placeholder"
         :rows="rows"
         :disabled="disabled"
+        :aria-invalid="isError ? 'true' : undefined"
         :class="classes"
         @input="onInput"
     />

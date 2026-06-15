@@ -99,7 +99,7 @@ provide('modal:open', toRef(props, 'modelValue'));
         >
             <div
                 v-if="modelValue"
-                class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto bg-black/40 backdrop-blur-[2px]"
+                class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto bg-black/40 backdrop-blur-[2px]"
                 @click.self="closeOnOverlay && close()"
             >
                 <Transition
@@ -114,7 +114,7 @@ provide('modal:open', toRef(props, 'modelValue'));
                         aria-modal="true"
                         tabindex="-1"
                         :class="panelClass"
-                        class="my-8 max-h-[90vh] flex flex-col"
+                        class="my-4 sm:my-8 max-h-[calc(100dvh-2rem)] sm:max-h-[90vh] flex flex-col"
                     >
                         <!-- Header: pakai shortcut props ATAU slot ModalHeader manual -->
                         <ModalHeader

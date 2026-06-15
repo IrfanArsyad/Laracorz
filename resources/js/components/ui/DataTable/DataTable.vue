@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import Checkbox from '../Checkbox/Checkbox.vue';
+import { Inbox, SearchX } from 'lucide-vue-next';
 import EmptyState from '../EmptyState/EmptyState.vue';
 import Skeleton from '../Skeleton/Skeleton.vue';
 import TableShell from '../TableShell/TableShell.vue';
@@ -35,6 +36,9 @@ const props = withDefaults(
         only?: string[];
         emptyTitle?: string;
         emptyDescription?: string;
+        /** Set true bila ada filter aktif (search/select) — empty state akan
+         *  pakai copy "Tidak ada hasil" instead of "Belum ada data". */
+        hasActiveFilter?: boolean;
         class?: string;
     }>(),
     {
@@ -43,6 +47,7 @@ const props = withDefaults(
         selectable: false,
         actionStickyRight: false,
         selected: () => [],
+        hasActiveFilter: false,
     },
 );
 
@@ -171,8 +176,21 @@ function sortBy(col: Column): void {
                         </td>
                     </tr>
                     <tr v-else-if="rows.length === 0">
-                        <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)" class="px-3 py-10">
-                            <EmptyState :title="emptyTitle ?? t('table.empty')" :description="emptyDescription" />
+                        <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)" class="px-3 py-4">
+                            <EmptyState
+                                v-if="hasActiveFilter"
+                                :icon="SearchX"
+                                :title="t('table.noResults')"
+                                :description="t('table.noResultsHint')"
+                                compact
+                            />
+                            <EmptyState
+                                v-else
+                                :icon="Inbox"
+                                :title="emptyTitle ?? t('table.empty')"
+                                :description="emptyDescription"
+                                compact
+                            />
                         </td>
                     </tr>
                     <tr

@@ -82,7 +82,12 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
                 </div>
             </FilterBar>
 
-            <DataTable :data="data" :columns="columns" @sort="sortBy">
+            <DataTable
+                :data="data"
+                :columns="columns"
+                :has-active-filter="!!(state.search || state.filters.action)"
+                @sort="sortBy"
+            >
                 <template #cell-action="{ value }">
                     <Badge :variant="((ADMIN_LOG_ACTIONS as any)[value as string]?.color ?? 'muted')">
                         {{ (ADMIN_LOG_ACTIONS as any)[value as string]?.label ?? value }}

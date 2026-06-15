@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject, type Ref } from 'vue';
 import { cn } from '@/lib/utils';
 
 const props = withDefaults(
@@ -18,6 +18,13 @@ const props = withDefaults(
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 
+// Auto-inject error + id dari FormField parent — otomatis konsisten
+// tanpa harus eksplisit wire setiap form.
+const injectedError = inject<Ref<string | undefined>>('formFieldError', undefined);
+const injectedId = inject<Ref<string>>('formFieldId', undefined);
+
+const isError = computed(() => Boolean(props.error || injectedError?.value));
+
 const classes = computed(() =>
     cn(
         'flex h-9 w-full rounded-md border bg-[var(--surface-raised)] px-3 py-1.5 text-sm text-[var(--text-default)]',
@@ -27,7 +34,7 @@ const classes = computed(() =>
         'focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]',
         'disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-[var(--surface-sunken)]',
         'read-only:bg-[var(--surface-sunken)] read-only:text-[var(--text-muted)]',
-        props.error
+        isError.value
             ? 'border-[var(--status-danger-border)] focus-visible:border-[var(--focus-ring-error)] focus-visible:ring-[color-mix(in_oklab,var(--focus-ring-error),transparent_82%)]'
             : 'border-[var(--border-default)]',
         props.class,
@@ -45,12 +52,13 @@ function onInput(e: Event): void {
             <slot name="prefix" />
         </span>
         <input
-            :id="id"
+            :id="id ?? injectedId?.value"
             :type="type"
             :value="modelValue ?? ''"
             :placeholder="placeholder"
             :disabled="disabled"
             :readonly="readonly"
+            :aria-invalid="isError ? 'true' : undefined"
             :class="[
                 classes,
                 $slots.prefix ? 'pl-9' : '',

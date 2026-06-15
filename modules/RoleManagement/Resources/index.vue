@@ -193,6 +193,8 @@ async function hapus(row: RoleRow): Promise<void> {
                 :sort="state.sort"
                 :direction="state.direction"
                 :only="['data']"
+                :has-active-filter="!!state.search"
+                :empty-title="t('roles.empty')"
                 @sort="sortBy"
             >
                 <template #cell-name="{ row }">

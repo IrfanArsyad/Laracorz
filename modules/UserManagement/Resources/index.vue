@@ -235,6 +235,8 @@ function resetFilters(): void {
                 :direction="state.direction"
                 :only="['data']"
                 :selectable="true"
+                :has-active-filter="!!(state.search || state.filters.role_id || state.filters.status)"
+                :empty-title="t('users.empty')"
                 v-model:selected="selected"
                 @sort="sortBy"
             >

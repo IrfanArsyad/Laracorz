@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, inject, onMounted, onUnmounted, ref, type Ref } from 'vue';
 import { Check, ChevronDown, X } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
 
 const { t } = useI18n();
+
+const injectedError = inject<Ref<string | undefined>>('formFieldError', undefined);
+const injectedId = inject<Ref<string>>('formFieldId', undefined);
 
 interface Option {
     label: string;
@@ -28,6 +31,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{ 'update:modelValue': [value: string | number | null] }>();
+
+const isError = computed(() => Boolean(props.error || injectedError?.value));
 
 const open = ref(false);
 const search = ref('');
@@ -96,9 +101,10 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
 <template>
     <div ref="containerRef" class="relative" @keydown="onKey">
         <button
-            :id="id"
+            :id="id ?? injectedId?.value"
             type="button"
             :disabled="disabled"
+            :aria-invalid="isError ? 'true' : undefined"
             :class="
                 cn(
                     'flex h-9 w-full items-center justify-between rounded-md border bg-[var(--surface-raised)] px-3 py-1.5 text-sm text-[var(--text-default)]',
@@ -106,7 +112,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                     'hover:border-[var(--border-strong)]',
                     'focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]',
                     'disabled:cursor-not-allowed disabled:opacity-60',
-                    error ? 'border-[var(--status-danger-border)]' : 'border-[var(--border-default)]',
+                    isError ? 'border-[var(--status-danger-border)]' : 'border-[var(--border-default)]',
                     $props.class,
                 )
             "
