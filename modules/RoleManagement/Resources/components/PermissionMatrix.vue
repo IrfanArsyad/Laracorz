@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Button } from '@/components/ui/Button';
 
@@ -38,7 +39,16 @@ const emit = defineEmits<{
     'update:modelExtra': [v: Record<string, string[]>];
 }>();
 
+const { t } = useI18n();
+
 const ACTIONS: Action[] = ['read', 'create', 'update', 'delete'];
+
+const ACTION_LABELS = computed<Record<Action, string>>(() => ({
+    read: t('roles.permissionRead'),
+    create: t('roles.permissionCreate'),
+    update: t('roles.permissionUpdate'),
+    delete: t('roles.permissionDelete'),
+}));
 
 const leaves = computed<Node[]>(() => {
     const out: Node[] = [];
@@ -135,20 +145,20 @@ function hasExtra(moduleName: string, ext: string): boolean {
 <template>
     <div class="space-y-4">
         <div class="flex items-center justify-end gap-2">
-            <Button type="button" size="sm" variant="outline" @click="clearAll">Bersihkan</Button>
-            <Button type="button" size="sm" variant="secondary" @click="setSuperAdmin">Super Admin (*)</Button>
+            <Button type="button" size="sm" variant="outline" @click="clearAll">{{ t('roles.matrixClear') }}</Button>
+            <Button type="button" size="sm" variant="secondary" @click="setSuperAdmin">{{ t('roles.matrixSuperAdmin') }}</Button>
         </div>
 
         <div class="rounded-lg border border-border overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-muted/40">
                     <tr>
-                        <th class="px-3 py-2 text-left">Modul</th>
-                        <th v-for="a in ACTIONS" :key="a" class="px-3 py-2 text-center capitalize">
-                            <button type="button" class="hover:underline" @click="toggleColumn(a)">{{ a }}</button>
+                        <th class="px-3 py-2 text-left">{{ t('roles.matrixColModule') }}</th>
+                        <th v-for="a in ACTIONS" :key="a" class="px-3 py-2 text-center">
+                            <button type="button" class="hover:underline" @click="toggleColumn(a)">{{ ACTION_LABELS[a] }}</button>
                         </th>
-                        <th class="px-3 py-2 text-right">Extra</th>
-                        <th class="px-3 py-2 text-center">Semua</th>
+                        <th class="px-3 py-2 text-right">{{ t('roles.matrixColExtra') }}</th>
+                        <th class="px-3 py-2 text-center">{{ t('roles.matrixColAll') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border">

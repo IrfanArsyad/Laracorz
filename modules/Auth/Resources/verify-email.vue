@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { Button } from '@/components/ui/Button';
 
 defineProps<{ status?: string }>();
+
+const { t } = useI18n();
 
 const form = useForm({});
 
@@ -17,17 +20,17 @@ function logout(): void {
 </script>
 
 <template>
-    <Head title="Verifikasi Email" />
-    <AuthLayout title="Verifikasi Email">
+    <Head :title="t('auth.verify')" />
+    <AuthLayout :title="t('auth.verifyTitle')">
         <p class="text-sm text-muted-foreground">
-            Sebelum melanjutkan, silakan periksa email Anda untuk tautan verifikasi.
+            {{ t('auth.verifyBody') }}
         </p>
         <p v-if="status === 'verification-link-sent'" class="mt-3 text-sm font-medium text-success">
-            Tautan verifikasi baru telah dikirim ke email Anda.
+            {{ t('auth.verifyLinkSent') }}
         </p>
         <div class="mt-6 flex items-center justify-between gap-2">
-            <Button :loading="form.processing" @click="submit">Kirim Ulang</Button>
-            <Button variant="ghost" @click="logout">Keluar</Button>
+            <Button :loading="form.processing" @click="submit">{{ t('auth.resend') }}</Button>
+            <Button variant="ghost" @click="logout">{{ t('topbar.logout') }}</Button>
         </div>
     </AuthLayout>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { Eye } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import FilterBar from '@/components/shared/FilterBar.vue';
@@ -31,6 +33,8 @@ interface LogRow {
 
 const props = defineProps<{ data: Paginated<LogRow>; filters: Record<string, unknown> }>();
 
+const { t } = useI18n();
+
 const { state, sortBy } = useDataTable({
     initial: {
         search: (props.filters.search as string) ?? '',
@@ -43,36 +47,36 @@ const { state, sortBy } = useDataTable({
     },
 });
 
-const columns: Column[] = [
-    { key: 'created_at', label: 'Waktu', sortable: true, width: '180px' },
-    { key: 'user_name', label: 'User' },
-    { key: 'module', label: 'Modul' },
-    { key: 'action', label: 'Aksi' },
-    { key: 'description', label: 'Deskripsi' },
-];
+const columns = computed<Column[]>(() => [
+    { key: 'created_at', label: t('logs.admin.columnTime'), sortable: true, width: '180px' },
+    { key: 'user_name', label: t('logs.admin.columnUser') },
+    { key: 'module', label: t('logs.admin.columnModule') },
+    { key: 'action', label: t('logs.admin.columnAction') },
+    { key: 'description', label: t('logs.admin.columnDescription') },
+]);
 
 const detail = useModal<LogRow | null>();
 const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label: v.label, value: k }));
 </script>
 
 <template>
-    <Head title="Admin Log" />
+    <Head :title="t('logs.admin.title')" />
     <AppLayout>
         <div class="space-y-6">
             <PageHeader
-                title="Admin Log"
-                description="Jejak aktivitas administrator."
-                :breadcrumbs="[{ label: 'System' }, { label: 'Admin Log' }]"
+                :title="t('logs.admin.title')"
+                :description="t('logs.admin.description')"
+                :breadcrumbs="[{ label: t('logs.admin.breadcrumbRoot') }, { label: t('logs.admin.breadcrumb') }]"
             />
 
             <FilterBar
                 v-model:search="state.search"
-                placeholder="Cari deskripsi/user/module..."
+                :placeholder="t('logs.admin.searchPlaceholder')"
                 :filters-count="state.filters.action ? 1 : 0"
                 @reset="state.filters.action = undefined; state.search = ''"
             >
-                <FormField label="Aksi">
-                    <Select v-model="state.filters.action" :options="actionOptions" placeholder="Semua aksi" clearable />
+                <FormField :label="t('logs.admin.filterAction')">
+                    <Select v-model="state.filters.action" :options="actionOptions" :placeholder="t('logs.admin.filterAllActions')" clearable />
                 </FormField>
             </FilterBar>
 
@@ -86,7 +90,7 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
                     <Badge variant="muted" class="font-mono">{{ value ?? '-' }}</Badge>
                 </template>
                 <template #actions="{ row }">
-                    <Button size="icon-xs" variant="ghost" aria-label="Detail" @click="detail.open(row)">
+                    <Button size="icon-xs" variant="ghost" :aria-label="t('common.detail')" @click="detail.open(row)">
                         <Eye class="h-3.5 w-3.5" />
                     </Button>
                 </template>
@@ -95,26 +99,26 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
 
         <Modal v-model="detail.isOpen.value" size="xl" :body-padding="false">
             <ModalHeader
-                :title="`Log #${detail.data.value?.id ?? ''}`"
+                :title="t('logs.admin.detailTitle', { id: detail.data.value?.id ?? '' })"
                 :description="detail.data.value?.description"
             />
             <ModalBody>
                 <div v-if="detail.data.value" class="space-y-4 text-sm">
                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">Waktu</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">{{ t('logs.admin.fieldTime') }}</p>
                             <p class="mt-0.5">{{ detail.data.value.created_at }}</p>
                         </div>
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">User</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">{{ t('logs.admin.fieldUser') }}</p>
                             <p class="mt-0.5">{{ detail.data.value.user_name ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">IP</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">{{ t('logs.admin.fieldIp') }}</p>
                             <p class="mt-0.5 font-mono text-xs">{{ detail.data.value.ip_address ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">Aksi</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)]">{{ t('logs.admin.fieldAction') }}</p>
                             <Badge :variant="((ADMIN_LOG_ACTIONS as any)[detail.data.value.action]?.color ?? 'muted')">
                                 {{ (ADMIN_LOG_ACTIONS as any)[detail.data.value.action]?.label ?? detail.data.value.action }}
                             </Badge>
@@ -123,18 +127,18 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Sebelum</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">{{ t('logs.admin.fieldBefore') }}</p>
                             <pre class="bg-[var(--surface-sunken)] border border-[var(--border-subtle)] rounded-md p-3 text-xs font-mono whitespace-pre-wrap overflow-auto max-h-64">{{ JSON.stringify(detail.data.value.old_values ?? {}, null, 2) }}</pre>
                         </div>
                         <div>
-                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">Sesudah</p>
+                            <p class="text-xs uppercase tracking-wider text-[var(--text-muted)] mb-1">{{ t('logs.admin.fieldAfter') }}</p>
                             <pre class="bg-[var(--surface-sunken)] border border-[var(--border-subtle)] rounded-md p-3 text-xs font-mono whitespace-pre-wrap overflow-auto max-h-64">{{ JSON.stringify(detail.data.value.new_values ?? {}, null, 2) }}</pre>
                         </div>
                     </div>
                 </div>
             </ModalBody>
             <ModalFooter>
-                <Button variant="ghost" @click="detail.close()">Tutup</Button>
+                <Button variant="ghost" @click="detail.close()">{{ t('common.close') }}</Button>
             </ModalFooter>
         </Modal>
     </AppLayout>

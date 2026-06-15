@@ -2,6 +2,7 @@
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Pencil, Plus, Trash2, ShieldCheck, Lock, AlertCircle } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import FilterBar from '@/components/shared/FilterBar.vue';
@@ -54,6 +55,8 @@ const props = defineProps<{
     filters: { search: string | null; sort: string | null; direction: 'asc' | 'desc' };
 }>();
 
+const { t } = useI18n();
+
 const { state, sortBy } = useDataTable({
     initial: {
         search: props.filters.search ?? '',
@@ -66,12 +69,12 @@ const { state, sortBy } = useDataTable({
 const { can } = usePermission();
 const { confirm } = useConfirm();
 
-const columns: Column[] = [
-    { key: 'name', label: 'Nama', sortable: true },
-    { key: 'display_name', label: 'Display Name', sortable: true },
-    { key: 'users_count', label: 'Jumlah User', align: 'right' },
-    { key: 'is_active', label: 'Status', align: 'center' },
-];
+const columns = computed<Column[]>(() => [
+    { key: 'name', label: t('common.name'), sortable: true },
+    { key: 'display_name', label: t('roles.columnDisplayName'), sortable: true },
+    { key: 'users_count', label: t('roles.usersCountColumn'), align: 'right' },
+    { key: 'is_active', label: t('common.status'), align: 'center' },
+]);
 
 // ─── Modal Create/Edit ─────────────────────────────────────────────────
 const formModal = useModal<RoleRow | null>();
@@ -150,10 +153,10 @@ function submit(): void {
 
 async function hapus(row: RoleRow): Promise<void> {
     const ok = await confirm({
-        title: 'Hapus role?',
-        message: `Yakin hapus role "${row.display_name}"?`,
+        title: t('roles.deleteTitle'),
+        message: t('roles.deleteConfirm', { name: row.display_name }),
         variant: 'destructive',
-        confirmLabel: 'Hapus',
+        confirmLabel: t('common.delete'),
     });
     if (!ok) return;
     router.delete(`/roles/${row.id}`, { preserveScroll: true });
@@ -161,24 +164,24 @@ async function hapus(row: RoleRow): Promise<void> {
 </script>
 
 <template>
-    <Head title="Manajemen Role" />
+    <Head :title="t('roles.title')" />
     <AppLayout>
         <div class="space-y-5">
             <PageHeader
-                title="Manajemen Role"
-                description="Atur peran pengguna dan matriks izin per modul."
-                :breadcrumbs="[{ label: 'Role & Permission' }, { label: 'Role' }]"
+                :title="t('roles.title')"
+                :description="t('roles.description')"
+                :breadcrumbs="[{ label: t('roles.breadcrumbRoot') }, { label: t('roles.breadcrumb') }]"
             >
                 <template #actions>
                     <Button v-if="can('create', 'role-management')" @click="openCreate">
-                        <Plus class="h-4 w-4" /> Tambah Role
+                        <Plus class="h-4 w-4" /> {{ t('roles.create') }}
                     </Button>
                 </template>
             </PageHeader>
 
             <FilterBar
                 v-model:search="state.search"
-                placeholder="Cari nama role..."
+                :placeholder="t('roles.searchPlaceholder')"
                 @reset="state.search = ''"
             />
 
@@ -200,7 +203,7 @@ async function hapus(row: RoleRow): Promise<void> {
                     <span class="tabular-nums">{{ value }}</span>
                 </template>
                 <template #cell-is_active="{ value }">
-                    <Badge :variant="value ? 'success' : 'muted'">{{ value ? 'Aktif' : 'Nonaktif' }}</Badge>
+                    <Badge :variant="value ? 'success' : 'muted'">{{ value ? t('roles.statusActive') : t('roles.statusInactive') }}</Badge>
                 </template>
                 <template #actions="{ row }">
                     <div class="flex justify-end gap-1">
@@ -208,7 +211,7 @@ async function hapus(row: RoleRow): Promise<void> {
                             v-if="can('update', 'role-management') && row.name !== 'super-admin'"
                             variant="ghost"
                             size="icon-xs"
-                            aria-label="Ubah"
+                            :aria-label="t('roles.actionEdit')"
                             @click="openEdit(row)"
                         >
                             <Pencil class="h-3.5 w-3.5" />
@@ -218,7 +221,7 @@ async function hapus(row: RoleRow): Promise<void> {
                             variant="ghost"
                             size="icon-xs"
                             class="text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
-                            aria-label="Hapus"
+                            :aria-label="t('roles.actionDelete')"
                             @click="hapus(row)"
                         >
                             <Trash2 class="h-3.5 w-3.5" />
@@ -231,8 +234,8 @@ async function hapus(row: RoleRow): Promise<void> {
         <!-- Modal Tambah/Ubah Role — pakai FormModal preset -->
         <FormModal
             v-model="formModal.isOpen.value"
-            :title="isEditing ? `Ubah Role: ${formModal.data.value?.display_name}` : 'Tambah Role Baru'"
-            :description="isEditing ? 'Perbarui detail role dan matriks izinnya.' : 'Buat peran baru dengan matriks izin per modul.'"
+            :title="isEditing ? t('roles.editTitle', { name: formModal.data.value?.display_name }) : t('roles.createNew')"
+            :description="isEditing ? t('roles.modalEditDesc') : t('roles.modalCreateDesc')"
             size="2xl"
             :processing="form.processing"
             @submit="submit"
@@ -244,24 +247,24 @@ async function hapus(row: RoleRow): Promise<void> {
                 class="mb-4 flex items-start gap-2 rounded-md border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] p-3 text-sm text-[var(--status-warning-fg)]"
             >
                 <Lock class="h-4 w-4 shrink-0 mt-px" />
-                <p>Role <strong>super-admin</strong> bersifat protected dan tidak dapat diubah.</p>
+                <p>{{ t('roles.superAdminBanner', { role: 'super-admin' }) }}</p>
             </div>
 
             <!-- Identitas role -->
             <div class="grid gap-3.5 sm:grid-cols-2">
-                <FormField label="Slug" hint="huruf kecil, tanpa spasi" :error="form.errors.name" required>
-                    <Input v-model="form.name" placeholder="contoh: editor" :disabled="isSuperAdmin" />
+                <FormField :label="t('roles.name')" :hint="t('roles.nameHint')" :error="form.errors.name" required>
+                    <Input v-model="form.name" :placeholder="t('roles.namePlaceholder')" :disabled="isSuperAdmin" />
                 </FormField>
-                <FormField label="Nama Tampilan" :error="form.errors.display_name" required>
-                    <Input v-model="form.display_name" placeholder="contoh: Editor Konten" :disabled="isSuperAdmin" />
+                <FormField :label="t('roles.displayName')" :error="form.errors.display_name" required>
+                    <Input v-model="form.display_name" :placeholder="t('roles.displayNamePlaceholder')" :disabled="isSuperAdmin" />
                 </FormField>
-                <FormField label="Deskripsi" class="sm:col-span-2">
+                <FormField :label="t('roles.description2')" class="sm:col-span-2">
                     <Textarea v-model="form.description" :rows="2" :disabled="isSuperAdmin" />
                 </FormField>
-                <FormField label="Status">
+                <FormField :label="t('common.status')">
                     <label class="inline-flex items-center gap-2 cursor-pointer">
                         <Switch v-model="form.is_active" :disabled="isSuperAdmin" />
-                        <span class="text-sm">{{ form.is_active ? 'Aktif' : 'Nonaktif' }}</span>
+                        <span class="text-sm">{{ form.is_active ? t('roles.statusActive') : t('roles.statusInactive') }}</span>
                     </label>
                 </FormField>
             </div>
@@ -270,14 +273,14 @@ async function hapus(row: RoleRow): Promise<void> {
             <div class="mt-6 pt-5 border-t border-[var(--border-subtle)]">
                 <div class="flex items-start justify-between gap-3 mb-3">
                     <div>
-                        <h3 class="text-sm font-semibold text-[var(--text-strong)]">Matriks Izin</h3>
-                        <p class="text-sm text-[var(--text-muted)]">Centang akses per modul. Container hanya tampil kalau ada leaf yang dipilih.</p>
+                        <h3 class="text-sm font-semibold text-[var(--text-strong)]">{{ t('roles.permissionMatrixTitle') }}</h3>
+                        <p class="text-sm text-[var(--text-muted)]">{{ t('roles.permissionMatrixDesc') }}</p>
                     </div>
                 </div>
 
                 <div v-if="!matrix" class="flex items-center gap-2 text-sm text-[var(--text-muted)] py-8 justify-center">
                     <AlertCircle class="h-4 w-4" />
-                    Memuat struktur modul...
+                    {{ t('roles.loadingMatrix') }}
                 </div>
                 <PermissionMatrix
                     v-else

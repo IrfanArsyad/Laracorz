@@ -33,6 +33,7 @@ import { usePermission } from '@/composables/usePermission';
 import { USER_STATUS } from '@/types/enums';
 import type { Paginated, User } from '@/types';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     data: Paginated<User>;
@@ -41,6 +42,8 @@ const props = defineProps<{
     trashed: boolean;
     stats?: { total: number; active: number; inactive: number; banned: number };
 }>();
+
+const { t } = useI18n();
 
 const { state, sortBy } = useDataTable({
     initial: {
@@ -63,13 +66,13 @@ const filtersCount = computed(() => {
     return n;
 });
 
-const columns: Column[] = [
-    { key: 'name', label: 'Nama', sortable: true },
-    { key: 'email', label: 'Email', sortable: true },
-    { key: 'role', label: 'Role' },
-    { key: 'status', label: 'Status', align: 'center' },
-    { key: 'last_login_at', label: 'Login terakhir', sortable: true },
-];
+const columns = computed<Column[]>(() => [
+    { key: 'name', label: t('users.columnName'), sortable: true },
+    { key: 'email', label: t('users.columnEmail'), sortable: true },
+    { key: 'role', label: t('users.columnRole') },
+    { key: 'status', label: t('users.columnStatus'), align: 'center' },
+    { key: 'last_login_at', label: t('users.columnLastLogin'), sortable: true },
+]);
 
 const roleOptions = computed(() => props.roles.map((r) => ({ label: r.display_name, value: r.id })));
 const statusOptions = Object.entries(USER_STATUS).map(([k, v]) => ({ label: v.label, value: k }));
@@ -128,10 +131,10 @@ function submit(): void {
 // ─── Aksi row ───────────────────────────────────────────────────────────
 async function hapus(row: User): Promise<void> {
     const ok = await confirm({
-        title: 'Hapus pengguna?',
-        message: `Yakin hapus "${row.name}"?`,
+        title: t('users.deleteTitle'),
+        message: t('users.deleteShort', { name: row.name }),
         variant: 'destructive',
-        confirmLabel: 'Hapus',
+        confirmLabel: t('common.delete'),
     });
     if (!ok) return;
     router.delete(`/users/${row.id}`, { preserveScroll: true });
@@ -143,8 +146,8 @@ function pulihkan(row: User): void {
 
 async function hapusBulk(): Promise<void> {
     const ok = await confirm({
-        title: 'Hapus pengguna terpilih?',
-        message: `Yakin hapus ${selected.value.length} pengguna?`,
+        title: t('users.deleteBulkTitle'),
+        message: t('users.deleteBulkConfirm', { count: selected.value.length }),
         variant: 'destructive',
     });
     if (!ok) return;
@@ -164,61 +167,61 @@ function resetFilters(): void {
 </script>
 
 <template>
-    <Head title="Manajemen Pengguna" />
+    <Head :title="t('users.title')" />
     <AppLayout>
         <div class="space-y-5">
             <PageHeader
-                title="Manajemen Pengguna"
-                description="Kelola pengguna sistem, role, dan status akses."
-                :breadcrumbs="[{ label: 'User & Access' }, { label: 'Pengguna' }]"
+                :title="t('users.title')"
+                :description="t('users.description')"
+                :breadcrumbs="[{ label: t('users.breadcrumbRoot') }, { label: t('users.breadcrumb') }]"
             >
                 <template #actions>
                     <DropdownMenu align="end">
                         <template #trigger>
                             <Button variant="outline" size="sm">
-                                <Download class="h-3.5 w-3.5" /> Ekspor
+                                <Download class="h-3.5 w-3.5" /> {{ t('common.export') }}
                             </Button>
                         </template>
                         <DropdownMenuItem as="a" :href="`/users/export/csv?search=${state.search ?? ''}`">CSV</DropdownMenuItem>
                     </DropdownMenu>
                     <Button variant="outline" size="sm" @click="toggleTrashed">
-                        <Trash class="h-3.5 w-3.5" /> {{ trashed ? 'Tampil aktif' : 'Tampil terhapus' }}
+                        <Trash class="h-3.5 w-3.5" /> {{ trashed ? t('users.showActive') : t('users.showTrashed') }}
                     </Button>
                     <Button v-if="can('create', 'user-management') && !trashed" @click="openCreate">
-                        <Plus class="h-4 w-4" /> Tambah Pengguna
+                        <Plus class="h-4 w-4" /> {{ t('users.create') }}
                     </Button>
                 </template>
             </PageHeader>
 
             <!-- Stat cards — KPI ringkas -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <StatCard label="Total Pengguna" :value="stats?.total ?? '—'" :icon="Users" :loading="!stats" />
-                <StatCard label="Aktif" :value="stats?.active ?? '—'" :icon="UserCheck" :loading="!stats" />
-                <StatCard label="Nonaktif" :value="stats?.inactive ?? '—'" :icon="UserMinus" :loading="!stats" />
-                <StatCard label="Diblokir" :value="stats?.banned ?? '—'" :icon="UserX" :loading="!stats" />
+                <StatCard :label="t('users.statsTotal')" :value="stats?.total ?? '—'" :icon="Users" :loading="!stats" />
+                <StatCard :label="t('users.statsActive')" :value="stats?.active ?? '—'" :icon="UserCheck" :loading="!stats" />
+                <StatCard :label="t('users.statsInactive')" :value="stats?.inactive ?? '—'" :icon="UserMinus" :loading="!stats" />
+                <StatCard :label="t('users.statsBanned')" :value="stats?.banned ?? '—'" :icon="UserX" :loading="!stats" />
             </div>
 
             <!-- Filter toolbar — search inline, filter collapsed in panel -->
             <FilterBar
                 v-model:search="state.search"
-                placeholder="Cari nama, username, atau email..."
+                :placeholder="t('users.searchPlaceholder')"
                 :filters-count="filtersCount"
                 @reset="resetFilters"
             >
-                <FormField label="Role">
+                <FormField :label="t('users.role')">
                     <Select
                         v-model="state.filters.role_id"
                         :options="roleOptions"
-                        placeholder="Semua role"
+                        :placeholder="t('users.filterAllRoles')"
                         clearable
                         searchable
                     />
                 </FormField>
-                <FormField label="Status">
+                <FormField :label="t('users.status')">
                     <Select
                         v-model="state.filters.status"
                         :options="statusOptions"
-                        placeholder="Semua status"
+                        :placeholder="t('users.filterAllStatuses')"
                         clearable
                     />
                 </FormField>
@@ -256,14 +259,14 @@ function resetFilters(): void {
                 </template>
                 <template #actions="{ row }">
                     <div class="flex justify-end gap-1">
-                        <Button as="link" :href="`/users/${row.id}`" variant="ghost" size="icon-xs" aria-label="Detail">
+                        <Button as="link" :href="`/users/${row.id}`" variant="ghost" size="icon-xs" :aria-label="t('users.actionDetail')">
                             <Eye class="h-3.5 w-3.5" />
                         </Button>
                         <Button
                             v-if="can('update', 'user-management') && !trashed"
                             variant="ghost"
                             size="icon-xs"
-                            aria-label="Ubah"
+                            :aria-label="t('users.actionEdit')"
                             @click="openEdit(row)"
                         >
                             <Pencil class="h-3.5 w-3.5" />
@@ -273,7 +276,7 @@ function resetFilters(): void {
                             variant="ghost"
                             size="icon-xs"
                             class="text-[var(--status-success-fg)] hover:bg-[var(--status-success-bg)]"
-                            aria-label="Pulihkan"
+                            :aria-label="t('users.actionRestore')"
                             @click="pulihkan(row)"
                         >
                             <RefreshCcw class="h-3.5 w-3.5" />
@@ -283,7 +286,7 @@ function resetFilters(): void {
                             variant="ghost"
                             size="icon-xs"
                             class="text-[var(--status-danger-fg)] hover:bg-[var(--status-danger-bg)]"
-                            aria-label="Hapus"
+                            :aria-label="t('users.actionDelete')"
                             @click="hapus(row)"
                         >
                             <Trash2 class="h-3.5 w-3.5" />
@@ -292,7 +295,7 @@ function resetFilters(): void {
                 </template>
                 <template #bulk-actions>
                     <Button variant="destructive" size="sm" @click="hapusBulk">
-                        <Trash2 class="h-3.5 w-3.5" /> Hapus terpilih
+                        <Trash2 class="h-3.5 w-3.5" /> {{ t('users.deleteBulkAction') }}
                     </Button>
                 </template>
             </DataTable>
@@ -301,8 +304,8 @@ function resetFilters(): void {
         <!-- Modal Tambah / Ubah Pengguna -->
         <FormModal
             v-model="formModal.isOpen.value"
-            :title="formModal.data.value ? `Ubah Pengguna: ${formModal.data.value.name}` : 'Tambah Pengguna'"
-            :description="formModal.data.value ? 'Perbarui detail akun.' : 'Buat akun pengguna baru.'"
+            :title="formModal.data.value ? t('users.modalEditTitle', { name: formModal.data.value.name }) : t('users.modalCreateTitle')"
+            :description="formModal.data.value ? t('users.modalEditDesc') : t('users.modalCreateDesc')"
             size="lg"
             :processing="form.processing"
             @submit="submit"

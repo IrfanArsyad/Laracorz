@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -14,6 +15,8 @@ import { FormActions } from '@/components/ui/FormActions';
 
 const props = defineProps<{ groups: Record<string, Array<{ key: string; label: string; type: string; description: string | null }>>; values: Record<string, unknown> }>();
 
+const { t } = useI18n();
+
 const tab = ref(Object.keys(props.groups)[0] ?? 'general');
 const form = useForm({
     values: { ...props.values },
@@ -26,9 +29,9 @@ function submit(): void {
 </script>
 
 <template>
-    <Head title="Pengaturan" />
+    <Head :title="t('settings.title')" />
     <AppLayout>
-        <PageHeader title="Pengaturan" description="Konfigurasi global aplikasi." />
+        <PageHeader :title="t('settings.title')" :description="t('settings.descriptionLong')" />
 
         <Card class="mt-6">
             <CardContent>
@@ -74,7 +77,7 @@ function submit(): void {
                     </Tabs>
 
                     <FormActions>
-                        <Button type="submit" :loading="form.processing">Simpan</Button>
+                        <Button type="submit" :loading="form.processing">{{ t('settings.save') }}</Button>
                     </FormActions>
                 </form>
             </CardContent>

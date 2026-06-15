@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { Check } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -18,6 +19,8 @@ interface NotifRow {
 
 defineProps<{ data: Paginated<NotifRow> }>();
 
+const { t } = useI18n();
+
 function markRead(id: string): void {
     router.patch(`/notifications/${id}/read`, {}, { preserveScroll: true });
 }
@@ -28,12 +31,12 @@ function markAllRead(): void {
 </script>
 
 <template>
-    <Head title="Notifikasi" />
+    <Head :title="t('notifications.title')" />
     <AppLayout>
-        <PageHeader title="Notifikasi" description="Semua pemberitahuan untuk Anda.">
+        <PageHeader :title="t('notifications.title')" :description="t('notifications.description')">
             <template #actions>
                 <Button variant="outline" size="sm" @click="markAllRead">
-                    <Check class="h-3.5 w-3.5" /> Tandai semua dibaca
+                    <Check class="h-3.5 w-3.5" /> {{ t('notifications.markAllRead') }}
                 </Button>
             </template>
         </PageHeader>
@@ -56,7 +59,7 @@ function markAllRead(): void {
                         </Button>
                     </li>
                 </ul>
-                <EmptyState v-else title="Tidak ada notifikasi" />
+                <EmptyState v-else :title="t('notifications.emptyTitle')" />
                 <Pagination v-if="data.data.length > 0" :meta="data.meta" class="mt-4" />
             </CardContent>
         </Card>

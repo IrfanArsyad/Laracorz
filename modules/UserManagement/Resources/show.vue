@@ -8,7 +8,8 @@ import { DescriptionList } from '@/components/ui/DescriptionList';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { USER_STATUS, ADMIN_LOG_ACTIONS } from '@/types/enums';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     user: {
@@ -24,28 +25,29 @@ const props = defineProps<{
     logs: Array<{ id: number; action: string; description: string; created_at: string }>;
 }>();
 
+const { t } = useI18n();
 const tab = ref('detail');
 
-const items = [
-    { label: 'Nama', value: props.user.name },
-    { label: 'Email', value: props.user.email },
-    { label: 'Role', value: props.user.role?.display_name ?? '-' },
+const items = computed(() => [
+    { label: t('users.detailName'), value: props.user.name },
+    { label: t('users.detailEmail'), value: props.user.email },
+    { label: t('users.detailRole'), value: props.user.role?.display_name ?? '-' },
     {
-        label: 'Status',
+        label: t('users.detailStatus'),
         value:
             (USER_STATUS as never)[props.user.status as never]?.label ?? props.user.status,
     },
-    { label: 'Login Terakhir', value: props.user.last_login_at ?? '-' },
-    { label: 'Dibuat', value: props.user.created_at },
-];
+    { label: t('users.detailLastLogin'), value: props.user.last_login_at ?? '-' },
+    { label: t('users.detailCreated'), value: props.user.created_at },
+]);
 </script>
 
 <template>
-    <Head :title="`Pengguna: ${user.name}`" />
+    <Head :title="t('users.pageTitle', { name: user.name })" />
     <AppLayout>
         <PageHeader
             :title="user.name"
-            :breadcrumbs="[{ label: 'Pengguna', href: '/users' }, { label: user.name }]"
+            :breadcrumbs="[{ label: t('users.breadcrumb'), href: '/users' }, { label: user.name }]"
         />
 
         <Card class="mt-6">
@@ -60,8 +62,8 @@ const items = [
 
                 <Tabs v-model="tab">
                     <TabsList>
-                        <TabsTrigger value="detail">Detail</TabsTrigger>
-                        <TabsTrigger value="activity">Aktivitas</TabsTrigger>
+                        <TabsTrigger value="detail">{{ t('users.tabDetail') }}</TabsTrigger>
+                        <TabsTrigger value="activity">{{ t('users.tabActivity') }}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="detail">
                         <DescriptionList :items="items" />
@@ -76,7 +78,7 @@ const items = [
                                 <span class="ml-auto text-xs text-muted-foreground">{{ log.created_at }}</span>
                             </li>
                             <li v-if="logs.length === 0" class="py-4 text-center text-sm text-muted-foreground">
-                                Belum ada aktivitas.
+                                {{ t('users.emptyActivity') }}
                             </li>
                         </ul>
                     </TabsContent>

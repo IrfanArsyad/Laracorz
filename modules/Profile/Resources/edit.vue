@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import { FormField } from '@/components/ui/FormField';
@@ -19,6 +20,8 @@ const props = defineProps<{
     status?: string;
     sessions?: Array<{ id: string; ip_address: string; user_agent: string; last_activity: number; current: boolean }>;
 }>();
+
+const { t } = useI18n();
 
 const page = usePage();
 const user = computed<User | null>(() => (page.props.auth as { user: User | null }).user);
@@ -67,10 +70,10 @@ const { confirm } = useConfirm();
 
 async function deleteAccount(): Promise<void> {
     const ok = await confirm({
-        title: 'Hapus Akun?',
-        message: 'Akun Anda akan dihapus permanen. Lanjutkan?',
+        title: t('profile.deleteAccountTitle'),
+        message: t('profile.deleteAccountMessage'),
         variant: 'destructive',
-        confirmLabel: 'Hapus',
+        confirmLabel: t('common.delete'),
     });
     if (!ok) return;
     deleteForm.delete('/profile', {
@@ -81,14 +84,14 @@ async function deleteAccount(): Promise<void> {
 </script>
 
 <template>
-    <Head title="Profil" />
+    <Head :title="t('profile.title')" />
     <AppLayout>
-        <PageHeader title="Profil" description="Kelola informasi akun, kata sandi, dan sesi Anda." />
+        <PageHeader :title="t('profile.title')" :description="t('profile.description')" />
 
         <Card>
             <CardContent>
                 <form @submit.prevent="saveProfile">
-                    <FormSection title="Informasi Akun" description="Perbarui nama dan email akun Anda.">
+                    <FormSection :title="t('profile.section.account')" :description="t('profile.section.accountDesc')">
                         <div class="flex items-center gap-4">
                             <Avatar :src="user?.avatar_url" :name="user?.name" size="lg" />
                             <div class="flex-1">
@@ -99,69 +102,69 @@ async function deleteAccount(): Promise<void> {
                                     @change="(e) => (avatarFile = (e.target as HTMLInputElement).files?.[0] ?? null)"
                                 />
                                 <Button v-if="avatarFile" size="sm" class="mt-2" @click="uploadAvatar">
-                                    Unggah foto
+                                    {{ t('profile.uploadAvatar') }}
                                 </Button>
                             </div>
                         </div>
-                        <FormField label="Nama" :error="profileForm.errors.name" required>
+                        <FormField :label="t('profile.name')" :error="profileForm.errors.name" required>
                             <Input v-model="profileForm.name" />
                         </FormField>
-                        <FormField label="Username" :error="profileForm.errors.username" required>
+                        <FormField :label="t('profile.username')" :error="profileForm.errors.username" required>
                             <Input v-model="profileForm.username" autocomplete="off" />
                         </FormField>
-                        <FormField label="Email" :error="profileForm.errors.email" required>
+                        <FormField :label="t('profile.email')" :error="profileForm.errors.email" required>
                             <Input v-model="profileForm.email" type="email" />
                         </FormField>
                         <p v-if="mustVerifyEmail && !user?.email_verified_at" class="text-xs text-warning">
-                            Email Anda belum terverifikasi.
+                            {{ t('profile.emailNotVerified') }}
                         </p>
                     </FormSection>
                     <FormActions>
-                        <Button type="submit" :loading="profileForm.processing">Simpan</Button>
+                        <Button type="submit" :loading="profileForm.processing">{{ t('profile.save') }}</Button>
                     </FormActions>
                 </form>
 
                 <form @submit.prevent="savePassword">
-                    <FormSection title="Kata Sandi" description="Ubah kata sandi akun.">
-                        <FormField label="Kata Sandi Saat Ini" :error="passwordForm.errors.current_password" required>
+                    <FormSection :title="t('profile.section.password')" :description="t('profile.section.passwordDesc')">
+                        <FormField :label="t('profile.currentPassword')" :error="passwordForm.errors.current_password" required>
                             <InputPassword v-model="passwordForm.current_password" />
                         </FormField>
-                        <FormField label="Kata Sandi Baru" :error="passwordForm.errors.password" required>
+                        <FormField :label="t('profile.newPassword')" :error="passwordForm.errors.password" required>
                             <InputPassword v-model="passwordForm.password" />
                         </FormField>
-                        <FormField label="Konfirmasi Kata Sandi" required>
+                        <FormField :label="t('profile.passwordConfirmation')" required>
                             <InputPassword v-model="passwordForm.password_confirmation" />
                         </FormField>
                     </FormSection>
                     <FormActions>
-                        <Button type="submit" :loading="passwordForm.processing">Ubah Kata Sandi</Button>
+                        <Button type="submit" :loading="passwordForm.processing">{{ t('profile.changePassword') }}</Button>
                     </FormActions>
                 </form>
 
                 <form @submit.prevent="logoutOthers">
-                    <FormSection title="Sesi Browser" description="Lihat dan keluarkan sesi browser lain.">
+                    <FormSection :title="t('profile.section.sessions')" :description="t('profile.section.sessionsDesc')">
                         <ul class="divide-y divide-border text-sm">
                             <li v-for="s in sessions" :key="s.id" class="py-2 flex justify-between">
                                 <span>{{ s.ip_address }} <span class="text-xs text-muted-foreground">{{ s.user_agent }}</span></span>
-                                <span v-if="s.current" class="text-xs text-success">Aktif</span>
+                                <span v-if="s.current" class="text-xs text-success">{{ t('profile.sessionCurrent') }}</span>
                             </li>
                         </ul>
-                        <FormField label="Kata Sandi" :error="sessionsForm.errors.password" required>
+                        <FormField :label="t('profile.password')" :error="sessionsForm.errors.password" required>
                             <InputPassword v-model="sessionsForm.password" />
                         </FormField>
                     </FormSection>
                     <FormActions>
-                        <Button type="submit" variant="outline" :loading="sessionsForm.processing">Keluarkan Sesi Lain</Button>
+                        <Button type="submit" variant="outline" :loading="sessionsForm.processing">{{ t('profile.logoutOthers') }}</Button>
                     </FormActions>
                 </form>
 
-                <FormSection title="Hapus Akun" description="Tindakan ini permanen dan tidak dapat dibatalkan.">
-                    <FormField label="Kata Sandi" :error="deleteForm.errors.password" required>
+                <FormSection :title="t('profile.section.deleteAccount')" :description="t('profile.section.deleteAccountDesc')">
+                    <FormField :label="t('profile.password')" :error="deleteForm.errors.password" required>
                         <InputPassword v-model="deleteForm.password" />
                     </FormField>
                     <FormActions>
                         <Button variant="destructive" :loading="deleteForm.processing" @click="deleteAccount">
-                            Hapus Akun Saya
+                            {{ t('profile.deleteAccount') }}
                         </Button>
                     </FormActions>
                 </FormSection>
