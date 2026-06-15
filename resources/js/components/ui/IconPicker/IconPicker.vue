@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import * as Icons from 'lucide-vue-next';
 import { Search, X, Check } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
-import { resolveIcon } from '@/lib/icon';
+import { resolveIcon, listIcons } from '@/lib/icon';
 import { cn } from '@/lib/utils';
 
 const { t } = useI18n();
@@ -35,47 +34,13 @@ const open = ref(false);
 const search = ref('');
 const containerRef = ref<HTMLElement | null>(null);
 
-/**
- * Filter Lucide exports → ambil hanya icon component, exclude helper export,
- * dan exclude alias (banyak icon punya 2-6 nama yang sama persis component-nya).
- * Pakai Set component reference untuk dedup.
- */
-const ALL_ICONS = computed(() => {
-    const seen = new Set<unknown>();
-    const list: Array<{ name: string; component: unknown }> = [];
-    const NON_ICONS = new Set([
-        'createLucideIcon',
-        'icons',
-        'default',
-        'Icon',
-        'LucideIcon',
-        'aliases',
-    ]);
-
-    for (const [name, component] of Object.entries(Icons)) {
-        if (NON_ICONS.has(name)) continue;
-        // skip variant 'XxxIcon' (alias); ambil yang tanpa suffix Icon
-        if (name.endsWith('Icon') && Icons[name.replace(/Icon$/, '') as keyof typeof Icons]) continue;
-        // skip "Lucide" prefix (alias)
-        if (name.startsWith('Lucide')) continue;
-        if (typeof component !== 'function' && typeof component !== 'object') continue;
-        if (seen.has(component)) continue;
-        seen.add(component);
-        // PascalCase → kebab-case
-        const kebab = name
-            .replace(/([A-Z])/g, '-$1')
-            .toLowerCase()
-            .replace(/^-/, '');
-        list.push({ name: kebab, component });
-    }
-
-    return list.sort((a, b) => a.name.localeCompare(b.name));
-});
+// Pakai registry curated dari lib/icon.ts — sudah tree-shaken named imports.
+const ALL_ICONS = listIcons().sort((a, b) => a.name.localeCompare(b.name));
 
 const filtered = computed(() => {
     const q = search.value.trim().toLowerCase();
-    if (!q) return ALL_ICONS.value;
-    return ALL_ICONS.value.filter((i) => i.name.includes(q));
+    if (!q) return ALL_ICONS;
+    return ALL_ICONS.filter((i) => i.name.includes(q));
 });
 
 const selectedIcon = computed(() => resolveIcon(props.modelValue));

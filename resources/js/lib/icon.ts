@@ -1,60 +1,167 @@
-import * as Icons from 'lucide-vue-next';
-import { Folder } from 'lucide-vue-next';
+import {
+    Activity,
+    AlertCircle,
+    Archive,
+    BarChart3,
+    Bell,
+    Bookmark,
+    Briefcase,
+    Calendar,
+    Camera,
+    Check,
+    CheckCircle,
+    ChevronDown,
+    ChevronRight,
+    ClipboardList,
+    Clock,
+    Cog,
+    Database,
+    Download,
+    Edit,
+    Eye,
+    File,
+    FileText,
+    Filter,
+    Flag,
+    Folder,
+    FolderOpen,
+    FolderTree,
+    Globe,
+    Hash,
+    Heart,
+    Home,
+    House,
+    Image,
+    Info,
+    Key,
+    Layers,
+    LayoutDashboard,
+    Link as LinkIcon,
+    List,
+    ListChecks,
+    ListFilter,
+    Lock,
+    LogIn,
+    LogOut,
+    Mail,
+    Menu,
+    MessageCircle,
+    MoreHorizontal,
+    MoreVertical,
+    Pencil,
+    Phone,
+    Plus,
+    Puzzle,
+    Search,
+    Send,
+    Settings,
+    Settings2,
+    Shield,
+    ShieldCheck,
+    Sliders,
+    Star,
+    Tag,
+    Trash2,
+    Upload,
+    User,
+    UserCog,
+    Users,
+    X,
+} from 'lucide-vue-next';
 import type { Component } from 'vue';
 
 /**
- * Resolve string icon name (kebab-case dari DB) ke komponen Lucide.
+ * Curated icon registry — semua icon yang nyata dipake di project ini
+ * (DB seed + UI). Pakai named imports supaya Vite tree-shake — tidak
+ * pull in 1000+ icons lucide ke main bundle. Hasil: bundle utama
+ * ~50KB lebih kecil dari pakai `import * as Icons`.
+ *
+ * Kalau butuh icon baru, tambah di sini.
  *
  *   resolveIcon('layout-dashboard')  // → LayoutDashboard component
  *   resolveIcon('users')             // → Users component
  *   resolveIcon('shield-check')      // → ShieldCheck component
  *   resolveIcon(null)                // → Folder (fallback)
  *   resolveIcon('not-exists', Hash)  // → Hash (custom fallback)
- *
- * Catatan: di lucide-vue-next v1.0.0 setiap icon = `(props, ctx) => h(...)`
- * (functional component). Validasi musti `typeof === 'function'`, BUKAN object.
- * Object check akan blokir SEMUA icon.
  */
 
-const NON_ICON_EXPORTS = new Set([
-    'createLucideIcon',
-    'icons',
-    'default',
-    'Icon',
-    'LucideIcon',
-    'aliases',
-]);
+const ICON_MAP: Record<string, Component> = {
+    activity: Activity,
+    'alert-circle': AlertCircle,
+    archive: Archive,
+    'bar-chart-3': BarChart3,
+    bell: Bell,
+    bookmark: Bookmark,
+    briefcase: Briefcase,
+    calendar: Calendar,
+    camera: Camera,
+    check: Check,
+    'check-circle': CheckCircle,
+    'chevron-down': ChevronDown,
+    'chevron-right': ChevronRight,
+    'clipboard-list': ClipboardList,
+    clock: Clock,
+    cog: Cog,
+    database: Database,
+    download: Download,
+    edit: Edit,
+    eye: Eye,
+    file: File,
+    'file-text': FileText,
+    filter: Filter,
+    flag: Flag,
+    folder: Folder,
+    'folder-open': FolderOpen,
+    'folder-tree': FolderTree,
+    globe: Globe,
+    hash: Hash,
+    heart: Heart,
+    home: Home,
+    house: House,
+    image: Image,
+    info: Info,
+    key: Key,
+    layers: Layers,
+    'layout-dashboard': LayoutDashboard,
+    link: LinkIcon,
+    list: List,
+    'list-checks': ListChecks,
+    'list-filter': ListFilter,
+    lock: Lock,
+    'log-in': LogIn,
+    'log-out': LogOut,
+    mail: Mail,
+    menu: Menu,
+    'message-circle': MessageCircle,
+    'more-horizontal': MoreHorizontal,
+    'more-vertical': MoreVertical,
+    pencil: Pencil,
+    phone: Phone,
+    plus: Plus,
+    puzzle: Puzzle,
+    search: Search,
+    send: Send,
+    settings: Settings,
+    'settings-2': Settings2,
+    shield: Shield,
+    'shield-check': ShieldCheck,
+    sliders: Sliders,
+    star: Star,
+    tag: Tag,
+    'trash-2': Trash2,
+    upload: Upload,
+    user: User,
+    'user-cog': UserCog,
+    users: Users,
+    x: X,
+};
 
-function toPascalCase(name: string): string {
-    return name
-        .split(/[-_\s]/)
-        .filter(Boolean)
-        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('');
+export function resolveIcon(name: string | null | undefined, fallback: Component = Folder): Component {
+    if (!name) return fallback;
+    return ICON_MAP[name] ?? fallback;
 }
 
-export function resolveIcon(
-    name: string | null | undefined,
-    fallback: Component = Folder,
-): Component {
-    if (!name) return fallback;
-
-    const key = toPascalCase(name);
-    if (NON_ICON_EXPORTS.has(key)) return fallback;
-
-    // Lucide v1.x: icons = functional component. Coba juga variant `{Name}Icon`.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const candidate =
-        (Icons as any)[key] ??
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (Icons as any)[`${key}Icon`];
-
-    if (!candidate) return fallback;
-
-    // Icon valid = function (functional component) atau object (defineComponent options)
-    if (typeof candidate === 'function' || typeof candidate === 'object') {
-        return candidate;
-    }
-
-    return fallback;
+/** Untuk IconPicker — biar bisa list semua icon yang tersedia di registry */
+export function listIcons(): Array<{ name: string; component: Component }> {
+    return Object.entries(ICON_MAP).map(([name, component]) => ({ name, component }));
 }

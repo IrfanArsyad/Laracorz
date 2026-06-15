@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Observers\MenuCacheObserver;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -52,5 +53,7 @@ class AppServiceProvider extends ServiceProvider
          *   $date->toIso8601String()
          */
         Carbon::serializeUsing(fn (CarbonInterface $date) => $date->format('Y-m-d H:i:s'));
+
+        MenuCacheObserver::bootstrap();
     }
 }
