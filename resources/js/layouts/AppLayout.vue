@@ -55,14 +55,14 @@ watch(
 <template>
     <div class="min-h-screen bg-[var(--surface-base)] text-[var(--text-default)]">
         <Sidebar :collapsed="sidebarCollapsed" :mobile-open="mobileOpen" @close="mobileOpen = false" />
-        <div :class="['transition-[padding] duration-[var(--duration-base)] ease-[var(--ease-out)]', sidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-64']">
+        <div :class="['min-h-screen flex flex-col transition-[padding] duration-[var(--duration-base)] ease-[var(--ease-out)]', sidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-64']">
             <Topbar @toggle-mobile="mobileOpen = !mobileOpen" @toggle-collapsed="toggleCollapsed" />
-            <main class="px-4 py-5 md:px-8 md:py-6 lg:px-10">
+            <main class="flex-1 px-4 py-5 md:px-8 md:py-6 lg:px-10">
                 <ErrorBoundary>
                     <slot />
                 </ErrorBoundary>
             </main>
-            <footer class="px-4 md:px-8 lg:px-10 py-4 text-xs text-[var(--text-muted)] flex flex-wrap items-center justify-between gap-2">
+            <footer class="mt-auto px-4 md:px-8 lg:px-10 py-4 text-xs text-[var(--text-muted)] flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-subtle)]">
                 <span>
                     &copy; {{ new Date().getFullYear() }} LaraCorz
                 </span>
