@@ -22,7 +22,11 @@ import Button from '../Button/Button.vue';
  *   </FormModal>
  */
 
-withDefaults(
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+const props = withDefaults(
     defineProps<{
         modelValue: boolean;
         title?: string;
@@ -36,8 +40,6 @@ withDefaults(
     }>(),
     {
         size: 'md',
-        submitLabel: 'Simpan',
-        cancelLabel: 'Batal',
         submitVariant: 'default',
         processing: false,
         disabled: false,
@@ -82,7 +84,7 @@ function onCancel(): void {
             </ModalFooter>
             <ModalFooter v-else>
                 <Button type="button" variant="ghost" :disabled="processing" @click="onCancel">
-                    {{ cancelLabel }}
+                    {{ cancelLabel ?? t('common.cancel') }}
                 </Button>
                 <Button
                     type="submit"
@@ -90,7 +92,7 @@ function onCancel(): void {
                     :loading="processing"
                     :disabled="disabled"
                 >
-                    {{ submitLabel }}
+                    {{ submitLabel ?? t('common.save') }}
                 </Button>
             </ModalFooter>
         </form>

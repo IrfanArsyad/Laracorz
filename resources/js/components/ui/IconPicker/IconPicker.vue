@@ -2,8 +2,11 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import * as Icons from 'lucide-vue-next';
 import { Search, X, Check } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import { resolveIcon } from '@/lib/icon';
 import { cn } from '@/lib/utils';
+
+const { t } = useI18n();
 
 /**
  * IconPicker — popover dengan grid icon Lucide + search.
@@ -21,7 +24,7 @@ const props = withDefaults(
         disabled?: boolean;
         error?: boolean;
     }>(),
-    { placeholder: 'Pilih ikon...', disabled: false },
+    { disabled: false },
 );
 
 const emit = defineEmits<{
@@ -76,7 +79,7 @@ const filtered = computed(() => {
 });
 
 const selectedIcon = computed(() => resolveIcon(props.modelValue));
-const selectedLabel = computed(() => props.modelValue || props.placeholder);
+const selectedLabel = computed(() => props.modelValue || props.placeholder || t('iconPicker.selectIcon'));
 
 function pick(name: string): void {
     emit('update:modelValue', name);
@@ -131,7 +134,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                     v-if="modelValue"
                     type="button"
                     class="rounded-full p-0.5 text-[var(--text-muted)] hover:bg-[var(--state-hover)] hover:text-[var(--text-default)]"
-                    aria-label="Bersihkan"
+                    :aria-label="t('common.reset')"
                     @click.stop="clear"
                 >
                     <X class="h-3 w-3" />
@@ -158,7 +161,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Cari ikon..."
+                        :placeholder="t('iconPicker.searchIcon')"
                         class="h-9 w-full rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] pl-8 pr-3 text-sm placeholder:text-[var(--text-muted)] outline-none focus-visible:border-[var(--border-focus)]"
                         autofocus
                     />
@@ -166,8 +169,8 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
 
                 <!-- Result count -->
                 <div class="px-3 py-1.5 text-xs text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
-                    <span class="tabular-nums">{{ filtered.length }}</span> ikon
-                    <span v-if="search.length">cocok dengan "{{ search }}"</span>
+                    <span class="tabular-nums">{{ filtered.length }}</span> {{ t('iconPicker.iconsCount') }}
+                    <span v-if="search.length">{{ t('iconPicker.matching', { q: search }) }}</span>
                 </div>
 
                 <!-- Grid icons -->
@@ -198,7 +201,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                         v-if="filtered.length === 0"
                         class="col-span-7 text-center text-sm text-[var(--text-muted)] py-6"
                     >
-                        Tidak ada ikon yang cocok.
+                        {{ t('iconPicker.empty') }}
                     </p>
                 </div>
             </div>

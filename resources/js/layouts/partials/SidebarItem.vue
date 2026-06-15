@@ -5,10 +5,13 @@ import { ChevronRight, Folder } from 'lucide-vue-next';
 import type { ModuleNode } from '@/types';
 import { cn } from '@/lib/utils';
 import { resolveIcon } from '@/lib/icon';
+import { useNavLabel } from '@/composables/useNavLabel';
 
 const props = defineProps<{ node: ModuleNode; collapsed: boolean; depth?: number }>();
 const open = ref(false);
 const page = usePage();
+const { moduleLabel } = useNavLabel();
+const label = computed(() => moduleLabel(props.node.name, props.node.label));
 
 const currentPath = computed(() => (page.url ?? ''));
 
@@ -41,7 +44,7 @@ const padLeft = computed(() => (props.depth ?? 0) * 16);
             :style="{ paddingLeft: padLeft + 12 + 'px' }"
         >
             <component :is="Icon" class="h-[18px] w-[18px] shrink-0" />
-            <span v-if="!collapsed" class="truncate">{{ node.label }}</span>
+            <span v-if="!collapsed" class="truncate">{{ label }}</span>
         </Link>
         <button
             v-else
@@ -57,7 +60,7 @@ const padLeft = computed(() => (props.depth ?? 0) * 16);
             @click="open = !open"
         >
             <component :is="Icon" class="h-[18px] w-[18px] shrink-0" />
-            <span v-if="!collapsed" class="truncate flex-1 text-left">{{ node.label }}</span>
+            <span v-if="!collapsed" class="truncate flex-1 text-left">{{ label }}</span>
             <ChevronRight
                 v-if="!collapsed"
                 :class="cn('h-3.5 w-3.5 transition-transform', open ? 'rotate-90' : '')"

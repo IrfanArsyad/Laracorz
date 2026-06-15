@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { X } from 'lucide-vue-next';
 import SidebarItem from './SidebarItem.vue';
 import { cn } from '@/lib/utils';
+import { useNavLabel } from '@/composables/useNavLabel';
 import type { MenuGroup } from '@/types';
 
 defineProps<{ collapsed: boolean; mobileOpen: boolean }>();
@@ -12,6 +13,7 @@ const emit = defineEmits<{ close: [] }>();
 
 const page = usePage();
 const { t } = useI18n();
+const { groupLabel } = useNavLabel();
 const menu = computed<MenuGroup[]>(() => (page.props.menu as MenuGroup[]) ?? []);
 const appName = computed(() => (page.props.app as { name?: string })?.name ?? 'LaraCorz');
 const initial = computed(() => appName.value.charAt(0).toUpperCase());
@@ -54,7 +56,7 @@ const initial = computed(() => appName.value.charAt(0).toUpperCase());
                     v-if="!collapsed"
                     class="px-4 mb-1.5 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--text-muted)]"
                 >
-                    {{ group.label }}
+                    {{ groupLabel(group.name, group.label) }}
                 </div>
                 <ul class="space-y-0.5 px-2">
                     <SidebarItem v-for="m in group.modules" :key="m.id" :node="m" :collapsed="collapsed" />

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Check, ChevronDown, X } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
+
+const { t } = useI18n();
 
 interface Option {
     label: string;
@@ -20,7 +23,7 @@ const props = withDefaults(
         class?: string;
         id?: string;
     }>(),
-    { modelValue: () => [], placeholder: 'Pilih...', searchable: true, disabled: false },
+    { modelValue: () => [], searchable: true, disabled: false },
 );
 
 const emit = defineEmits<{ 'update:modelValue': [value: Array<string | number>] }>();
@@ -79,7 +82,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
             "
             @click="open = !open"
         >
-            <div v-if="selected.length === 0" class="text-muted-foreground px-1">{{ placeholder }}</div>
+            <div v-if="selected.length === 0" class="text-muted-foreground px-1">{{ placeholder ?? t('common.select') }}</div>
             <div v-else class="flex flex-wrap gap-1">
                 <span
                     v-for="opt in selected"
@@ -109,16 +112,16 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Cari..."
+                        :placeholder="t('common.search')"
                         class="flex-1 px-2 py-1.5 text-sm bg-transparent outline-none placeholder:text-muted-foreground"
                     />
                 </div>
                 <div class="flex justify-between gap-1 p-1 border-b border-border">
                     <button type="button" class="text-xs px-2 py-1 hover:bg-accent rounded" @click="selectAll">
-                        Pilih semua
+                        {{ t('common.all') }}
                     </button>
                     <button type="button" class="text-xs px-2 py-1 hover:bg-accent rounded" @click="clear">
-                        Bersihkan
+                        {{ t('common.reset') }}
                     </button>
                 </div>
                 <ul role="listbox" class="max-h-60 overflow-y-auto py-1">

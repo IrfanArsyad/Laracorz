@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
+
+const { t, locale } = useI18n();
 
 const props = withDefaults(
     defineProps<{
@@ -12,14 +15,23 @@ const props = withDefaults(
         disabled?: boolean;
         class?: string;
     }>(),
-    { placeholder: 'Pilih tanggal' },
+    {},
 );
 const emit = defineEmits<{ 'update:modelValue': [value: string | null] }>();
 
 const open = ref(false);
 const containerRef = ref<HTMLElement | null>(null);
-const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-const DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const MONTHS_BY_LOCALE: Record<string, string[]> = {
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    id: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+};
+const DAYS_BY_LOCALE: Record<string, string[]> = {
+    en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    id: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+};
+const MONTHS = computed(() => MONTHS_BY_LOCALE[locale.value] ?? MONTHS_BY_LOCALE.en);
+const DAYS = computed(() => DAYS_BY_LOCALE[locale.value] ?? DAYS_BY_LOCALE.en);
+const placeholderText = computed(() => props.placeholder ?? t('common.select'));
 
 const current = ref<Date>(props.modelValue ? new Date(props.modelValue) : new Date());
 const view = ref<{ year: number; month: number }>({
@@ -106,7 +118,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
             "
             @click="open = !open"
         >
-            <span :class="!display ? 'text-muted-foreground' : ''">{{ display || placeholder }}</span>
+            <span :class="!display ? 'text-muted-foreground' : ''">{{ display || placeholderText }}</span>
             <Calendar class="h-4 w-4 opacity-50" />
         </button>
 

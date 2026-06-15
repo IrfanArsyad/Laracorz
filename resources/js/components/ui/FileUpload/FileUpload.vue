@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Upload, X } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
+
+const { t } = useI18n();
 
 const props = withDefaults(
     defineProps<{
@@ -94,7 +97,7 @@ function onDrop(e: DragEvent): void {
             v-if="modelValue || preview"
             type="button"
             class="absolute top-2 right-2 rounded-full bg-card border border-border p-1 hover:bg-muted"
-            aria-label="Hapus"
+            :aria-label="t('common.delete')"
             @click.stop="clear"
         >
             <X class="h-3 w-3" />

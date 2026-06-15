@@ -12,10 +12,12 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
 import { FormActions } from '@/components/ui/FormActions';
+import { useNavLabel } from '@/composables/useNavLabel';
 
 const props = defineProps<{ groups: Record<string, Array<{ key: string; label: string; type: string; description: string | null }>>; values: Record<string, unknown> }>();
 
 const { t } = useI18n();
+const { settingsGroup, settingsField } = useNavLabel();
 
 const tab = ref(Object.keys(props.groups)[0] ?? 'general');
 const form = useForm({
@@ -39,7 +41,7 @@ function submit(): void {
                     <Tabs v-model="tab">
                         <TabsList>
                             <TabsTrigger v-for="(rows, group) in groups" :key="group" :value="group">
-                                {{ group }}
+                                {{ settingsGroup(group) }}
                             </TabsTrigger>
                         </TabsList>
 
@@ -48,7 +50,7 @@ function submit(): void {
                                 <FormField
                                     v-for="row in rows"
                                     :key="row.key"
-                                    :label="row.label ?? row.key"
+                                    :label="settingsField(row.key, row.label ?? row.key)"
                                     :hint="row.description ?? undefined"
                                 >
                                     <Input

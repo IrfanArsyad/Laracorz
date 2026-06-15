@@ -1,4 +1,5 @@
 import { reactive } from 'vue';
+import { i18n } from '@/i18n';
 
 export interface ConfirmOptions {
     title?: string;
@@ -17,18 +18,22 @@ const state = reactive<ConfirmState>({
     open: false,
     title: '',
     message: '',
-    confirmLabel: 'Ya',
-    cancelLabel: 'Batal',
+    confirmLabel: '',
+    cancelLabel: '',
     variant: 'default',
     resolve: null,
 });
 
+function t(key: string): string {
+    return i18n.global.t(key);
+}
+
 function confirm(opts: ConfirmOptions): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-        state.title = opts.title ?? 'Konfirmasi';
+        state.title = opts.title ?? t('common.confirm');
         state.message = opts.message;
-        state.confirmLabel = opts.confirmLabel ?? 'Ya';
-        state.cancelLabel = opts.cancelLabel ?? 'Batal';
+        state.confirmLabel = opts.confirmLabel ?? t('common.yes');
+        state.cancelLabel = opts.cancelLabel ?? t('common.cancel');
         state.variant = opts.variant ?? 'default';
         state.resolve = resolve;
         state.open = true;

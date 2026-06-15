@@ -28,6 +28,9 @@ interface Item {
     value?: string | number | null;
 }
 
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 withDefaults(
     defineProps<{
         modelValue: boolean;
@@ -37,7 +40,7 @@ withDefaults(
         size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
         closeLabel?: string;
     }>(),
-    { size: 'md', closeLabel: 'Tutup' },
+    { size: 'md' },
 );
 
 const emit = defineEmits<{ 'update:modelValue': [v: boolean] }>();
@@ -61,7 +64,7 @@ const emit = defineEmits<{ 'update:modelValue': [v: boolean] }>();
             <slot name="actions" />
         </ModalFooter>
         <ModalFooter v-else>
-            <Button variant="ghost" @click="emit('update:modelValue', false)">{{ closeLabel }}</Button>
+            <Button variant="ghost" @click="emit('update:modelValue', false)">{{ closeLabel ?? t('common.close') }}</Button>
         </ModalFooter>
     </Modal>
 </template>

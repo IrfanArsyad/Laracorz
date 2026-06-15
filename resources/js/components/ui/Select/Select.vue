@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Check, ChevronDown, X } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
+
+const { t } = useI18n();
 
 interface Option {
     label: string;
@@ -21,7 +24,7 @@ const props = withDefaults(
         class?: string;
         id?: string;
     }>(),
-    { placeholder: 'Pilih...', searchable: false, clearable: false, disabled: false },
+    { searchable: false, clearable: false, disabled: false },
 );
 
 const emit = defineEmits<{ 'update:modelValue': [value: string | number | null] }>();
@@ -110,7 +113,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
             @click="toggle"
         >
             <span :class="modelValue == null ? 'text-muted-foreground' : ''">
-                {{ selectedLabel || placeholder }}
+                {{ selectedLabel || placeholder || t('common.select') }}
             </span>
             <span class="flex items-center gap-1">
                 <button
@@ -119,7 +122,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                     class="text-muted-foreground hover:text-foreground"
                     @click="clear"
                     @keydown.enter="clear"
-                    aria-label="Hapus"
+                    :aria-label="t('common.reset')"
                 >
                     <X class="h-3.5 w-3.5" />
                 </button>
@@ -143,7 +146,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
                     <input
                         v-model="search"
                         type="text"
-                        placeholder="Cari..."
+                        :placeholder="t('common.search')"
                         class="w-full px-2 py-1.5 text-sm bg-transparent outline-none placeholder:text-muted-foreground"
                     />
                 </div>

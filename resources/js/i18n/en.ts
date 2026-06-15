@@ -86,6 +86,47 @@ export default {
         collapse: 'Collapse',
         expand: 'Expand',
     },
+    iconPicker: {
+        selectIcon: 'Select icon...',
+        searchIcon: 'Search icon...',
+        iconsCount: 'icons',
+        matching: 'matching "{q}"',
+        empty: 'No matching icon.',
+    },
+    nav: {
+        // Module groups (kunci = ModuleGroup.name slug)
+        groups: {
+            main: 'Main',
+            'user-access': 'User & Access',
+            system: 'System',
+        },
+        // Modules (kunci = Module.name slug)
+        modules: {
+            dashboard: 'Dashboard',
+            'user-management': 'Users',
+            'role-permission': 'Role & Permission',
+            'role-management': 'Roles',
+            'module-management': 'Modules',
+            'admin-log': 'Admin Log',
+            'system-log': 'System Log',
+            settings: 'Settings',
+            profile: 'Profile',
+            notifications: 'Notifications',
+        },
+    },
+    settingsGroup: {
+        general: 'General',
+        appearance: 'Appearance',
+        notifications: 'Notifications',
+        security: 'Security',
+    },
+    settingsField: {
+        'app.name': 'Application name',
+        'app.tagline': 'Tagline',
+        'app.logo': 'Logo',
+        'app.description': 'Description',
+        'theme.default': 'Default theme',
+    },
     auth: {
         login: 'Sign in',
         loginTitle: 'Sign in to your account',

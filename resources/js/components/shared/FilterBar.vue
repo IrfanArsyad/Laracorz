@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { Search, X, ListFilter, ChevronDown } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
+
+const { t } = useI18n();
 
 /**
  * FilterBar v2 — collapsible.
@@ -27,7 +30,7 @@ const props = withDefaults(
         defaultOpen?: boolean;
         class?: string;
     }>(),
-    { placeholder: 'Cari...', filtersCount: 0, defaultOpen: false },
+    { filtersCount: 0, defaultOpen: false },
 );
 
 const emit = defineEmits<{
@@ -50,7 +53,7 @@ const hasAnyFilter = computed(() => props.search.length > 0 || props.filtersCoun
                 <input
                     type="text"
                     :value="search"
-                    :placeholder="placeholder"
+                    :placeholder="placeholder ?? t('common.search')"
                     class="h-10 w-full rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] pl-9 pr-9 text-sm text-[var(--text-default)] placeholder:text-[var(--text-muted)] transition-[border-color,box-shadow] duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:border-[var(--border-strong)] focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]"
                     @input="emit('update:search', ($event.target as HTMLInputElement).value)"
                 />
@@ -58,7 +61,7 @@ const hasAnyFilter = computed(() => props.search.length > 0 || props.filtersCoun
                     v-if="search"
                     type="button"
                     class="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full text-[var(--text-muted)] hover:bg-[var(--state-hover)] hover:text-[var(--text-default)] transition-colors"
-                    aria-label="Bersihkan pencarian"
+                    :aria-label="t('common.reset')"
                     @click="emit('update:search', '')"
                 >
                     <X class="h-3 w-3" />
@@ -83,7 +86,7 @@ const hasAnyFilter = computed(() => props.search.length > 0 || props.filtersCoun
                     @click="open = !open"
                 >
                     <ListFilter class="h-4 w-4" />
-                    <span>Filter</span>
+                    <span>{{ t('common.filter') }}</span>
                     <span
                         v-if="filtersCount > 0"
                         class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--brand-bg)] px-1.5 text-xs font-semibold text-[var(--brand-fg)] tabular-nums"
@@ -108,7 +111,7 @@ const hasAnyFilter = computed(() => props.search.length > 0 || props.filtersCoun
                     @click="emit('reset')"
                 >
                     <X class="h-3.5 w-3.5" />
-                    Reset
+                    {{ t('common.reset') }}
                 </button>
             </div>
         </div>
