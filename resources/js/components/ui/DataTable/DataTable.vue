@@ -41,7 +41,7 @@ const props = withDefaults(
         rowKey: 'id',
         loading: false,
         selectable: false,
-        actionStickyRight: true,
+        actionStickyRight: false,
         selected: () => [],
     },
 );
@@ -158,7 +158,7 @@ function sortBy(col: Column): void {
                         </th>
                         <th
                             v-if="$slots.actions"
-                            :class="cn('px-3 py-2 text-right', actionStickyRight ? 'sticky right-0 bg-[var(--surface-sunken)]' : '')"
+                            :class="cn('px-3 py-2 text-right', actionStickyRight ? 'sticky right-0 bg-[var(--surface-sunken)] z-10' : '')"
                         >
                             <span class="sr-only">{{ t('common.actions') }}</span>
                         </th>
@@ -179,7 +179,12 @@ function sortBy(col: Column): void {
                         v-for="row in rows"
                         v-else
                         :key="row[rowKey] as string | number"
-                        class="transition-colors hover:bg-[var(--state-hover)]"
+                        :class="
+                            cn(
+                                'group transition-colors hover:bg-[var(--state-hover)]',
+                                $attrs.onRowClick !== undefined ? 'cursor-pointer' : '',
+                            )
+                        "
                         @click="emit('row-click', row)"
                     >
                         <td v-if="selectable" class="w-9 px-3 py-2.5" @click.stop>
@@ -205,7 +210,14 @@ function sortBy(col: Column): void {
                         </td>
                         <td
                             v-if="$slots.actions"
-                            :class="cn('px-3 py-2 text-right', actionStickyRight ? 'sticky right-0 bg-[var(--surface-raised)]' : '')"
+                            :class="
+                                cn(
+                                    'px-3 py-2 text-right',
+                                    actionStickyRight
+                                        ? 'sticky right-0 bg-[var(--surface-raised)] before:absolute before:inset-0 before:pointer-events-none before:bg-[var(--state-hover)] before:opacity-0 group-hover:before:opacity-100 before:transition-opacity'
+                                        : '',
+                                )
+                            "
                             @click.stop
                         >
                             <slot name="actions" :row="row" />
