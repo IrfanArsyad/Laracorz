@@ -5,8 +5,8 @@ import { FormSection } from '@/components/ui/FormSection';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Switch } from '@/components/ui/Switch';
-import { Textarea } from '@/components/ui/Textarea';
 import { InputNumber } from '@/components/ui/InputNumber';
+import { IconPicker } from '@/components/ui/IconPicker';
 
 const props = defineProps<{
     form: Record<string, any>;
@@ -26,8 +26,8 @@ const parentOptions = computed(() => [{ label: '— Root —', value: null }, ..
         <FormField label="Label" :error="form.errors.label" required>
             <Input v-model="form.label" placeholder="contoh: Pengguna" />
         </FormField>
-        <FormField label="Icon (lucide)">
-            <Input v-model="form.icon" placeholder="contoh: users" />
+        <FormField label="Icon (lucide)" hint="cari & pilih ikon visual">
+            <IconPicker v-model="form.icon" />
         </FormField>
     </FormSection>
 

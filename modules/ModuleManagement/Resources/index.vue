@@ -1,39 +1,24 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import {
-    Pencil,
     Plus,
-    Trash2,
-    ChevronRight,
-    ChevronDown,
-    Eye,
     FolderTree,
     Info,
-    MoreVertical,
     Layers,
-    FolderOpen,
     Hash,
     Activity,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { FormModal, DetailModal } from '@/components/ui/Modal';
-import {
-    DropdownMenu,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-} from '@/components/ui/DropdownMenu';
 import StatCard from '@/components/ui/StatCard/StatCard.vue';
 import ModuleForm from './components/ModuleForm.vue';
 import GroupForm from './components/GroupForm.vue';
+import SortableTree from './components/SortableTree.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useModal } from '@/composables/useModal';
-import { resolveIcon } from '@/lib/icon';
 
 interface Node {
     id: number;
@@ -69,7 +54,6 @@ const props = defineProps<{
     modules: Array<{ id: number; name: string; label: string }>;
 }>();
 
-const expanded = ref<Record<number, boolean>>({});
 const { confirm } = useConfirm();
 
 const stats = computed(() => {
@@ -95,10 +79,6 @@ const stats = computed(() => {
         inactiveCount,
     };
 });
-
-function toggleExpand(id: number): void {
-    expanded.value[id] = !expanded.value[id];
-}
 
 // Modal: Modul
 const moduleModal = useModal<Node | null>();
@@ -223,17 +203,6 @@ async function deleteGroup(group: Group): Promise<void> {
 
 // Detail modal — read-only
 const detailModal = useModal<Node | null>();
-
-async function deleteModule(id: number, label: string): Promise<void> {
-    const ok = await confirm({
-        title: 'Hapus modul?',
-        message: `Yakin hapus "${label}"? Ini akan menghapus izin terkait di semua role.`,
-        variant: 'destructive',
-        confirmLabel: 'Hapus',
-    });
-    if (!ok) return;
-    router.delete(`/modules/${id}`, { preserveScroll: true });
-}
 </script>
 
 <template>
@@ -280,181 +249,31 @@ async function deleteModule(id: number, label: string): Promise<void> {
                 </div>
             </div>
 
-            <!-- Unified view: per-Grup card -->
-            <div class="space-y-4">
-                <Card v-for="group in tree" :key="group.id" class="overflow-hidden">
-                    <!-- Group header -->
-                    <div class="flex items-center gap-3 px-5 py-3.5 bg-[var(--surface-sunken)]/40 border-b border-[var(--border-subtle)]">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)]">
-                            <component :is="resolveIcon(group.icon, FolderTree)" class="h-4 w-4" />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="text-base font-semibold text-[var(--text-strong)]">{{ group.label }}</h3>
-                                <Badge variant="muted" class="font-mono text-xs">{{ group.name }}</Badge>
-                                <Badge v-if="!group.active" variant="warning">Nonaktif</Badge>
-                            </div>
-                            <p class="text-sm text-[var(--text-muted)] mt-0.5">
-                                {{ group.modules.length }} modul · urutan ke-{{ group.order }}
-                            </p>
-                        </div>
+            <!-- Sortable tree table — drag to reorder / nest -->
+            <SortableTree
+                v-if="tree.length > 0"
+                :tree="tree"
+                @edit="openEditModule"
+                @detail="(n) => detailModal.open(n)"
+                @add-sub="(parentId) => openCreateModule(undefined, parentId)"
+                @add-to-group="(groupId) => openCreateModule(groupId)"
+                @edit-group="openEditGroup"
+                @delete-group="deleteGroup"
+            />
 
-                        <Button size="sm" variant="outline" @click="openCreateModule(group.id)">
-                            <Plus class="h-3.5 w-3.5" /> Modul
-                        </Button>
-
-                        <DropdownMenu align="end">
-                            <template #trigger>
-                                <Button size="icon-sm" variant="ghost" aria-label="Opsi grup">
-                                    <MoreVertical class="h-4 w-4" />
-                                </Button>
-                            </template>
-                            <DropdownMenuLabel>Grup: {{ group.label }}</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem @click="openEditGroup(group)">
-                                <Pencil class="h-4 w-4" /> Ubah grup
-                            </DropdownMenuItem>
-                            <DropdownMenuItem variant="destructive" @click="deleteGroup(group)">
-                                <Trash2 class="h-4 w-4" /> Hapus grup
-                            </DropdownMenuItem>
-                        </DropdownMenu>
-                    </div>
-
-                    <!-- Modul list di dalam grup -->
-                    <CardContent class="pt-3 pb-3">
-                        <p v-if="group.modules.length === 0" class="text-sm text-[var(--text-muted)] py-4 text-center">
-                            Belum ada modul di grup ini.
-                            <button
-                                type="button"
-                                class="text-[var(--text-link)] hover:underline ml-1"
-                                @click="openCreateModule(group.id)"
-                            >
-                                Tambah modul pertama
-                            </button>
-                        </p>
-
-                        <ul v-else class="space-y-0.5">
-                            <li v-for="node in group.modules" :key="node.id">
-                                <div class="group flex items-center gap-2 rounded-md px-2 py-2 hover:bg-[var(--state-hover)] transition-colors">
-                                    <button
-                                        v-if="!node.is_leaf && node.children.length"
-                                        type="button"
-                                        class="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-default)]"
-                                        :aria-label="expanded[node.id] ? 'Tutup' : 'Buka'"
-                                        @click="toggleExpand(node.id)"
-                                    >
-                                        <ChevronDown v-if="expanded[node.id]" class="h-4 w-4" />
-                                        <ChevronRight v-else class="h-4 w-4" />
-                                    </button>
-                                    <span v-else class="w-5 shrink-0" />
-
-                                    <component
-                                        :is="resolveIcon(node.icon, node.is_leaf ? Hash : FolderOpen)"
-                                        :class="[
-                                            'h-4 w-4 shrink-0',
-                                            node.is_leaf ? 'text-[var(--brand-soft-fg)]' : 'text-[var(--text-muted)]',
-                                        ]"
-                                    />
-
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <span class="text-sm font-medium text-[var(--text-strong)]">{{ node.label }}</span>
-                                            <Badge variant="muted" class="font-mono text-xs">{{ node.name }}</Badge>
-                                            <Badge :variant="node.is_leaf ? 'info' : 'secondary'" class="text-xs">
-                                                {{ node.is_leaf ? 'Leaf' : 'Container' }}
-                                            </Badge>
-                                            <Badge v-if="!node.active" variant="warning" class="text-xs">Nonaktif</Badge>
-                                        </div>
-                                        <p v-if="node.url" class="text-xs text-[var(--text-muted)] truncate mt-0.5 font-mono">
-                                            {{ node.url }}
-                                        </p>
-                                    </div>
-
-                                    <DropdownMenu align="end">
-                                        <template #trigger>
-                                            <Button size="icon-xs" variant="ghost" aria-label="Opsi">
-                                                <MoreVertical class="h-3.5 w-3.5" />
-                                            </Button>
-                                        </template>
-                                        <DropdownMenuItem @click="detailModal.open(node)">
-                                            <Eye class="h-3.5 w-3.5" /> Detail
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem @click="openEditModule(node)">
-                                            <Pencil class="h-3.5 w-3.5" /> Ubah
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            v-if="!node.is_leaf"
-                                            @click="openCreateModule(undefined, node.id)"
-                                        >
-                                            <Plus class="h-3.5 w-3.5" /> Tambah sub-modul
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                            variant="destructive"
-                                            @click="deleteModule(node.id, node.label)"
-                                        >
-                                            <Trash2 class="h-3.5 w-3.5" /> Hapus
-                                        </DropdownMenuItem>
-                                    </DropdownMenu>
-                                </div>
-
-                                <!-- Children inline expand -->
-                                <ul
-                                    v-if="!node.is_leaf && expanded[node.id] && node.children?.length"
-                                    class="ml-7 mt-0.5 space-y-0.5 border-l border-[var(--border-subtle)] pl-3"
-                                >
-                                    <li
-                                        v-for="child in node.children"
-                                        :key="child.id"
-                                        class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-[var(--state-hover)] transition-colors"
-                                    >
-                                        <component
-                                            :is="resolveIcon(child.icon, Hash)"
-                                            class="h-3.5 w-3.5 text-[var(--brand-soft-fg)] shrink-0"
-                                        />
-                                        <span class="text-sm font-medium text-[var(--text-strong)]">{{ child.label }}</span>
-                                        <Badge variant="muted" class="font-mono text-xs">{{ child.name }}</Badge>
-                                        <span v-if="child.url" class="text-xs text-[var(--text-muted)] truncate ml-auto font-mono">
-                                            {{ child.url }}
-                                        </span>
-                                        <DropdownMenu align="end">
-                                            <template #trigger>
-                                                <Button size="icon-xs" variant="ghost">
-                                                    <MoreVertical class="h-3.5 w-3.5" />
-                                                </Button>
-                                            </template>
-                                            <DropdownMenuItem @click="detailModal.open(child)">
-                                                <Eye class="h-3.5 w-3.5" /> Detail
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem @click="openEditModule(child)">
-                                                <Pencil class="h-3.5 w-3.5" /> Ubah
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem variant="destructive" @click="deleteModule(child.id, child.label)">
-                                                <Trash2 class="h-3.5 w-3.5" /> Hapus
-                                            </DropdownMenuItem>
-                                        </DropdownMenu>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </CardContent>
-                </Card>
-
-                <!-- Empty state -->
-                <div
-                    v-if="tree.length === 0"
-                    class="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-raised)] p-8 text-center"
-                >
-                    <FolderTree class="h-10 w-10 mx-auto text-[var(--text-muted)] mb-3" />
-                    <h3 class="text-base font-semibold text-[var(--text-strong)]">Belum ada grup</h3>
-                    <p class="text-sm text-[var(--text-muted)] mt-1">
-                        Mulai dengan membuat grup pertama (contoh: "Main", "System").
-                    </p>
-                    <Button class="mt-4" @click="openCreateGroup">
-                        <Plus class="h-4 w-4" /> Tambah Grup Pertama
-                    </Button>
-                </div>
+            <!-- Empty state -->
+            <div
+                v-else
+                class="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-raised)] p-8 text-center"
+            >
+                <FolderTree class="h-10 w-10 mx-auto text-[var(--text-muted)] mb-3" />
+                <h3 class="text-base font-semibold text-[var(--text-strong)]">Belum ada grup</h3>
+                <p class="text-sm text-[var(--text-muted)] mt-1">
+                    Mulai dengan membuat grup pertama (contoh: "Main", "System").
+                </p>
+                <Button class="mt-4" @click="openCreateGroup">
+                    <Plus class="h-4 w-4" /> Tambah Grup Pertama
+                </Button>
             </div>
         </div>
 

@@ -3,6 +3,7 @@ import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { InputNumber } from '@/components/ui/InputNumber';
 import { Switch } from '@/components/ui/Switch';
+import { IconPicker } from '@/components/ui/IconPicker';
 
 defineProps<{ form: Record<string, any> }>();
 </script>
@@ -17,8 +18,8 @@ defineProps<{ form: Record<string, any> }>();
             <Input v-model="form.label" placeholder="contoh: Main" />
         </FormField>
 
-        <FormField label="Icon (lucide)" hint="nama icon dari lucide.dev (contoh: house, shield-check)">
-            <Input v-model="form.icon" placeholder="contoh: shield-check" />
+        <FormField label="Icon (lucide)" hint="cari & pilih ikon visual">
+            <IconPicker v-model="form.icon" />
         </FormField>
 
         <div class="grid gap-3.5 sm:grid-cols-2">

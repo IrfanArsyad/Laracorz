@@ -26,6 +26,16 @@ Route::middleware(['auth'])
         Route::delete('/{module}', [ModuleController::class, 'destroy'])
             ->middleware('module.permission:module-management,delete')
             ->name('destroy');
+        Route::patch('/{module}/toggle', [ModuleController::class, 'toggleActive'])
+            ->middleware('module.permission:module-management,update')
+            ->name('toggle');
+        Route::post('/{module}/move/{direction}', [ModuleController::class, 'move'])
+            ->where('direction', 'up|down')
+            ->middleware('module.permission:module-management,update')
+            ->name('move');
+        Route::post('/reorder', [ModuleController::class, 'reorder'])
+            ->middleware('module.permission:module-management,update')
+            ->name('reorder');
         Route::post('/groups', [ModuleController::class, 'storeGroup'])
             ->middleware('module.permission:module-management,create')
             ->name('groups.store');
