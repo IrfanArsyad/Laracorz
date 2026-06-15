@@ -63,6 +63,7 @@ export default {
         description: 'Deskripsi',
         createdAt: 'Dibuat pada',
         updatedAt: 'Diperbarui pada',
+        error: 'Galat',
     },
     confirm: {
         deleteTitle: 'Hapus data?',

@@ -63,6 +63,7 @@ export default {
         description: 'Description',
         createdAt: 'Created at',
         updatedAt: 'Updated at',
+        error: 'Error',
     },
     confirm: {
         deleteTitle: 'Delete item?',
