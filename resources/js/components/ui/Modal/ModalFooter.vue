@@ -21,7 +21,7 @@ const alignClass = {
     <footer
         :class="
             cn(
-                'flex items-center gap-2 px-5 py-3 border-t border-[var(--border-subtle)] bg-[var(--surface-sunken)]/40 rounded-b-xl',
+                'flex items-center gap-2.5 px-5 py-3.5 border-t border-[var(--border-subtle)] rounded-b-xl',
                 alignClass[align],
                 $props.class,
             )

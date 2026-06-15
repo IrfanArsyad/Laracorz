@@ -16,7 +16,7 @@ withDefaults(
         :class="
             cn(
                 'flex-1',
-                padded ? 'px-5 py-4' : '',
+                padded ? 'px-5 py-5' : '',
                 scroll ? 'overflow-y-auto' : '',
                 $props.class,
             )

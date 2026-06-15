@@ -74,7 +74,7 @@ function onCancel(): void {
             <ModalHeader :title="title" :description="description" />
 
             <ModalBody>
-                <div class="space-y-4">
+                <div class="space-y-5">
                     <slot />
                 </div>
             </ModalBody>

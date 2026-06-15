@@ -22,16 +22,16 @@ const open = inject<Ref<boolean>>('modal:open');
     <header
         :class="
             cn(
-                'flex items-start justify-between gap-4 px-5 pt-4 pb-3 border-b border-[var(--border-subtle)]',
+                'flex items-start justify-between gap-4 px-5 pt-5 pb-4 border-b border-[var(--border-subtle)]',
                 $props.class,
             )
         "
     >
-        <div class="min-w-0 flex-1 space-y-0.5">
+        <div class="min-w-0 flex-1 space-y-1">
             <h2 v-if="title" class="text-base font-semibold leading-tight tracking-tight text-[var(--text-strong)]">
                 {{ title }}
             </h2>
-            <p v-if="description" class="text-sm text-[var(--text-muted)]">
+            <p v-if="description" class="text-sm leading-relaxed text-[var(--text-muted)]">
                 {{ description }}
             </p>
             <slot />
@@ -40,8 +40,8 @@ const open = inject<Ref<boolean>>('modal:open');
         <button
             v-if="closeable"
             type="button"
-            class="-mr-1 -mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--state-hover)] hover:text-[var(--text-strong)] transition-colors"
-            aria-label="Tutup"
+            class="-mr-1.5 -mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--state-hover)] hover:text-[var(--text-strong)] transition-colors"
+            aria-label="Close"
             @click="close"
         >
             <X class="h-4 w-4" />
