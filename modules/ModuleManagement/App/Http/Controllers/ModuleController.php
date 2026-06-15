@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Modules\ModuleManagement\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Module;
 use App\Models\ModuleGroup;
 use App\Services\AdminLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\ModuleManagement\App\Http\Requests\StoreModuleGroupRequest;
+use Modules\ModuleManagement\App\Http\Requests\StoreModuleRequest;
+use Modules\ModuleManagement\App\Http\Requests\UpdateModuleGroupRequest;
+use Modules\ModuleManagement\App\Http\Requests\UpdateModuleRequest;
 
 class ModuleController extends Controller
 {
@@ -57,9 +59,9 @@ class ModuleController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreModuleRequest $request): RedirectResponse
     {
-        $data = $this->validate($request);
+        $data = $request->validated();
         $module = Module::query()->create($data);
         $this->logger->log('created', "Membuat modul {$module->name}", $module, [], $data, 'module-management');
 
@@ -75,9 +77,9 @@ class ModuleController extends Controller
         ]);
     }
 
-    public function update(Request $request, Module $module): RedirectResponse
+    public function update(UpdateModuleRequest $request, Module $module): RedirectResponse
     {
-        $data = $this->validate($request, $module);
+        $data = $request->validated();
         $old = $module->only(array_keys($data));
         $module->update($data);
         $this->logger->log('updated', "Mengubah modul {$module->name}", $module, $old, $data, 'module-management');
@@ -93,30 +95,16 @@ class ModuleController extends Controller
         return back()->with('success', 'Modul berhasil dihapus.');
     }
 
-    public function storeGroup(Request $request): RedirectResponse
+    public function storeGroup(StoreModuleGroupRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:50', 'unique:module_groups,name'],
-            'label' => ['required', 'string', 'max:100'],
-            'icon' => ['nullable', 'string', 'max:50'],
-            'order' => ['integer', 'min:0'],
-            'active' => ['boolean'],
-        ]);
-        ModuleGroup::query()->create($data);
+        ModuleGroup::query()->create($request->validated());
 
         return back()->with('success', 'Grup berhasil ditambahkan.');
     }
 
-    public function updateGroup(Request $request, ModuleGroup $group): RedirectResponse
+    public function updateGroup(UpdateModuleGroupRequest $request, ModuleGroup $group): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:50', Rule::unique('module_groups', 'name')->ignore($group->id)],
-            'label' => ['required', 'string', 'max:100'],
-            'icon' => ['nullable', 'string', 'max:50'],
-            'order' => ['integer', 'min:0'],
-            'active' => ['boolean'],
-        ]);
-        $group->update($data);
+        $group->update($request->validated());
 
         return back()->with('success', 'Grup berhasil diperbarui.');
     }
@@ -129,44 +117,6 @@ class ModuleController extends Controller
         $group->delete();
 
         return back()->with('success', 'Grup berhasil dihapus.');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validate(Request $request, ?Module $module = null): array
-    {
-        $rules = [
-            'parent_id' => ['nullable', 'integer', 'exists:modules,id'],
-            'module_group_id' => ['nullable', 'integer', 'exists:module_groups,id'],
-            'name' => ['required', 'string', 'max:80', Rule::unique('modules', 'name')->ignore($module?->id)],
-            'label' => ['required', 'string', 'max:100'],
-            'icon' => ['nullable', 'string', 'max:50'],
-            'url' => ['nullable', 'string', 'max:200'],
-            'route_name' => ['nullable', 'string', 'max:200', Rule::unique('modules', 'route_name')->ignore($module?->id)],
-            'badge_source' => ['nullable', 'string', 'max:80'],
-            'extra_actions' => ['nullable', 'array'],
-            'active' => ['boolean'],
-            'external' => ['boolean'],
-            'order' => ['integer', 'min:0'],
-        ];
-        $data = $request->validate($rules);
-
-        // Tree integrity: group only at root
-        if ($data['parent_id'] ?? null) {
-            $data['module_group_id'] = null;
-        } elseif (! ($data['module_group_id'] ?? null)) {
-            abort(422, 'Modul root wajib memiliki grup.');
-        }
-
-        // Leaf wajib url+route_name; container tidak boleh
-        $hasUrl = ! empty($data['url']);
-        $hasRoute = ! empty($data['route_name']);
-        if ($hasUrl !== $hasRoute) {
-            abort(422, 'Leaf wajib mengisi url dan route_name. Container kosongkan keduanya.');
-        }
-
-        return $data;
     }
 
     /**

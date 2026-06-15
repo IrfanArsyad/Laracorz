@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\RoleManagement\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Module;
 use App\Models\ModuleGroup;
 use App\Models\Role;
@@ -13,6 +12,8 @@ use App\Services\AdminLogService;
 use App\Support\SearchFilterDto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Modules\RoleManagement\App\Http\Requests\StoreRoleRequest;
+use Modules\RoleManagement\App\Http\Requests\UpdateRoleRequest;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -51,10 +52,9 @@ class RoleController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRoleRequest $request): RedirectResponse
     {
-        $data = $this->validate($request);
-
+        $data = $request->validated();
         $role = Role::query()->create($data);
         $this->logger->log('created', "Membuat role {$role->name}", $role, [], $data, 'role-management');
 
@@ -69,11 +69,9 @@ class RoleController extends Controller
         ]);
     }
 
-    public function update(Request $request, Role $role): RedirectResponse
+    public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
     {
-        abort_if($role->name === Role::SUPER_ADMIN, 403, 'Role super-admin tidak dapat diubah.');
-
-        $data = $this->validate($request, $role);
+        $data = $request->validated();
         $old = $role->only(['name', 'display_name', 'is_active', 'read', 'create', 'update', 'delete', 'extra']);
         $role->update($data);
         $this->logger->log('updated', "Mengubah role {$role->name}", $role, $old, $data, 'role-management');
@@ -92,24 +90,6 @@ class RoleController extends Controller
         $this->logger->log('deleted', "Menghapus role {$role->name}", $role, [], [], 'role-management');
 
         return back()->with('success', 'Role berhasil dihapus.');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validate(Request $request, ?Role $role = null): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:50', Rule::unique('roles', 'name')->ignore($role?->id)],
-            'display_name' => ['required', 'string', 'max:100'],
-            'description' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['boolean'],
-            'read' => ['array'],
-            'create' => ['array'],
-            'update' => ['array'],
-            'delete' => ['array'],
-            'extra' => ['array'],
-        ]);
     }
 
     /**

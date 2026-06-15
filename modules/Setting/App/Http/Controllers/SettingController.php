@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Modules\Setting\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Setting;
 use App\Services\AdminLogService;
 use App\Services\FileService;
 use App\Services\SettingService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Setting\App\Http\Requests\UpdateSettingRequest;
 
 class SettingController extends Controller
 {
@@ -31,12 +30,9 @@ class SettingController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(UpdateSettingRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'values' => ['required', 'array'],
-            'logo' => ['nullable', 'image', 'max:2048'],
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('logo')) {
             $path = $this->files->upload($request->file('logo'), 'settings', (string) $this->settings->get('app.logo'), 512);
