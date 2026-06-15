@@ -62,6 +62,19 @@ watch(
                     <slot />
                 </ErrorBoundary>
             </main>
+            <footer class="px-4 md:px-8 lg:px-10 py-4 text-xs text-[var(--text-muted)] flex flex-wrap items-center justify-between gap-2">
+                <span>
+                    &copy; {{ new Date().getFullYear() }} LaraCorz
+                </span>
+                <a
+                    href="https://studiolab.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-[var(--text-default)] transition-colors"
+                >
+                    Created by <span class="font-medium text-[var(--text-default)]">studiolab.id</span>
+                </a>
+            </footer>
         </div>
 
         <ToastContainer />

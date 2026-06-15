@@ -36,16 +36,29 @@ const page = usePage();
         </div>
 
         <!-- Form panel -->
-        <div class="flex items-center justify-center p-6 md:col-span-3 md:p-10">
-            <div class="w-full max-w-sm animate-slide-up">
-                <h2 v-if="title" class="text-2xl font-semibold tracking-tight text-[var(--text-strong)] mb-1">
-                    {{ title }}
-                </h2>
-                <p class="mb-6 text-sm text-[var(--text-muted)]">
-                    Masuk ke <strong class="text-[var(--text-default)]">{{ page.props.app?.name ?? 'LaraCorz' }}</strong> untuk melanjutkan.
-                </p>
-                <slot />
+        <div class="relative flex flex-col p-6 md:col-span-3 md:p-10">
+            <div class="flex-1 flex items-center justify-center">
+                <div class="w-full max-w-sm animate-slide-up">
+                    <h2 v-if="title" class="text-2xl font-semibold tracking-tight text-[var(--text-strong)] mb-1">
+                        {{ title }}
+                    </h2>
+                    <p class="mb-6 text-sm text-[var(--text-muted)]">
+                        Masuk ke <strong class="text-[var(--text-default)]">{{ page.props.app?.name ?? 'LaraCorz' }}</strong> untuk melanjutkan.
+                    </p>
+                    <slot />
+                </div>
             </div>
+            <footer class="pt-6 text-xs text-[var(--text-muted)] text-center">
+                &copy; {{ new Date().getFullYear() }} LaraCorz · Created by
+                <a
+                    href="https://studiolab.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-medium text-[var(--text-default)] hover:underline"
+                >
+                    studiolab.id
+                </a>
+            </footer>
         </div>
         <ToastContainer />
     </div>
