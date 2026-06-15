@@ -4,8 +4,8 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import Checkbox from '../Checkbox/Checkbox.vue';
 import EmptyState from '../EmptyState/EmptyState.vue';
-import Pagination from '../Pagination/Pagination.vue';
 import Skeleton from '../Skeleton/Skeleton.vue';
+import TableShell from '../TableShell/TableShell.vue';
 import { cn } from '@/lib/utils';
 import type { Paginated, PaginationMeta } from '@/types';
 
@@ -107,42 +107,20 @@ function sortBy(col: Column): void {
     emit('sort', col.key);
 }
 
-const hasPagination = computed(() => paginationMeta.value !== null && paginationMeta.value.total > 0);
-const isMultiPage = computed(() => (paginationMeta.value?.last_page ?? 1) > 1);
 </script>
 
 <template>
-    <div :class="cn('rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-xs)] overflow-hidden', $props.class)">
-        <div v-if="$slots.toolbar" class="border-b border-[var(--border-subtle)] px-4 py-2.5">
-            <slot name="toolbar" />
-        </div>
+    <TableShell :pagination-meta="paginationMeta" :only="only" :class="$props.class">
+        <template v-if="$slots.toolbar" #toolbar><slot name="toolbar" /></template>
 
-        <!-- Header bar: count (left) + per-page + nav (right) — semua dalam 1 baris ghost style -->
-        <div
-            v-if="hasPagination"
-            class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-1.5"
-        >
-            <Pagination
-                :meta="paginationMeta"
-                :only="only"
-                :show-nav="false"
-                :show-per-page="false"
-                class="!gap-0"
-            />
-            <Pagination
-                :meta="paginationMeta"
-                :only="only"
-                :show-count="false"
-                :show-nav="isMultiPage"
-            />
-        </div>
-
-        <div v-if="selected.length > 0" class="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)] px-4 py-2 text-sm">
-            <span class="font-medium">{{ t('table.selected', { count: selected.length }) }}</span>
-            <div class="ml-auto flex items-center gap-2">
-                <slot name="bulk-actions" :selected="selected" />
+        <template #bulk>
+            <div v-if="selected.length > 0" class="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)] px-4 py-2 text-sm">
+                <span class="font-medium">{{ t('table.selected', { count: selected.length }) }}</span>
+                <div class="ml-auto flex items-center gap-2">
+                    <slot name="bulk-actions" :selected="selected" />
+                </div>
             </div>
-        </div>
+        </template>
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -236,6 +214,5 @@ const isMultiPage = computed(() => (paginationMeta.value?.last_page ?? 1) > 1);
                 </tbody>
             </table>
         </div>
-
-    </div>
+    </TableShell>
 </template>

@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Switch } from '@/components/ui/Switch';
+import { TableShell } from '@/components/ui/TableShell';
 import {
     DropdownMenu,
     DropdownMenuItem,
@@ -80,6 +81,11 @@ const totals = computed(() => {
     for (const g of props.tree) walk(g.modules);
     return { groups: props.tree.length, modules };
 });
+
+const summary = computed(
+    () =>
+        `${t('common.showing')} ${totals.value.groups} ${t('modules.statsGroups').toLowerCase()} · ${totals.value.modules} ${t('modules.statsModules').toLowerCase()}`,
+);
 const emit = defineEmits<{
     edit: [node: Node];
     detail: [node: Node];
@@ -415,19 +421,7 @@ async function deleteModule(node: Node): Promise<void> {
 </script>
 
 <template>
-    <div class="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-xs)] overflow-hidden">
-        <!-- Info bar (count) — konsisten dengan DataTable -->
-        <div class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-1.5">
-            <p class="text-xs text-[var(--text-muted)] tabular-nums">
-                {{ t('common.showing') }}
-                <span class="font-semibold text-[var(--text-default)]">{{ totals.groups }}</span>
-                {{ t('modules.statsGroups').toLowerCase() }}
-                ·
-                <span class="font-semibold text-[var(--text-default)]">{{ totals.modules }}</span>
-                {{ t('modules.statsModules').toLowerCase() }}
-            </p>
-        </div>
-
+    <TableShell :summary="summary">
         <!-- Table header -->
         <div class="grid grid-cols-[28px_minmax(0,1fr)_120px_90px_80px_60px_40px] gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] bg-[var(--surface-sunken)] border-b border-[var(--border-subtle)]">
             <div class="text-center"><GripVertical class="h-3 w-3 inline opacity-50" /></div>
@@ -627,5 +621,5 @@ async function deleteModule(node: Node): Promise<void> {
         <div v-if="tree.length === 0" class="p-8 text-center text-sm text-[var(--text-muted)]">
             {{ t('modules.table.emptyTable') }}
         </div>
-    </div>
+    </TableShell>
 </template>
