@@ -83,5 +83,6 @@ stubs/laracorz/  ← stubs untuk module:make-crud
 
 ## Dokumentasi
 - `docs/ARCHITECTURE.md` — keputusan arsitektur (single role, jsonb vs pivot, lapisan masa depan).
-- `docs/COMPONENTS.md` — referensi komponen UI.
+- **`docs/COMPONENTS.md`** — referensi lengkap UI library + composable (props/emits/slot per komponen, contoh kode).
+- **`docs/CUSTOM_COMPONENT.md`** — panduan bikin/kustom komponen baru (file structure, CVA, tokens, a11y, motion, checklist, anti-pattern).
 - `docs/MODULES.md` — cara membuat modul baru.
