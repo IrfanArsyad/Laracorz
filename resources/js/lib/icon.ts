@@ -11,12 +11,11 @@ import type { Component } from 'vue';
  *   resolveIcon(null)                // → Folder (fallback)
  *   resolveIcon('not-exists', Hash)  // → Hash (custom fallback)
  *
- * Validasi cukup permissive: cek `typeof === 'object'` plus exclude known
- * non-icon exports (mis. `createLucideIcon`, `icons`, `default`) supaya tidak
- * crash di runtime.
+ * Catatan: di lucide-vue-next v1.0.0 setiap icon = `(props, ctx) => h(...)`
+ * (functional component). Validasi musti `typeof === 'function'`, BUKAN object.
+ * Object check akan blokir SEMUA icon.
  */
 
-/** Export dari lucide-vue-next yang BUKAN komponen icon */
 const NON_ICON_EXPORTS = new Set([
     'createLucideIcon',
     'icons',
@@ -43,14 +42,19 @@ export function resolveIcon(
     const key = toPascalCase(name);
     if (NON_ICON_EXPORTS.has(key)) return fallback;
 
-    // Coba beberapa variant: Folder, FolderIcon, dst (lucide kadang ada suffix Icon)
+    // Lucide v1.x: icons = functional component. Coba juga variant `{Name}Icon`.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const candidate =
         (Icons as any)[key] ??
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (Icons as any)[`${key}Icon`];
 
-    if (!candidate || typeof candidate !== 'object') return fallback;
+    if (!candidate) return fallback;
 
-    return candidate;
+    // Icon valid = function (functional component) atau object (defineComponent options)
+    if (typeof candidate === 'function' || typeof candidate === 'object') {
+        return candidate;
+    }
+
+    return fallback;
 }
