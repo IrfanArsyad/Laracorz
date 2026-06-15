@@ -31,9 +31,11 @@ class LaravelLogReader
      * `laravel-YYYY-MM-DD.log`. Single channel pakai `laravel.log`.
      * Urut paling baru di depan.
      *
+     * @param  string|null  $onlyDate  Filter tanggal `YYYY-MM-DD` — kalau diset,
+     *                                 hanya file dengan tanggal itu yang dibaca.
      * @return list<string>
      */
-    private function logFiles(): array
+    private function logFiles(?string $onlyDate = null): array
     {
         $dir = dirname($this->logPath);
         if (! is_dir($dir)) {
@@ -45,22 +47,65 @@ class LaravelLogReader
 
         // Daily channel files: laravel-YYYY-MM-DD.log
         foreach (glob($dir.'/'.$base.'-*.log') ?: [] as $f) {
+            if ($onlyDate !== null) {
+                if (! preg_match('/-(\d{4}-\d{2}-\d{2})\.log$/', $f, $m) || $m[1] !== $onlyDate) {
+                    continue;
+                }
+            }
             $files[] = $f;
         }
 
-        // Single file fallback
+        // Single-driver fallback: hanya kalau laravel.log ada DAN tidak ada
+        // filter tanggal (atau filter = hari ini)
         if (is_file($this->logPath)) {
-            $files[] = $this->logPath;
+            $today = date('Y-m-d');
+            if ($onlyDate === null || $onlyDate === $today) {
+                $files[] = $this->logPath;
+            }
         }
 
-        // Urut terbaru di depan berdasar mtime
         usort($files, fn ($a, $b) => filemtime($b) <=> filemtime($a));
 
         return $files;
     }
 
     /**
-     * @param  array{level?: string|null, search?: string|null}  $filters
+     * Daftar tanggal yang masih punya file log (dalam window retensi).
+     * Format: ['2026-06-15', '2026-06-14', ...] terbaru di depan.
+     *
+     * @return list<string>
+     */
+    public function availableDates(): array
+    {
+        $dir = dirname($this->logPath);
+        if (! is_dir($dir)) {
+            return [];
+        }
+
+        $base = basename($this->logPath, '.log');
+        $dates = [];
+
+        // Tanggal dari file rotated
+        foreach (glob($dir.'/'.$base.'-*.log') ?: [] as $f) {
+            if (preg_match('/-(\d{4}-\d{2}-\d{2})\.log$/', $f, $m)) {
+                $dates[] = $m[1];
+            }
+        }
+
+        // Tanggal hari ini kalau laravel.log ada (current daily file)
+        if (is_file($this->logPath)) {
+            $dates[] = date('Y-m-d');
+        }
+
+        // Dedup + urut desc
+        $dates = array_values(array_unique($dates));
+        rsort($dates);
+
+        return $dates;
+    }
+
+    /**
+     * @param  array{level?: string|null, search?: string|null, date?: string|null}  $filters
      * @return array{data: array<int, array<string, mixed>>, total: int, from: int, to: int, current_page: int, per_page: int, last_page: int}
      */
     public function paginate(array $filters = [], int $page = 1, int $perPage = 25): array
@@ -83,12 +128,13 @@ class LaravelLogReader
     }
 
     /**
-     * @param  array{level?: string|null, search?: string|null}  $filters
+     * @param  array{level?: string|null, search?: string|null, date?: string|null}  $filters
      * @return Collection<int, array<string, mixed>>
      */
     public function all(array $filters = []): Collection
     {
-        $files = $this->logFiles();
+        $date = ! empty($filters['date']) ? (string) $filters['date'] : null;
+        $files = $this->logFiles($date);
         if (empty($files)) {
             return collect();
         }

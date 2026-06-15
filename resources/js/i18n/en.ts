@@ -491,6 +491,7 @@ export default {
             searchPlaceholder: 'Search message/event...',
             filterLevel: 'Level',
             filterAllLevels: 'All levels',
+            filterAllDates: 'All dates',
             columnTime: 'Time',
             columnLevel: 'Level',
             columnChannel: 'Channel',

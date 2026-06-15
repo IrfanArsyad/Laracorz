@@ -28,15 +28,30 @@ interface LogRow {
     exception: string | null;
 }
 
-const props = defineProps<{ data: Paginated<LogRow>; filters: Record<string, unknown> }>();
+const props = defineProps<{
+    data: Paginated<LogRow>;
+    filters: Record<string, unknown>;
+    availableDates: string[];
+}>();
 
 const { t } = useI18n();
 
 const { state, sortBy } = useDataTable({
     initial: {
         search: (props.filters.search as string) ?? '',
-        filters: { level: props.filters.level, channel: props.filters.channel },
+        filters: {
+            level: props.filters.level,
+            date: props.filters.date,
+        },
     },
+});
+
+const dateOptions = computed(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return props.availableDates.map((d) => ({
+        value: d,
+        label: d === today ? `${d} (today)` : d,
+    }));
 });
 
 const columns = computed<Column[]>(() => [
@@ -96,12 +111,20 @@ async function copyDetail(row: LogRow): Promise<void> {
             <FilterBar
                 v-model:search="state.search"
                 :placeholder="t('logs.system.searchPlaceholder')"
-                :filters-count="state.filters.level ? 1 : 0"
+                :filters-count="(state.filters.level ? 1 : 0) + (state.filters.date ? 1 : 0)"
                 scope="system-log"
                 :state="state"
-                @reset="state.filters.level = undefined; state.search = ''"
+                @reset="state.filters.level = undefined; state.filters.date = undefined; state.search = ''"
             >
                 <div class="min-w-[180px]">
+                    <Select
+                        v-model="state.filters.date"
+                        :options="dateOptions"
+                        :placeholder="t('logs.system.filterAllDates')"
+                        clearable
+                    />
+                </div>
+                <div class="min-w-[160px]">
                     <Select v-model="state.filters.level" :options="levelOptions" :placeholder="t('logs.system.filterAllLevels')" clearable />
                 </div>
             </FilterBar>

@@ -16,9 +16,15 @@ class SystemLogController extends Controller
     {
         $reader = new LaravelLogReader(storage_path('logs/laravel.log'));
 
+        $availableDates = $reader->availableDates();
+        $requestedDate = $request->input('filters.date');
+        // Validasi: hanya boleh tanggal yang masih ada file-nya.
+        $date = in_array($requestedDate, $availableDates, true) ? $requestedDate : null;
+
         $filters = [
             'level' => $request->input('filters.level'),
             'search' => $request->input('search'),
+            'date' => $date,
         ];
 
         $page = (int) $request->input('page', 1);
@@ -29,8 +35,9 @@ class SystemLogController extends Controller
             'filters' => [
                 'search' => $filters['search'],
                 'level' => $filters['level'],
+                'date' => $date,
             ],
-            'distinctLevels' => $reader->distinctLevels(),
+            'availableDates' => $availableDates,
         ]);
     }
 }

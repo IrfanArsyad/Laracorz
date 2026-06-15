@@ -489,6 +489,7 @@ export default {
             searchPlaceholder: 'Cari pesan/event...',
             filterLevel: 'Level',
             filterAllLevels: 'Semua level',
+            filterAllDates: 'Semua tanggal',
             columnTime: 'Waktu',
             columnLevel: 'Level',
             columnChannel: 'Channel',
