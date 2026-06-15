@@ -69,8 +69,17 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_DAILY_DAYS', 14),
+            'days' => env('LOG_DAILY_DAYS', 7),
             'replace_placeholders' => true,
+        ],
+
+        /*
+         * Retensi log: 7 hari. Audit `admin_logs` (DB) di-prune lewat
+         * scheduled command `logs:prune` (lihat bootstrap/app.php
+         * withSchedule). Laravel log file diputar via channel `daily`.
+         */
+        'retention' => [
+            'admin' => env('LOG_RETENTION_ADMIN', 7),
         ],
 
         'slack' => [

@@ -15,7 +15,7 @@ class LogsPruneCommand extends Command
 
     public function handle(): int
     {
-        $adminDays = (int) ($this->option('admin-days') ?? config('logging.retention.admin', 180));
+        $adminDays = (int) ($this->option('admin-days') ?? config('logging.retention.admin', 7));
 
         $adminCount = AdminLog::query()->where('created_at', '<', now()->subDays($adminDays))->delete();
 

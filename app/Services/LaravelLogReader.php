@@ -17,10 +17,46 @@ use Illuminate\Support\Collection;
  */
 class LaravelLogReader
 {
-    private const LINE_PATTERN = '/^\[(?<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (?<env>\w+)\.(?<level>\w+): (?<message>.*?)(?:\{(?<context>".*"[\s\S]*?)\})?$/m';
-
+    /**
+     * @param  string  $logPath  Base path. Untuk daily channel pakai
+     *                           `storage/logs/laravel.log` — reader akan
+     *                           auto-discover laravel-YYYY-MM-DD.log files.
+     */
     public function __construct(private readonly string $logPath)
     {
+    }
+
+    /**
+     * Daftar file log yang akan dibaca. Daily channel pakai pola
+     * `laravel-YYYY-MM-DD.log`. Single channel pakai `laravel.log`.
+     * Urut paling baru di depan.
+     *
+     * @return list<string>
+     */
+    private function logFiles(): array
+    {
+        $dir = dirname($this->logPath);
+        if (! is_dir($dir)) {
+            return [];
+        }
+
+        $base = basename($this->logPath, '.log');
+        $files = [];
+
+        // Daily channel files: laravel-YYYY-MM-DD.log
+        foreach (glob($dir.'/'.$base.'-*.log') ?: [] as $f) {
+            $files[] = $f;
+        }
+
+        // Single file fallback
+        if (is_file($this->logPath)) {
+            $files[] = $this->logPath;
+        }
+
+        // Urut terbaru di depan berdasar mtime
+        usort($files, fn ($a, $b) => filemtime($b) <=> filemtime($a));
+
+        return $files;
     }
 
     /**
@@ -52,16 +88,21 @@ class LaravelLogReader
      */
     public function all(array $filters = []): Collection
     {
-        if (! is_file($this->logPath)) {
+        $files = $this->logFiles();
+        if (empty($files)) {
             return collect();
         }
 
-        $raw = @file_get_contents($this->logPath);
-        if ($raw === false || $raw === '') {
-            return collect();
+        $entries = collect();
+        $offset = 0;
+        foreach ($files as $file) {
+            $raw = @file_get_contents($file);
+            if ($raw === false || $raw === '') {
+                continue;
+            }
+            $entries = $entries->concat($this->parse($raw, $offset));
+            $offset += 100000; // Ensure unique IDs across files
         }
-
-        $entries = $this->parse($raw);
 
         if (! empty($filters['level'])) {
             $level = strtolower((string) $filters['level']);
@@ -76,8 +117,8 @@ class LaravelLogReader
             );
         }
 
-        // Tampil terbaru di atas
-        return $entries->reverse()->values();
+        // Sort by waktu desc, paling baru di atas
+        return $entries->sortByDesc('created_at')->values();
     }
 
     public function distinctLevels(): array
@@ -93,7 +134,7 @@ class LaravelLogReader
     /**
      * @return Collection<int, array<string, mixed>>
      */
-    private function parse(string $raw): Collection
+    private function parse(string $raw, int $offset = 0): Collection
     {
         // Setiap entry log dimulai dengan `[YYYY-mm-dd HH:ii:ss]`. Split di
         // batas baris baru yang diawali pola itu, lalu parse satu per satu.
@@ -119,7 +160,7 @@ class LaravelLogReader
             }
 
             $entries[] = [
-                'id' => $idx + 1,
+                'id' => $offset + $idx + 1,
                 'created_at' => $m['time'],
                 'channel' => $m['channel'],
                 'level' => strtolower($m['level']),
