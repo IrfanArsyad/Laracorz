@@ -17,6 +17,13 @@ const isActive = computed(() => {
     return currentPath.value === props.node.url || currentPath.value.startsWith(props.node.url + '/');
 });
 
+/**
+ * Resolve string icon (mis. "users", "shield-check") ke komponen Lucide.
+ * Lucide icon adalah hasil defineComponent() — bentuknya object dengan property
+ * 'name' yang sama dengan PascalCase key. Pakai check ini supaya tidak salah
+ * resolve ke helper/utility export dari namespace (mis. `createLucideIcon`,
+ * `icons`, `default`) yang bukan komponen.
+ */
 const Icon = computed(() => {
     if (!props.node.icon) return Folder;
     const key = props.node.icon
@@ -24,7 +31,12 @@ const Icon = computed(() => {
         .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
         .join('');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ((Icons as any)[key] ?? Folder);
+    const candidate = (Icons as any)[key];
+    // Lucide icons return dari defineComponent yang punya field `name`
+    // matching nama icon — pakai itu sebagai signature pengecekan
+    return candidate && typeof candidate === 'object' && 'name' in candidate
+        ? candidate
+        : Folder;
 });
 
 const isLeaf = computed(() => !!props.node.url);

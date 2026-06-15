@@ -28,6 +28,19 @@ async function loadModuleStyles(moduleStudly: string): Promise<void> {
     loadedModuleStyles.add(moduleStudly);
 }
 
+/**
+ * Fallback ke halaman 404 supaya tidak crash kalau modul/page tidak ada.
+ * Console warn agar developer tahu, tapi UI tetap mulus.
+ */
+async function fallback404(reason: string): Promise<DefineComponent> {
+    console.warn('[Inertia resolver]', reason);
+    const loader = corePages['./pages/errors/404.vue'];
+    if (!loader) {
+        throw new Error(`Halaman fallback errors/404 tidak ada. ${reason}`);
+    }
+    return (await loader()).default as DefineComponent;
+}
+
 async function resolvePage(name: string): Promise<DefineComponent> {
     if (name.includes('::')) {
         const [moduleName, ...rest] = name.split('::');
@@ -40,7 +53,7 @@ async function resolvePage(name: string): Promise<DefineComponent> {
         const key = `../../modules/${moduleStudly}/Resources/${pagePath}.vue`;
         const loader = modulePages[key];
         if (!loader) {
-            throw new Error(`Halaman modul tidak ditemukan: ${name} (${key})`);
+            return fallback404(`Halaman modul tidak ditemukan: ${name} (expected ${key})`);
         }
         return (await loader()).default as DefineComponent;
     }
@@ -48,7 +61,7 @@ async function resolvePage(name: string): Promise<DefineComponent> {
     const key = `./pages/${name}.vue`;
     const loader = corePages[key];
     if (!loader) {
-        throw new Error(`Halaman core tidak ditemukan: ${name} (${key})`);
+        return fallback404(`Halaman core tidak ditemukan: ${name} (expected ${key})`);
     }
     return (await loader()).default as DefineComponent;
 }

@@ -113,7 +113,7 @@ function sortBy(col: Column): void {
                             :key="col.key"
                             :class="
                                 cn(
-                                    'px-3 py-2 text-xs font-medium tracking-tight',
+                                    'px-3 py-2.5 text-xs font-semibold uppercase tracking-wider',
                                     col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
                                     col.sortable ? 'cursor-pointer select-none hover:text-[var(--text-default)] transition-colors' : '',
                                     col.class,

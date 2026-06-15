@@ -26,20 +26,81 @@ export function debounce<T extends (...args: unknown[]) => void>(
     };
 }
 
+/**
+ * Format tanggal/jam.
+ *
+ *   formatDate('2026-06-14T04:24:07.000000Z')          // → "14/06/2026"
+ *   formatDate('2026-06-14T04:24:07.000000Z', 'long')  // → "14 Juni 2026"
+ *   formatDate('2026-06-14T04:24:07.000000Z', 'datetime') // → "14/06/2026 11:24"
+ *   formatDate('2026-06-14T04:24:07.000000Z', 'time')  // → "11:24"
+ *   formatDate('2026-06-14T04:24:07.000000Z', 'iso')   // → "2026-06-14 04:24:07" (UTC stripped)
+ *   formatDate('2026-06-14T04:24:07.000000Z', 'iso-local') // → "2026-06-14 11:24:07" (local TZ)
+ *   formatDate('2026-06-14T04:24:07.000000Z', 'human') // → "2 jam yang lalu"
+ */
 export function formatDate(
     value: string | Date | null | undefined,
-    style: 'short' | 'long' | 'datetime' = 'short',
+    style: 'short' | 'long' | 'datetime' | 'time' | 'iso' | 'iso-local' | 'human' = 'short',
 ): string {
     if (!value) return '-';
+
+    // Format "ISO": jangan parse — strip "T" dan microsecond + trailing Z, supaya
+    // return persis seperti yang Carbon serializeUsing() kirim ("Y-m-d H:i:s").
+    if (style === 'iso' && typeof value === 'string') {
+        return value
+            .replace('T', ' ')
+            .replace(/\.\d+/, '')
+            .replace(/Z$/, '')
+            .trim();
+    }
+
     const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) return '-';
+
+    if (style === 'iso-local') {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return (
+            `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+            `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+        );
+    }
+
+    if (style === 'human') {
+        const diff = (Date.now() - date.getTime()) / 1000;
+        if (diff < 60) return 'baru saja';
+        if (diff < 3600) return `${Math.floor(diff / 60)} menit yang lalu`;
+        if (diff < 86_400) return `${Math.floor(diff / 3600)} jam yang lalu`;
+        if (diff < 604_800) return `${Math.floor(diff / 86_400)} hari yang lalu`;
+        if (diff < 2_592_000) return `${Math.floor(diff / 604_800)} minggu yang lalu`;
+        if (diff < 31_536_000) return `${Math.floor(diff / 2_592_000)} bulan yang lalu`;
+        return `${Math.floor(diff / 31_536_000)} tahun yang lalu`;
+    }
+
     const opts: Intl.DateTimeFormatOptions =
         style === 'long'
             ? { day: 'numeric', month: 'long', year: 'numeric' }
             : style === 'datetime'
               ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
-              : { day: '2-digit', month: '2-digit', year: 'numeric' };
+              : style === 'time'
+                ? { hour: '2-digit', minute: '2-digit' }
+                : { day: '2-digit', month: '2-digit', year: 'numeric' };
     return new Intl.DateTimeFormat('id-ID', opts).format(date);
+}
+
+/**
+ * Shortcut khusus untuk format Y-m-d H:i:s (stamp Carbon).
+ * Sama persis dengan output backend `Carbon::serializeUsing` di AppServiceProvider.
+ *
+ *   formatTimestamp('2026-06-14T04:24:07.000000Z') // → "2026-06-14 04:24:07"
+ *   formatTimestamp('2026-06-14 04:24:07')         // → "2026-06-14 04:24:07" (passthrough)
+ *
+ * Pakai option `local: true` untuk konversi ke zona waktu user:
+ *   formatTimestamp('2026-06-14T04:24:07.000000Z', { local: true }) // → "2026-06-14 11:24:07"
+ */
+export function formatTimestamp(
+    value: string | Date | null | undefined,
+    options: { local?: boolean } = {},
+): string {
+    return formatDate(value, options.local ? 'iso-local' : 'iso');
 }
 
 export function formatCurrency(

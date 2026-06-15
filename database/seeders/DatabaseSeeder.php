@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminUserSeeder::class,
             SettingsSeeder::class,
+
+            // Sample data — comment kalau gak mau di-seed di production
+            SampleRolesSeeder::class,
+            SampleUsersSeeder::class,
         ]);
     }
 }
