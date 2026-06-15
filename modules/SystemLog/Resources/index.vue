@@ -65,11 +65,13 @@ const levelOptions = Object.entries(LOG_LEVELS).map(([k, v]) => ({ label: v.labe
                 v-model:search="state.search"
                 :placeholder="t('logs.system.searchPlaceholder')"
                 :filters-count="state.filters.level ? 1 : 0"
+                scope="system-log"
+                :state="state"
                 @reset="state.filters.level = undefined; state.search = ''"
             >
-                <FormField :label="t('logs.system.filterLevel')">
+                <div class="min-w-[180px]">
                     <Select v-model="state.filters.level" :options="levelOptions" :placeholder="t('logs.system.filterAllLevels')" clearable />
-                </FormField>
+                </div>
             </FilterBar>
 
             <DataTable :data="data" :columns="columns" @sort="sortBy">

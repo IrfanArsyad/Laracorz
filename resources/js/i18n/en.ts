@@ -93,6 +93,12 @@ export default {
         matching: 'matching "{q}"',
         empty: 'No matching icon.',
     },
+    filter: {
+        saveView: 'Save view',
+        views: 'Views',
+        viewNamePlaceholder: 'Name this view (e.g. Active staff)',
+        unnamed: 'Untitled view',
+    },
     nav: {
         // Module groups (kunci = ModuleGroup.name slug)
         groups: {

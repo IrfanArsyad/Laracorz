@@ -93,6 +93,12 @@ export default {
         matching: 'cocok dengan "{q}"',
         empty: 'Tidak ada ikon yang cocok.',
     },
+    filter: {
+        saveView: 'Simpan tampilan',
+        views: 'Tampilan',
+        viewNamePlaceholder: 'Beri nama tampilan (mis. Pengguna aktif)',
+        unnamed: 'Tanpa nama',
+    },
     nav: {
         groups: {
             main: 'Utama',

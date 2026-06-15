@@ -201,14 +201,15 @@ function resetFilters(): void {
                 <StatCard :label="t('users.statsBanned')" :value="stats?.banned ?? '—'" :icon="UserX" :loading="!stats" />
             </div>
 
-            <!-- Filter toolbar — search inline, filter collapsed in panel -->
             <FilterBar
                 v-model:search="state.search"
                 :placeholder="t('users.searchPlaceholder')"
                 :filters-count="filtersCount"
+                scope="users"
+                :state="state"
                 @reset="resetFilters"
             >
-                <FormField :label="t('users.role')">
+                <div class="min-w-[160px]">
                     <Select
                         v-model="state.filters.role_id"
                         :options="roleOptions"
@@ -216,15 +217,15 @@ function resetFilters(): void {
                         clearable
                         searchable
                     />
-                </FormField>
-                <FormField :label="t('users.status')">
+                </div>
+                <div class="min-w-[160px]">
                     <Select
                         v-model="state.filters.status"
                         :options="statusOptions"
                         :placeholder="t('users.filterAllStatuses')"
                         clearable
                     />
-                </FormField>
+                </div>
             </FilterBar>
 
             <DataTable

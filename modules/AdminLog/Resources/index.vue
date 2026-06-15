@@ -73,11 +73,13 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
                 v-model:search="state.search"
                 :placeholder="t('logs.admin.searchPlaceholder')"
                 :filters-count="state.filters.action ? 1 : 0"
+                scope="admin-log"
+                :state="state"
                 @reset="state.filters.action = undefined; state.search = ''"
             >
-                <FormField :label="t('logs.admin.filterAction')">
+                <div class="min-w-[180px]">
                     <Select v-model="state.filters.action" :options="actionOptions" :placeholder="t('logs.admin.filterAllActions')" clearable />
-                </FormField>
+                </div>
             </FilterBar>
 
             <DataTable :data="data" :columns="columns" @sort="sortBy">

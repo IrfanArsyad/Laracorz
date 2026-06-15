@@ -182,6 +182,8 @@ async function hapus(row: RoleRow): Promise<void> {
             <FilterBar
                 v-model:search="state.search"
                 :placeholder="t('roles.searchPlaceholder')"
+                scope="roles"
+                :state="state"
                 @reset="state.search = ''"
             />
 
