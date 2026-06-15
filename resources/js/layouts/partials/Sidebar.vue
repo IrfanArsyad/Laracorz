@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import { X } from 'lucide-vue-next';
 import SidebarItem from './SidebarItem.vue';
 import { cn } from '@/lib/utils';
@@ -10,6 +11,7 @@ defineProps<{ collapsed: boolean; mobileOpen: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 
 const page = usePage();
+const { t } = useI18n();
 const menu = computed<MenuGroup[]>(() => (page.props.menu as MenuGroup[]) ?? []);
 const appName = computed(() => (page.props.app as { name?: string })?.name ?? 'LaraCorz');
 const initial = computed(() => appName.value.charAt(0).toUpperCase());
@@ -39,7 +41,7 @@ const initial = computed(() => appName.value.charAt(0).toUpperCase());
             <button
                 type="button"
                 class="md:hidden rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--state-hover)]"
-                aria-label="Tutup"
+                :aria-label="t('common.close')"
                 @click="emit('close')"
             >
                 <X class="h-5 w-5" />

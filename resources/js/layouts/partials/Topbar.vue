@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
-import { Menu, PanelLeftClose, PanelLeftOpen, LogOut, User as UserIcon, Settings as SettingsIcon, Command } from 'lucide-vue-next';
+import { router, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import { Menu, PanelLeftClose, LogOut, User as UserIcon, Settings as SettingsIcon, Command } from 'lucide-vue-next';
 import Avatar from '@/components/ui/Avatar/Avatar.vue';
 import Kbd from '@/components/ui/Kbd/Kbd.vue';
 import ThemeToggle from '@/components/ui/ThemeToggle/ThemeToggle.vue';
+import { LocaleSwitcher } from '@/components/ui/LocaleSwitcher';
 import {
     DropdownMenu,
     DropdownMenuItem,
@@ -17,6 +19,7 @@ import type { User } from '@/types';
 const emit = defineEmits<{ toggleMobile: []; toggleCollapsed: [] }>();
 
 const page = usePage();
+const { t } = useI18n();
 const user = computed<User | null>(() => (page.props.auth as { user: User | null })?.user ?? null);
 
 function logout(): void {
@@ -29,7 +32,7 @@ function logout(): void {
         <button
             type="button"
             class="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-[var(--state-hover)] text-[var(--text-default)]"
-            aria-label="Buka menu"
+            :aria-label="t('topbar.openMenu')"
             @click="emit('toggleMobile')"
         >
             <Menu class="h-4 w-4" />
@@ -37,7 +40,7 @@ function logout(): void {
         <button
             type="button"
             class="hidden md:inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-[var(--state-hover)] text-[var(--text-muted)] hover:text-[var(--text-default)] transition-colors"
-            aria-label="Toggle sidebar"
+            :aria-label="t('topbar.toggleSidebar')"
             @click="emit('toggleCollapsed')"
         >
             <PanelLeftClose class="h-4 w-4" />
@@ -47,15 +50,16 @@ function logout(): void {
             <button
                 type="button"
                 class="hidden md:inline-flex h-8 items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] pl-2.5 pr-1.5 text-xs text-[var(--text-muted)] hover:border-[var(--border-default)] transition-colors"
-                aria-label="Cari"
+                :aria-label="t('common.search')"
                 @click="$el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))"
             >
                 <Command class="h-3.5 w-3.5" />
-                <span>Cari...</span>
+                <span>{{ t('topbar.search') }}</span>
                 <Kbd class="ml-3">⌘K</Kbd>
             </button>
 
             <NotificationBell />
+            <LocaleSwitcher />
             <ThemeToggle />
 
             <DropdownMenu align="end">
@@ -63,7 +67,7 @@ function logout(): void {
                     <button
                         type="button"
                         class="inline-flex items-center gap-2 rounded-full hover:opacity-80 p-1"
-                        aria-label="Akun"
+                        :aria-label="t('topbar.account')"
                     >
                         <Avatar :src="user?.avatar_url" :name="user?.name" size="sm" />
                     </button>
@@ -79,14 +83,14 @@ function logout(): void {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem as="link" href="/profile">
-                    <UserIcon class="h-4 w-4 mr-2" /> Profil
+                    <UserIcon class="h-4 w-4 mr-2" /> {{ t('topbar.profile') }}
                 </DropdownMenuItem>
                 <DropdownMenuItem as="link" href="/settings">
-                    <SettingsIcon class="h-4 w-4 mr-2" /> Pengaturan
+                    <SettingsIcon class="h-4 w-4 mr-2" /> {{ t('topbar.settings') }}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" @click="logout">
-                    <LogOut class="h-4 w-4 mr-2" /> Keluar
+                    <LogOut class="h-4 w-4 mr-2" /> {{ t('topbar.logout') }}
                 </DropdownMenuItem>
             </DropdownMenu>
         </div>

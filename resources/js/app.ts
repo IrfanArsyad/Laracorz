@@ -4,6 +4,7 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { createApp, h, type DefineComponent } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { i18n } from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'LaraCorz';
 
@@ -72,6 +73,7 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(i18n)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .use(ZiggyVue as any)
             .mount(el);

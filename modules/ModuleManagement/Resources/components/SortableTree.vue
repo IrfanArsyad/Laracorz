@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import {
     Pencil,
     Trash2,
@@ -78,6 +79,7 @@ const emit = defineEmits<{
 
 const { confirm } = useConfirm();
 const toast = useToast();
+const { t } = useI18n();
 
 /* ──────────────────────────────────────────────────────────────
  * Flatten tree → flat list dengan info depth + groupId, dipakai
@@ -269,7 +271,7 @@ async function onDrop(): Promise<void> {
 
     // Tidak boleh drop ke descendant sendiri
     if (isAncestor(src, target.id) && src !== target.id) {
-        toast.warning('Tidak bisa pindahkan ke dalam descendant sendiri.');
+        toast.warning(t('modules.toast.cantNestInDescendant'));
         clearDrag();
         return;
     }
@@ -357,9 +359,9 @@ async function commitMove(
         {
             preserveScroll: true,
             preserveState: false,
-            onSuccess: () => toast.success('Struktur modul diperbarui'),
+            onSuccess: () => toast.success(t('modules.toast.structureUpdated')),
             onError: (errors) => {
-                const msg = (Object.values(errors)[0] as string) || 'Gagal mengubah urutan';
+                const msg = (Object.values(errors)[0] as string) || t('modules.toast.structureUpdateFailed');
                 toast.error(msg);
             },
         },
@@ -377,17 +379,23 @@ function toggleActive(node: Node): void {
         {
             preserveScroll: true,
             preserveState: false,
-            onSuccess: () => toast.success(`Modul ${node.label} → ${node.active ? 'nonaktif' : 'aktif'}`),
+            onSuccess: () =>
+                toast.success(
+                    t('modules.toast.toggleSuccess', {
+                        label: node.label,
+                        state: node.active ? t('common.inactive') : t('common.active'),
+                    }),
+                ),
         },
     );
 }
 
 async function deleteModule(node: Node): Promise<void> {
     const ok = await confirm({
-        title: 'Hapus modul?',
-        message: `Yakin hapus "${node.label}"? Ini juga akan menghapus izin terkait di semua role.`,
+        title: t('modules.deleteModule') + '?',
+        message: t('modules.deleteModuleConfirm', { label: node.label }),
         variant: 'destructive',
-        confirmLabel: 'Hapus',
+        confirmLabel: t('common.delete'),
     });
     if (!ok) return;
     router.delete(`/modules/${node.id}`, { preserveScroll: true });
@@ -399,11 +407,11 @@ async function deleteModule(node: Node): Promise<void> {
         <!-- Table header -->
         <div class="grid grid-cols-[28px_minmax(0,1fr)_120px_90px_80px_60px_40px] gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] bg-[var(--surface-sunken)] border-b border-[var(--border-subtle)]">
             <div class="text-center"><GripVertical class="h-3 w-3 inline opacity-50" /></div>
-            <div>Modul</div>
-            <div>Slug</div>
-            <div>Tipe</div>
-            <div class="text-center">Role</div>
-            <div class="text-center">Aktif</div>
+            <div>{{ t('modules.table.module') }}</div>
+            <div>{{ t('modules.table.slug') }}</div>
+            <div>{{ t('modules.table.type') }}</div>
+            <div class="text-center">{{ t('modules.table.role') }}</div>
+            <div class="text-center">{{ t('modules.table.active') }}</div>
             <div></div>
         </div>
 
@@ -432,29 +440,29 @@ async function deleteModule(node: Node): Promise<void> {
                         </div>
                         <span class="text-sm font-semibold text-[var(--text-strong)] truncate">{{ row.group.label }}</span>
                         <Badge variant="muted" class="font-mono text-xs">{{ row.group.name }}</Badge>
-                        <Badge v-if="!row.group.active" variant="warning">Nonaktif</Badge>
+                        <Badge v-if="!row.group.active" variant="warning">{{ t('common.inactive') }}</Badge>
                     </div>
-                    <div class="text-xs text-[var(--text-muted)] truncate self-center">{{ row.group.modules.length }} modul</div>
+                    <div class="text-xs text-[var(--text-muted)] truncate self-center">{{ t('modules.table.moduleCount', { count: row.group.modules.length }) }}</div>
                     <div></div>
                     <div></div>
                     <div></div>
                     <div class="flex items-center justify-end gap-1">
-                        <Button size="icon-xs" variant="ghost" aria-label="Tambah modul" @click="emit('add-to-group', row.group.id)">
+                        <Button size="icon-xs" variant="ghost" :aria-label="t('modules.addModule')" @click="emit('add-to-group', row.group.id)">
                             <Plus class="h-3.5 w-3.5" />
                         </Button>
                         <DropdownMenu align="end">
                             <template #trigger>
-                                <Button size="icon-xs" variant="ghost" aria-label="Opsi grup">
+                                <Button size="icon-xs" variant="ghost" :aria-label="t('common.more')">
                                     <MoreVertical class="h-3.5 w-3.5" />
                                 </Button>
                             </template>
-                            <DropdownMenuLabel>Grup: {{ row.group.label }}</DropdownMenuLabel>
+                            <DropdownMenuLabel>{{ row.group.label }}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem @click="emit('edit-group', row.group)">
-                                <Pencil class="h-3.5 w-3.5" /> Ubah grup
+                                <Pencil class="h-3.5 w-3.5" /> {{ t('modules.editGroup') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem variant="destructive" @click="emit('delete-group', row.group)">
-                                <Trash2 class="h-3.5 w-3.5" /> Hapus grup
+                                <Trash2 class="h-3.5 w-3.5" /> {{ t('modules.deleteGroup') }}
                             </DropdownMenuItem>
                         </DropdownMenu>
                     </div>
@@ -496,7 +504,7 @@ async function deleteModule(node: Node): Promise<void> {
                             v-if="!row.node.is_leaf && row.node.children.length"
                             type="button"
                             class="flex h-4 w-4 items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-default)] shrink-0"
-                            :aria-label="isExpanded(row.id) ? 'Tutup' : 'Buka'"
+                            :aria-label="isExpanded(row.id) ? t('sidebar.collapse') : t('sidebar.expand')"
                             @click="toggleExpand(row.id)"
                         >
                             <svg
@@ -538,7 +546,7 @@ async function deleteModule(node: Node): Promise<void> {
                     <!-- Type badge -->
                     <div class="self-center">
                         <Badge :variant="row.node.is_leaf ? 'info' : 'secondary'" class="text-xs">
-                            {{ row.node.is_leaf ? 'Leaf' : 'Container' }}
+                            {{ row.node.is_leaf ? t('modules.typeLeaf') : t('modules.typeContainer') }}
                         </Badge>
                     </div>
 
@@ -563,27 +571,27 @@ async function deleteModule(node: Node): Promise<void> {
                     <div class="flex items-center justify-end self-center">
                         <DropdownMenu align="end">
                             <template #trigger>
-                                <Button size="icon-xs" variant="ghost" aria-label="Opsi">
+                                <Button size="icon-xs" variant="ghost" :aria-label="t('common.actions')">
                                     <MoreVertical class="h-3.5 w-3.5" />
                                 </Button>
                             </template>
                             <DropdownMenuItem @click="emit('detail', row.node!)">
-                                <Eye class="h-3.5 w-3.5" /> Detail
+                                <Eye class="h-3.5 w-3.5" /> {{ t('common.detail') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="emit('edit', row.node!)">
-                                <Pencil class="h-3.5 w-3.5" /> Ubah
+                                <Pencil class="h-3.5 w-3.5" /> {{ t('common.edit') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem v-if="!row.node.is_leaf" @click="emit('add-sub', row.node!.id)">
-                                <Plus class="h-3.5 w-3.5" /> Tambah sub-modul
+                                <Plus class="h-3.5 w-3.5" /> {{ t('modules.addSubmodule') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="toggleActive(row.node!)">
                                 <Power v-if="!row.node.active" class="h-3.5 w-3.5" />
                                 <PowerOff v-else class="h-3.5 w-3.5" />
-                                {{ row.node.active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                {{ row.node.active ? t('common.inactive') : t('common.active') }}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem variant="destructive" @click="deleteModule(row.node!)">
-                                <Trash2 class="h-3.5 w-3.5" /> Hapus
+                                <Trash2 class="h-3.5 w-3.5" /> {{ t('common.delete') }}
                             </DropdownMenuItem>
                         </DropdownMenu>
                     </div>
@@ -593,7 +601,7 @@ async function deleteModule(node: Node): Promise<void> {
 
         <!-- Empty state -->
         <div v-if="tree.length === 0" class="p-8 text-center text-sm text-[var(--text-muted)]">
-            Belum ada grup. Tambahkan grup terlebih dahulu.
+            {{ t('modules.table.emptyTable') }}
         </div>
     </div>
 </template>

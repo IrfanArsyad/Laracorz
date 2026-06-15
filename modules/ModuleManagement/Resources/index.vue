@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import {
     Plus,
     FolderTree,
-    Info,
     Layers,
     Hash,
     Activity,
@@ -19,6 +19,8 @@ import GroupForm from './components/GroupForm.vue';
 import SortableTree from './components/SortableTree.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useModal } from '@/composables/useModal';
+
+const { t } = useI18n();
 
 interface Node {
     id: number;
@@ -184,18 +186,18 @@ function submitGroup(): void {
 async function deleteGroup(group: Group): Promise<void> {
     if (group.modules?.length) {
         await confirm({
-            title: 'Grup masih punya modul',
-            message: `Grup "${group.label}" masih punya ${group.modules.length} modul. Hapus semuanya dulu sebelum menghapus grup.`,
-            confirmLabel: 'OK',
+            title: t('modules.groupHasModules'),
+            message: t('modules.groupHasModulesMessage', { label: group.label, count: group.modules.length }),
+            confirmLabel: t('common.ok'),
             cancelLabel: '',
         });
         return;
     }
     const ok = await confirm({
-        title: 'Hapus grup?',
-        message: `Yakin hapus grup "${group.label}"?`,
+        title: t('modules.deleteGroup') + '?',
+        message: t('modules.deleteGroupConfirm', { label: group.label }),
         variant: 'destructive',
-        confirmLabel: 'Hapus',
+        confirmLabel: t('common.delete'),
     });
     if (!ok) return;
     router.delete(`/modules/groups/${group.id}`, { preserveScroll: true });
@@ -206,47 +208,30 @@ const detailModal = useModal<Node | null>();
 </script>
 
 <template>
-    <Head title="Manajemen Modul" />
+    <Head :title="t('modules.title')" />
     <AppLayout>
         <div class="space-y-5">
             <PageHeader
-                title="Manajemen Modul"
-                description="Atur struktur menu sidebar dan unit izin sistem."
-                :breadcrumbs="[{ label: 'Role & Permission' }, { label: 'Module' }]"
+                :title="t('modules.title')"
+                :description="t('modules.description')"
+                :breadcrumbs="[{ label: t('modules.breadcrumbRoot') }, { label: t('modules.breadcrumb') }]"
             >
                 <template #actions>
                     <Button variant="outline" @click="openCreateGroup">
-                        <FolderTree class="h-4 w-4" /> Tambah Grup
+                        <FolderTree class="h-4 w-4" /> {{ t('modules.addGroup') }}
                     </Button>
                     <Button @click="() => openCreateModule()">
-                        <Plus class="h-4 w-4" /> Tambah Modul
+                        <Plus class="h-4 w-4" /> {{ t('modules.addModule') }}
                     </Button>
                 </template>
             </PageHeader>
 
             <!-- KPI ringkas -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <StatCard label="Total Grup" :value="stats.groups" :icon="FolderTree" />
-                <StatCard label="Total Modul" :value="stats.totalModules" :icon="Layers" />
-                <StatCard label="Leaf (Halaman)" :value="stats.leafCount" :icon="Hash" />
-                <StatCard label="Nonaktif" :value="stats.inactiveCount" :icon="Activity" />
-            </div>
-
-            <!-- Info concept banner -->
-            <div
-                class="flex items-start gap-3 rounded-xl border border-[var(--status-info-border)] bg-[var(--status-info-bg)] p-4 text-sm text-[var(--status-info-fg)]"
-            >
-                <Info class="h-5 w-5 shrink-0 mt-0.5" />
-                <div class="space-y-1.5 leading-relaxed">
-                    <p class="font-semibold">Konsep Grup &amp; Modul</p>
-                    <p>
-                        <strong>Grup</strong> = section pemisah di sidebar (mis. "User &amp; Access").
-                        <strong>Modul</strong> = entri yang bisa diklik. Modul bisa berupa
-                        <em>leaf</em> (punya url, contoh: "Pengguna" → /users) atau
-                        <em>container</em> (cuma folder yang isinya modul lain).
-                        Permission disimpan per modul leaf — container otomatis tampil kalau ≥ 1 child-nya boleh diakses.
-                    </p>
-                </div>
+                <StatCard :label="t('modules.statsGroups')" :value="stats.groups" :icon="FolderTree" />
+                <StatCard :label="t('modules.statsModules')" :value="stats.totalModules" :icon="Layers" />
+                <StatCard :label="t('modules.statsLeaves')" :value="stats.leafCount" :icon="Hash" />
+                <StatCard :label="t('modules.statsInactive')" :value="stats.inactiveCount" :icon="Activity" />
             </div>
 
             <!-- Sortable tree table — drag to reorder / nest -->
@@ -267,12 +252,12 @@ const detailModal = useModal<Node | null>();
                 class="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-raised)] p-8 text-center"
             >
                 <FolderTree class="h-10 w-10 mx-auto text-[var(--text-muted)] mb-3" />
-                <h3 class="text-base font-semibold text-[var(--text-strong)]">Belum ada grup</h3>
+                <h3 class="text-base font-semibold text-[var(--text-strong)]">{{ t('modules.emptyTitle') }}</h3>
                 <p class="text-sm text-[var(--text-muted)] mt-1">
-                    Mulai dengan membuat grup pertama (contoh: "Main", "System").
+                    {{ t('modules.emptyDescription') }}
                 </p>
                 <Button class="mt-4" @click="openCreateGroup">
-                    <Plus class="h-4 w-4" /> Tambah Grup Pertama
+                    <Plus class="h-4 w-4" /> {{ t('modules.addFirstGroup') }}
                 </Button>
             </div>
         </div>
@@ -280,8 +265,8 @@ const detailModal = useModal<Node | null>();
         <!-- Modal: Modul (create/edit) -->
         <FormModal
             v-model="moduleModal.isOpen.value"
-            :title="moduleModal.data.value ? `Ubah Modul: ${moduleModal.data.value.label}` : 'Tambah Modul'"
-            :description="moduleModal.data.value ? 'Perbarui detail modul.' : 'Buat modul baru. Modul leaf butuh URL + route name; container biarkan kosong.'"
+            :title="moduleModal.data.value ? t('modules.editModuleTitle', { label: moduleModal.data.value.label }) : t('modules.createModuleTitle')"
+            :description="moduleModal.data.value ? t('modules.editModuleDesc') : t('modules.createModuleDesc')"
             size="xl"
             :processing="moduleForm.processing"
             @submit="submitModule"
@@ -293,8 +278,8 @@ const detailModal = useModal<Node | null>();
         <!-- Modal: Grup (create/edit) -->
         <FormModal
             v-model="groupModal.isOpen.value"
-            :title="groupModal.data.value ? `Ubah Grup: ${groupModal.data.value.label}` : 'Tambah Grup'"
-            :description="groupModal.data.value ? 'Perbarui detail grup.' : 'Grup adalah section header di sidebar yang menampung modul-modul terkait.'"
+            :title="groupModal.data.value ? t('modules.editGroupTitle', { label: groupModal.data.value.label }) : t('modules.createGroupTitle')"
+            :description="groupModal.data.value ? t('modules.editGroupDesc') : t('modules.createGroupDesc')"
             size="md"
             :processing="groupForm.processing"
             @submit="submitGroup"
@@ -306,16 +291,16 @@ const detailModal = useModal<Node | null>();
         <!-- Modal: Detail -->
         <DetailModal
             v-model="detailModal.isOpen.value"
-            :title="detailModal.data.value?.label ?? 'Detail'"
+            :title="detailModal.data.value?.label ?? t('common.detail')"
             :description="detailModal.data.value?.name"
             :items="detailModal.data.value ? [
-                { label: 'Slug', value: detailModal.data.value.name },
-                { label: 'URL', value: detailModal.data.value.url ?? '— container —' },
-                { label: 'Route', value: detailModal.data.value.route_name ?? '—' },
-                { label: 'Tipe', value: detailModal.data.value.is_leaf ? 'Leaf (halaman)' : 'Container (folder)' },
-                { label: 'Icon', value: detailModal.data.value.icon ?? '—' },
-                { label: 'Urutan', value: detailModal.data.value.order },
-                { label: 'Status', value: detailModal.data.value.active ? 'Aktif' : 'Nonaktif' },
+                { label: t('common.slug'), value: detailModal.data.value.name },
+                { label: t('common.url'), value: detailModal.data.value.url ?? t('modules.detail.container') },
+                { label: t('common.route'), value: detailModal.data.value.route_name ?? '—' },
+                { label: t('modules.detail.type'), value: detailModal.data.value.is_leaf ? t('modules.typeLeafFull') : t('modules.typeContainerFull') },
+                { label: t('modules.detail.icon'), value: detailModal.data.value.icon ?? '—' },
+                { label: t('modules.detail.order'), value: detailModal.data.value.order },
+                { label: t('modules.detail.status'), value: detailModal.data.value.active ? t('common.active') : t('common.inactive') },
             ] : []"
         />
     </AppLayout>
