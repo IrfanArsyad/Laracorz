@@ -81,14 +81,34 @@ const blankForm = {
     display_name: '',
     description: '',
     is_active: true,
-    read: [] as Array<number | string>,
-    create: [] as Array<number | string>,
-    update: [] as Array<number | string>,
-    delete: [] as Array<number | string>,
+    /*
+     * Field di-prefix `perm_` supaya tidak bentrok dengan Inertia useForm
+     * built-in methods (`form.delete()` HTTP DELETE) — kalau dinamai polos
+     * `delete`, akses `form.delete` me-return method, bukan array kita.
+     * Sebelum submit, transform balik ke nama backend (read/create/update/delete)
+     * via `form.transform()`.
+     */
+    perm_read: [] as Array<number | string>,
+    perm_create: [] as Array<number | string>,
+    perm_update: [] as Array<number | string>,
+    perm_delete: [] as Array<number | string>,
     extra: {} as Record<string, string[]>,
 };
 
 const form = useForm<typeof blankForm & { _method?: string }>({ ...blankForm });
+
+form.transform((data) => ({
+    name: data.name,
+    display_name: data.display_name,
+    description: data.description,
+    is_active: data.is_active,
+    read: data.perm_read,
+    create: data.perm_create,
+    update: data.perm_update,
+    delete: data.perm_delete,
+    extra: data.extra,
+    ...(data._method ? { _method: data._method } : {}),
+}));
 
 const isEditing = computed(() => !!formModal.data.value);
 const isSuperAdmin = computed(() => formModal.data.value?.name === 'super-admin');
@@ -109,10 +129,10 @@ function openEdit(row: RoleRow): void {
         display_name: row.display_name,
         description: row.description ?? '',
         is_active: row.is_active,
-        read: Array.isArray(row.read) ? row.read : [],
-        create: Array.isArray(row.create) ? row.create : [],
-        update: Array.isArray(row.update) ? row.update : [],
-        delete: Array.isArray(row.delete) ? row.delete : [],
+        perm_read: Array.isArray(row.read) ? row.read : [],
+        perm_create: Array.isArray(row.create) ? row.create : [],
+        perm_update: Array.isArray(row.update) ? row.update : [],
+        perm_delete: Array.isArray(row.delete) ? row.delete : [],
         extra: row.extra ?? {},
     });
     formModal.open(row);
@@ -262,10 +282,10 @@ async function hapus(row: RoleRow): Promise<void> {
                 <PermissionMatrix
                     v-else
                     :matrix="matrix as never"
-                    v-model:model-read="form.read"
-                    v-model:model-create="form.create"
-                    v-model:model-update="form.update"
-                    v-model:model-delete="form.delete"
+                    v-model:model-read="form.perm_read"
+                    v-model:model-create="form.perm_create"
+                    v-model:model-update="form.perm_update"
+                    v-model:model-delete="form.perm_delete"
                     v-model:model-extra="form.extra"
                 />
             </div>
