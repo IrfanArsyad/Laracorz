@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { router } from '@inertiajs/vue3';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import Checkbox from '../Checkbox/Checkbox.vue';
@@ -110,17 +109,6 @@ function sortBy(col: Column): void {
 
 const hasPagination = computed(() => paginationMeta.value !== null && paginationMeta.value.total > 0);
 const isMultiPage = computed(() => (paginationMeta.value?.last_page ?? 1) > 1);
-
-function changePerPage(v: string): void {
-    const perPage = Number(v) || 10;
-    const url = new URL(window.location.href);
-    const q: Record<string, string> = {};
-    url.searchParams.forEach((val, key) => {
-        if (key !== 'per_page' && key !== 'page') q[key] = val;
-    });
-    q.per_page = String(perPage);
-    router.get(url.pathname, q, { preserveState: true, preserveScroll: true, replace: true, only: props.only });
-}
 </script>
 
 <template>
@@ -129,30 +117,24 @@ function changePerPage(v: string): void {
             <slot name="toolbar" />
         </div>
 
-        <!-- Header info bar: count (left) + per-page (right) -->
+        <!-- Header bar: count (left) + per-page + nav (right) — semua dalam 1 baris ghost style -->
         <div
             v-if="hasPagination"
-            class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-1.5 bg-[var(--surface-sunken)]/30"
+            class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-1.5"
         >
-            <p class="text-xs text-[var(--text-muted)] tabular-nums">
-                {{ t('common.showing') }}
-                <span class="font-semibold text-[var(--text-default)]">{{ paginationMeta?.from ?? 0 }}</span>
-                <span>–</span>
-                <span class="font-semibold text-[var(--text-default)]">{{ paginationMeta?.to ?? 0 }}</span>
-                {{ t('common.of') }}
-                <span class="font-semibold text-[var(--text-default)]">{{ paginationMeta?.total ?? 0 }}</span>
-                {{ t('common.items') }}
-            </p>
-            <label class="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                <span class="hidden sm:inline">{{ t('common.rowsPerPage') }}</span>
-                <select
-                    :value="paginationMeta?.per_page ?? 10"
-                    class="h-7 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] pl-1.5 pr-6 text-xs font-medium text-[var(--text-default)] cursor-pointer transition-colors hover:border-[var(--border-strong)] focus-visible:outline-none focus-visible:border-[var(--border-focus)]"
-                    @change="changePerPage(($event.target as HTMLSelectElement).value)"
-                >
-                    <option v-for="opt in [10, 25, 50, 100]" :key="opt" :value="opt">{{ opt }}</option>
-                </select>
-            </label>
+            <Pagination
+                :meta="paginationMeta"
+                :only="only"
+                :show-nav="false"
+                :show-per-page="false"
+                class="!gap-0"
+            />
+            <Pagination
+                :meta="paginationMeta"
+                :only="only"
+                :show-count="false"
+                :show-nav="isMultiPage"
+            />
         </div>
 
         <div v-if="selected.length > 0" class="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)] px-4 py-2 text-sm">
@@ -255,9 +237,5 @@ function changePerPage(v: string): void {
             </table>
         </div>
 
-        <!-- Footer: hanya page navigation, hanya kalau multi-page -->
-        <div v-if="isMultiPage" class="border-t border-[var(--border-subtle)] px-4 py-2 bg-[var(--surface-sunken)]/30 rounded-b-xl flex justify-center">
-            <Pagination :meta="paginationMeta" :only="only" :show-count="false" :show-per-page="false" />
-        </div>
     </div>
 </template>

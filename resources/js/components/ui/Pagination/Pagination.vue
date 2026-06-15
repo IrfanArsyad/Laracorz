@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import type { PaginationMeta } from '@/types';
 
@@ -95,24 +95,24 @@ function routeQuery(): Record<string, string> {
 const isFirst = computed(() => safeMeta.value.current_page <= 1);
 const isLast = computed(() => safeMeta.value.current_page >= safeMeta.value.last_page);
 
-const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-default)] transition-colors hover:border-[var(--border-default)] hover:bg-[var(--state-hover)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--border-subtle)] disabled:hover:bg-[var(--surface-raised)]';
+const navBtn = 'inline-flex h-7 w-7 items-center justify-center rounded text-[var(--text-muted)] transition-colors hover:bg-[var(--state-hover)] hover:text-[var(--text-default)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent';
 </script>
 
 <template>
-    <div :class="cn('flex items-center justify-between gap-4 flex-wrap', $props.class)">
+    <div :class="cn('flex items-center gap-3 flex-wrap', $props.class)">
         <!-- Total info -->
-        <p v-if="showCount" class="text-sm text-[var(--text-muted)] order-1">
+        <p v-if="showCount" class="text-xs text-[var(--text-muted)] tabular-nums order-1">
             {{ t('common.showing') }}
-            <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.from }}</span>
-            <span class="text-[var(--text-muted)]">–</span>
-            <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.to }}</span>
+            <span class="font-semibold text-[var(--text-default)]">{{ safeMeta.from }}</span>
+            <span>–</span>
+            <span class="font-semibold text-[var(--text-default)]">{{ safeMeta.to }}</span>
             {{ t('common.of') }}
-            <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.total }}</span>
+            <span class="font-semibold text-[var(--text-default)]">{{ safeMeta.total }}</span>
             {{ t('common.items') }}
         </p>
 
         <!-- Page navigation: ‹‹ ‹ [input] of M › ›› -->
-        <div v-if="showNav" class="flex items-center gap-1.5 order-3 sm:order-2 sm:ml-auto">
+        <div v-if="showNav" class="flex items-center gap-0.5 order-3 sm:order-2">
             <button
                 type="button"
                 :class="navBtn"
@@ -120,7 +120,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 :aria-label="t('common.page') + ' 1'"
                 @click="goTo(1)"
             >
-                <ChevronsLeft class="h-4 w-4" />
+                <ChevronsLeft class="h-3.5 w-3.5" />
             </button>
             <button
                 type="button"
@@ -129,22 +129,22 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 :aria-label="t('common.previous')"
                 @click="goTo(safeMeta.current_page - 1)"
             >
-                <ChevronLeft class="h-4 w-4" />
+                <ChevronLeft class="h-3.5 w-3.5" />
             </button>
 
-            <div class="flex items-center gap-1.5 px-1 text-sm">
+            <div class="flex items-center gap-1 px-1 text-xs">
                 <input
                     v-model.number="pageInput"
                     type="number"
                     :min="1"
                     :max="safeMeta.last_page"
-                    class="h-9 w-14 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] px-2 text-center text-sm font-medium tabular-nums text-[var(--text-default)] transition-colors focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    class="h-7 w-10 rounded bg-transparent px-1 text-center text-xs font-semibold tabular-nums text-[var(--text-default)] transition-colors hover:bg-[var(--state-hover)] focus-visible:outline-none focus-visible:bg-[var(--state-hover)] focus-visible:ring-1 focus-visible:ring-[var(--border-focus)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     :aria-label="t('common.page')"
                     @blur="onInputBlur"
                     @keydown="onInputEnter"
                 />
                 <span class="text-[var(--text-muted)] whitespace-nowrap">
-                    {{ t('common.of') }} <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.last_page }}</span>
+                    / <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.last_page }}</span>
                 </span>
             </div>
 
@@ -155,7 +155,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 :aria-label="t('common.next')"
                 @click="goTo(safeMeta.current_page + 1)"
             >
-                <ChevronRight class="h-4 w-4" />
+                <ChevronRight class="h-3.5 w-3.5" />
             </button>
             <button
                 type="button"
@@ -164,20 +164,20 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 :aria-label="t('common.page') + ' ' + safeMeta.last_page"
                 @click="goTo(safeMeta.last_page)"
             >
-                <ChevronsRight class="h-4 w-4" />
+                <ChevronsRight class="h-3.5 w-3.5" />
             </button>
         </div>
 
-        <!-- Per-page selector -->
-        <div v-if="showPerPage" class="flex items-center gap-2 text-sm text-[var(--text-muted)] order-2 sm:order-3">
-            <span class="whitespace-nowrap">{{ t('common.rowsPerPage') }}</span>
+        <!-- Per-page selector (borderless, ghost) -->
+        <div v-if="showPerPage" class="relative order-2 sm:order-3">
             <select
                 :value="safeMeta.per_page"
-                class="h-9 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] pl-2 pr-7 text-sm font-medium text-[var(--text-default)] cursor-pointer transition-colors hover:border-[var(--border-strong)] focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]"
+                class="h-7 appearance-none rounded bg-transparent pl-2 pr-6 text-xs font-semibold tabular-nums text-[var(--text-default)] cursor-pointer transition-colors hover:bg-[var(--state-hover)] focus-visible:outline-none focus-visible:bg-[var(--state-hover)] focus-visible:ring-1 focus-visible:ring-[var(--border-focus)]"
                 @change="changePerPage(($event.target as HTMLSelectElement).value)"
             >
                 <option v-for="opt in [10, 25, 50, 100]" :key="opt" :value="opt">{{ opt }}</option>
             </select>
+            <ChevronDown class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[var(--text-muted)]" />
         </div>
     </div>
 </template>
