@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Support\Traits\Searchable;
+use App\Support\Traits\SerializesDates;
 use App\Support\Traits\Sortable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AdminLog extends Model
 {
-    use Searchable, Sortable;
+    use Searchable, SerializesDates, Sortable;
 
     public $timestamps = false;
 

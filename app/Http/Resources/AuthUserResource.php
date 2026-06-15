@@ -32,10 +32,10 @@ class AuthUserResource extends JsonResource
                 'is_active' => (bool) $this->role->is_active,
             ]),
             'status' => $this->status,
-            'email_verified_at' => $this->email_verified_at?->toIso8601String(),
-            'last_login_at' => $this->last_login_at?->toIso8601String(),
-            'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
+            'email_verified_at' => $this->email_verified_at?->format('Y-m-d H:i:s'),
+            'last_login_at' => $this->last_login_at?->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
     }
 }

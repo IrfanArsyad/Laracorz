@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Support\Traits\HasActiveScope;
+use App\Support\Traits\SerializesDates;
 use Database\Factories\ModuleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Module extends Model
 {
     /** @use HasFactory<ModuleFactory> */
-    use HasActiveScope, HasFactory, SoftDeletes;
+    use HasActiveScope, HasFactory, SerializesDates, SoftDeletes;
 
     protected $activeColumn = 'active';
 

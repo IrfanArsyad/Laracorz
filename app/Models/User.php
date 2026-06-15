@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Support\Traits\Searchable;
+use App\Support\Traits\SerializesDates;
 use App\Support\Traits\Sortable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +19,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, Searchable, SoftDeletes, Sortable;
+    use HasApiTokens, HasFactory, Notifiable, Searchable, SerializesDates, SoftDeletes, Sortable;
 
     public const string STATUS_ACTIVE = 'active';
 

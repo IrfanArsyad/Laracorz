@@ -99,6 +99,10 @@ export default {
         viewNamePlaceholder: 'Name this view (e.g. Active staff)',
         unnamed: 'Untitled view',
     },
+    table: {
+        selected: '{count} selected',
+        empty: 'No data yet',
+    },
     nav: {
         // Module groups (kunci = ModuleGroup.name slug)
         groups: {

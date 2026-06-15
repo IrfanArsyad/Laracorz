@@ -99,6 +99,10 @@ export default {
         viewNamePlaceholder: 'Beri nama tampilan (mis. Pengguna aktif)',
         unnamed: 'Tanpa nama',
     },
+    table: {
+        selected: '{count} terpilih',
+        empty: 'Belum ada data',
+    },
     nav: {
         groups: {
             main: 'Utama',

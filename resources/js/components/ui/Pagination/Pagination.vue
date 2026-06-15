@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import type { PaginationMeta } from '@/types';
+
+const { t } = useI18n();
 
 /**
  * Pagination v2 — custom input page number.
@@ -94,13 +97,13 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
     <div :class="cn('flex items-center justify-between gap-4 flex-wrap', $props.class)">
         <!-- Total info -->
         <p class="text-sm text-[var(--text-muted)] order-1">
-            Menampilkan
+            {{ t('common.showing') }}
             <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.from }}</span>
             <span class="text-[var(--text-muted)]">–</span>
             <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.to }}</span>
-            dari
+            {{ t('common.of') }}
             <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.total }}</span>
-            data
+            {{ t('common.items') }}
         </p>
 
         <!-- Page navigation: ‹‹ ‹ [input] dari M › ›› -->
@@ -109,7 +112,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 type="button"
                 :class="navBtn"
                 :disabled="isFirst"
-                aria-label="Halaman pertama"
+                :aria-label="t('common.page') + ' 1'"
                 @click="goTo(1)"
             >
                 <ChevronsLeft class="h-4 w-4" />
@@ -118,7 +121,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 type="button"
                 :class="navBtn"
                 :disabled="isFirst"
-                aria-label="Sebelumnya"
+                :aria-label="t('common.previous')"
                 @click="goTo(safeMeta.current_page - 1)"
             >
                 <ChevronLeft class="h-4 w-4" />
@@ -131,12 +134,12 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                     :min="1"
                     :max="safeMeta.last_page"
                     class="h-9 w-14 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] px-2 text-center text-sm font-medium tabular-nums text-[var(--text-default)] transition-colors focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    aria-label="Halaman saat ini"
+                    :aria-label="t('common.page')"
                     @blur="onInputBlur"
                     @keydown="onInputEnter"
                 />
                 <span class="text-[var(--text-muted)] whitespace-nowrap">
-                    dari <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.last_page }}</span>
+                    {{ t('common.of') }} <span class="font-semibold text-[var(--text-default)] tabular-nums">{{ safeMeta.last_page }}</span>
                 </span>
             </div>
 
@@ -144,7 +147,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 type="button"
                 :class="navBtn"
                 :disabled="isLast"
-                aria-label="Berikutnya"
+                :aria-label="t('common.next')"
                 @click="goTo(safeMeta.current_page + 1)"
             >
                 <ChevronRight class="h-4 w-4" />
@@ -153,7 +156,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
                 type="button"
                 :class="navBtn"
                 :disabled="isLast"
-                aria-label="Halaman terakhir"
+                :aria-label="t('common.page') + ' ' + safeMeta.last_page"
                 @click="goTo(safeMeta.last_page)"
             >
                 <ChevronsRight class="h-4 w-4" />
@@ -162,7 +165,7 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
 
         <!-- Per-page selector -->
         <div v-if="showPerPage" class="flex items-center gap-2 text-sm text-[var(--text-muted)] order-2 sm:order-3">
-            <span class="whitespace-nowrap">Tampil</span>
+            <span class="whitespace-nowrap">{{ t('common.rowsPerPage') }}</span>
             <select
                 :value="safeMeta.per_page"
                 class="h-9 rounded-md border border-[var(--border-default)] bg-[var(--surface-raised)] pl-2 pr-7 text-sm font-medium text-[var(--text-default)] cursor-pointer transition-colors hover:border-[var(--border-strong)] focus-visible:outline-none focus-visible:border-[var(--border-focus)] focus-visible:ring-4 focus-visible:ring-[color-mix(in_oklab,var(--focus-ring),transparent_82%)]"
@@ -170,7 +173,6 @@ const navBtn = 'inline-flex h-9 w-9 items-center justify-center rounded-md borde
             >
                 <option v-for="opt in [10, 25, 50, 100]" :key="opt" :value="opt">{{ opt }}</option>
             </select>
-            <span class="whitespace-nowrap">per hal.</span>
         </div>
     </div>
 </template>

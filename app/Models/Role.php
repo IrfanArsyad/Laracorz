@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Services\ModuleRegistry;
 use App\Support\Traits\HasActiveScope;
 use App\Support\Traits\Searchable;
+use App\Support\Traits\SerializesDates;
 use App\Support\Traits\Sortable;
 use Database\Factories\RoleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Role extends Model
 {
     /** @use HasFactory<RoleFactory> */
-    use HasActiveScope, HasFactory, Searchable, SoftDeletes, Sortable;
+    use HasActiveScope, HasFactory, Searchable, SerializesDates, SoftDeletes, Sortable;
 
     public const string ACTION_READ = 'read';
 

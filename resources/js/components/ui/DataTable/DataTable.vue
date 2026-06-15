@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 import Checkbox from '../Checkbox/Checkbox.vue';
 import EmptyState from '../EmptyState/EmptyState.vue';
 import Pagination from '../Pagination/Pagination.vue';
 import Skeleton from '../Skeleton/Skeleton.vue';
 import { cn } from '@/lib/utils';
-import type { Paginated } from '@/types';
+import type { Paginated, PaginationMeta } from '@/types';
+
+const { t } = useI18n();
 
 export interface Column<T = unknown> {
     key: string;
@@ -39,7 +42,6 @@ const props = withDefaults(
         loading: false,
         selectable: false,
         actionStickyRight: true,
-        emptyTitle: 'Belum ada data',
         selected: () => [],
     },
 );
@@ -51,6 +53,28 @@ const emit = defineEmits<{
 }>();
 
 const rows = computed(() => props.data?.data ?? []);
+
+// Laravel ->paginate() langsung mengembalikan flat `{ data, current_page,
+// last_page, total, per_page, from, to, ... }` — TANPA wrapper meta. Resource
+// collection bungkus dalam { data, meta, links }. Dukung dua-duanya.
+const paginationMeta = computed<PaginationMeta | null>(() => {
+    if (!props.data) return null;
+    const d = props.data as unknown as Record<string, unknown>;
+    if (d.meta) return d.meta as PaginationMeta;
+    if (typeof d.current_page === 'number') {
+        return {
+            current_page: d.current_page as number,
+            last_page: (d.last_page as number) ?? 1,
+            from: (d.from as number | null) ?? 0,
+            to: (d.to as number | null) ?? 0,
+            total: (d.total as number) ?? 0,
+            per_page: (d.per_page as number) ?? 10,
+            path: (d.path as string) ?? '',
+            links: (d.links as never) ?? [],
+        };
+    }
+    return null;
+});
 const safeSelected = computed<Array<string | number>>(() =>
     Array.isArray(props.selected) ? props.selected : [],
 );
@@ -91,7 +115,7 @@ function sortBy(col: Column): void {
         </div>
 
         <div v-if="selected.length > 0" class="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)] px-4 py-2 text-sm">
-            <span class="font-medium">{{ selected.length }} dipilih</span>
+            <span class="font-medium">{{ t('table.selected', { count: selected.length }) }}</span>
             <div class="ml-auto flex items-center gap-2">
                 <slot name="bulk-actions" :selected="selected" />
             </div>
@@ -135,7 +159,7 @@ function sortBy(col: Column): void {
                             v-if="$slots.actions"
                             :class="cn('px-3 py-2 text-right', actionStickyRight ? 'sticky right-0 bg-[var(--surface-sunken)]' : '')"
                         >
-                            <span class="sr-only">Aksi</span>
+                            <span class="sr-only">{{ t('common.actions') }}</span>
                         </th>
                     </tr>
                 </thead>
@@ -147,7 +171,7 @@ function sortBy(col: Column): void {
                     </tr>
                     <tr v-else-if="rows.length === 0">
                         <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)" class="px-3 py-10">
-                            <EmptyState :title="emptyTitle" :description="emptyDescription" />
+                            <EmptyState :title="emptyTitle ?? t('table.empty')" :description="emptyDescription" />
                         </td>
                     </tr>
                     <tr
@@ -190,8 +214,8 @@ function sortBy(col: Column): void {
             </table>
         </div>
 
-        <div v-if="data?.meta" class="border-t border-[var(--border-subtle)] px-4 py-2 bg-[var(--surface-sunken)]/40 rounded-b-xl">
-            <Pagination :meta="data.meta" :only="only" />
+        <div v-if="paginationMeta" class="border-t border-[var(--border-subtle)] px-4 py-2 bg-[var(--surface-sunken)]/40 rounded-b-xl">
+            <Pagination :meta="paginationMeta" :only="only" />
         </div>
     </div>
 </template>
