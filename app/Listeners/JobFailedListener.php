@@ -4,21 +4,17 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Services\SystemLogService;
 use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Log;
 
 class JobFailedListener
 {
-    public function __construct(private readonly SystemLogService $logger) {}
-
     public function handle(JobFailed $event): void
     {
-        $this->logger->log(
-            level: 'error',
-            channel: 'queue',
-            message: 'Job gagal: '.$event->job->resolveName(),
-            context: ['event' => 'job_failed', 'job' => $event->job->resolveName()],
-            exception: $event->exception,
-        );
+        Log::channel('queue')->error('Job failed: '.$event->job->resolveName(), [
+            'event' => 'job_failed',
+            'job' => $event->job->resolveName(),
+            'exception' => $event->exception->getMessage(),
+        ]);
     }
 }

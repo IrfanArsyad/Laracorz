@@ -39,8 +39,6 @@ class MenuCacheObserver
 
     private function flush(): void
     {
-        Cache::forget('modules.summary');
-
         // Flush per-role menu cache. Tanpa tags, kita iterate role IDs.
         Role::query()->pluck('id')->each(function ($roleId): void {
             Cache::forget("menu.role.{$roleId}");

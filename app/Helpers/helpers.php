@@ -70,13 +70,10 @@ if (! function_exists('system_log')) {
         array $context = [],
         ?\Throwable $e = null,
     ): void {
-        app(\App\Services\SystemLogService::class)->log(
-            level: $level,
-            channel: $channel,
-            message: $message,
-            context: $context,
-            exception: $e,
-        );
+        if ($e !== null) {
+            $context['exception'] = $e->getMessage();
+        }
+        \Illuminate\Support\Facades\Log::channel($channel)->log($level, $message, $context);
     }
 }
 

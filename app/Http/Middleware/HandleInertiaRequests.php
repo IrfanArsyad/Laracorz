@@ -9,7 +9,6 @@ use App\Models\Module;
 use App\Services\MenuService;
 use App\Services\UserSessionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -55,10 +54,8 @@ class HandleInertiaRequests extends Middleware
                 },
             ],
             'menu' => fn () => app(MenuService::class)->forUser($request->user()),
-            'modules' => fn () => Cache::rememberForever(
-                'modules.summary',
-                fn () => Module::query()->withoutTrashed()->get(['id', 'name'])->all(),
-            ),
+            // Query kecil (10-20 rows), tidak perlu di-cache.
+            'modules' => fn () => Module::query()->withoutTrashed()->get(['id', 'name'])->all(),
             'flash' => fn () => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
