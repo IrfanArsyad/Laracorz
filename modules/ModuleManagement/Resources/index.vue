@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import {
     Plus,
@@ -8,47 +8,19 @@ import {
     Hash,
     Activity,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/shared/PageHeader.vue';
 import { Button } from '@/components/ui/Button';
-import { FormModal, DetailModal } from '@/components/ui/Modal';
 import StatCard from '@/components/ui/StatCard/StatCard.vue';
-import ModuleForm from './components/ModuleForm.vue';
-import GroupForm from './components/GroupForm.vue';
 import SortableTree from './components/SortableTree.vue';
+import ModuleModal from './components/module-modal.vue';
+import GroupModal from './components/group-modal.vue';
+import DetailNodeModal from './components/detail-modal.vue';
 import { useConfirm } from '@/composables/useConfirm';
-import { useModal } from '@/composables/useModal';
+import type { Node, Group } from './types';
 
 const { t } = useI18n();
-
-interface Node {
-    id: number;
-    name: string;
-    label: string;
-    icon: string | null;
-    url: string | null;
-    route_name: string | null;
-    order: number;
-    active: boolean;
-    is_leaf: boolean;
-    children: Node[];
-    parent_id?: number | null;
-    module_group_id?: number | null;
-    badge_source?: string | null;
-    extra_actions?: string[] | null;
-    external?: boolean;
-}
-
-interface Group {
-    id: number;
-    name: string;
-    label: string;
-    icon: string | null;
-    order: number;
-    active: boolean;
-    modules: Node[];
-}
 
 const props = defineProps<{
     tree: Group[];
@@ -82,105 +54,38 @@ const stats = computed(() => {
     };
 });
 
-// Modal: Modul
-const moduleModal = useModal<Node | null>();
-
-const blankModule = {
-    name: '',
-    label: '',
-    icon: '',
-    module_group_id: null as number | null,
-    parent_id: null as number | null,
-    url: '',
-    route_name: '',
-    badge_source: '',
-    extra_actions: [] as string[],
-    order: 0,
-    active: true,
-    external: false,
-};
-
-const moduleForm = useForm({ ...blankModule });
+// Modal: Modul (form & submit di components/module-modal.vue)
+const moduleModalOpen = ref(false);
+const editingModule = ref<Node | null>(null);
+const modulePresetGroup = ref<number | null>(null);
+const modulePresetParent = ref<number | null>(null);
 
 function openCreateModule(presetGroupId?: number, presetParentId?: number): void {
-    moduleForm.reset();
-    Object.assign(moduleForm, blankModule, {
-        module_group_id: presetGroupId ?? null,
-        parent_id: presetParentId ?? null,
-    });
-    moduleModal.open(null);
+    editingModule.value = null;
+    modulePresetGroup.value = presetGroupId ?? null;
+    modulePresetParent.value = presetParentId ?? null;
+    moduleModalOpen.value = true;
 }
 
 function openEditModule(node: Node): void {
-    moduleForm.reset();
-    Object.assign(moduleForm, {
-        ...blankModule,
-        name: node.name,
-        label: node.label,
-        icon: node.icon ?? '',
-        module_group_id: node.module_group_id ?? null,
-        parent_id: node.parent_id ?? null,
-        url: node.url ?? '',
-        route_name: node.route_name ?? '',
-        badge_source: node.badge_source ?? '',
-        extra_actions: node.extra_actions ?? [],
-        order: node.order,
-        active: node.active,
-        external: node.external ?? false,
-    });
-    moduleModal.open(node);
+    editingModule.value = node;
+    modulePresetGroup.value = null;
+    modulePresetParent.value = null;
+    moduleModalOpen.value = true;
 }
 
-function submitModule(): void {
-    const editing = moduleModal.data.value;
-    const opts = { preserveScroll: true, onSuccess: () => moduleModal.close() };
-    if (editing) {
-        moduleForm.put(`/modules/${editing.id}`, opts);
-    } else {
-        moduleForm.post('/modules', opts);
-    }
-}
-
-// Modal: Grup
-const groupModal = useModal<Group | null>();
-
-const blankGroup = {
-    name: '',
-    label: '',
-    icon: '',
-    order: 0,
-    active: true,
-};
-
-const groupForm = useForm({ ...blankGroup });
+// Modal: Grup (form & submit di components/group-modal.vue)
+const groupModalOpen = ref(false);
+const editingGroup = ref<Group | null>(null);
 
 function openCreateGroup(): void {
-    groupForm.reset();
-    Object.assign(groupForm, blankGroup);
-    groupModal.open(null);
+    editingGroup.value = null;
+    groupModalOpen.value = true;
 }
 
 function openEditGroup(group: Group): void {
-    groupForm.reset();
-    Object.assign(groupForm, {
-        ...blankGroup,
-        name: group.name,
-        label: group.label,
-        icon: group.icon ?? '',
-        order: group.order,
-        active: group.active,
-    });
-    groupModal.open(group);
-}
-
-function submitGroup(): void {
-    const editing = groupModal.data.value;
-    const opts = { preserveScroll: true, onSuccess: () => groupModal.close() };
-    if (editing) {
-        groupForm.put(`/modules/groups/${editing.id}`, opts);
-    } else {
-        groupForm.post('/modules/groups', opts);
-    }
+    editingGroup.value = group;
+    groupModalOpen.value = true;
 }
 
 async function deleteGroup(group: Group): Promise<void> {
@@ -203,8 +108,14 @@ async function deleteGroup(group: Group): Promise<void> {
     router.delete(`/modules/groups/${group.id}`, { preserveScroll: true });
 }
 
-// Detail modal — read-only
-const detailModal = useModal<Node | null>();
+// Detail modal — read-only (konten di components/detail-modal.vue)
+const detailOpen = ref(false);
+const detailNode = ref<Node | null>(null);
+
+function openDetail(node: Node): void {
+    detailNode.value = node;
+    detailOpen.value = true;
+}
 </script>
 
 <template>
@@ -239,7 +150,7 @@ const detailModal = useModal<Node | null>();
                 v-if="tree.length > 0"
                 :tree="tree"
                 @edit="openEditModule"
-                @detail="(n) => detailModal.open(n)"
+                @detail="openDetail"
                 @add-sub="(parentId) => openCreateModule(undefined, parentId)"
                 @add-to-group="(groupId) => openCreateModule(groupId)"
                 @edit-group="openEditGroup"
@@ -262,46 +173,16 @@ const detailModal = useModal<Node | null>();
             </div>
         </div>
 
-        <!-- Modal: Modul (create/edit) -->
-        <FormModal
-            v-model="moduleModal.isOpen.value"
-            :title="moduleModal.data.value ? t('modules.editModuleTitle', { label: moduleModal.data.value.label }) : t('modules.createModuleTitle')"
-            :description="moduleModal.data.value ? t('modules.editModuleDesc') : t('modules.createModuleDesc')"
-            size="xl"
-            :processing="moduleForm.processing"
-            @submit="submitModule"
-            @cancel="moduleModal.close()"
-        >
-            <ModuleForm :form="moduleForm" :groups="groups" :modules="modules" />
-        </FormModal>
-
-        <!-- Modal: Grup (create/edit) -->
-        <FormModal
-            v-model="groupModal.isOpen.value"
-            :title="groupModal.data.value ? t('modules.editGroupTitle', { label: groupModal.data.value.label }) : t('modules.createGroupTitle')"
-            :description="groupModal.data.value ? t('modules.editGroupDesc') : t('modules.createGroupDesc')"
-            size="md"
-            :processing="groupForm.processing"
-            @submit="submitGroup"
-            @cancel="groupModal.close()"
-        >
-            <GroupForm :form="groupForm" />
-        </FormModal>
-
-        <!-- Modal: Detail -->
-        <DetailModal
-            v-model="detailModal.isOpen.value"
-            :title="detailModal.data.value?.label ?? t('common.detail')"
-            :description="detailModal.data.value?.name"
-            :items="detailModal.data.value ? [
-                { label: t('common.slug'), value: detailModal.data.value.name },
-                { label: t('common.url'), value: detailModal.data.value.url ?? t('modules.detail.container') },
-                { label: t('common.route'), value: detailModal.data.value.route_name ?? '—' },
-                { label: t('modules.detail.type'), value: detailModal.data.value.is_leaf ? t('modules.typeLeafFull') : t('modules.typeContainerFull') },
-                { label: t('modules.detail.icon'), value: detailModal.data.value.icon ?? '—' },
-                { label: t('modules.detail.order'), value: detailModal.data.value.order },
-                { label: t('modules.detail.status'), value: detailModal.data.value.active ? t('common.active') : t('common.inactive') },
-            ] : []"
+        <!-- Modal: Modul / Grup / Detail (konten di components/) -->
+        <ModuleModal
+            v-model="moduleModalOpen"
+            :node="editingModule"
+            :groups="groups"
+            :modules="modules"
+            :preset-group-id="modulePresetGroup"
+            :preset-parent-id="modulePresetParent"
         />
+        <GroupModal v-model="groupModalOpen" :group="editingGroup" />
+        <DetailNodeModal v-model="detailOpen" :node="detailNode" />
     </AppLayout>
 </template>
