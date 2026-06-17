@@ -95,7 +95,10 @@ function toggleAll(): void {
     if (allSelected.value) {
         emit('update:selected', []);
     } else {
-        emit('update:selected', rows.value.map((r) => r[props.rowKey] as string | number));
+        emit(
+            'update:selected',
+            rows.value.map((r) => r[props.rowKey] as string | number),
+        );
     }
 }
 
@@ -111,7 +114,6 @@ function sortBy(col: Column): void {
     if (!col.sortable) return;
     emit('sort', col.key);
 }
-
 </script>
 
 <template>
@@ -119,8 +121,13 @@ function sortBy(col: Column): void {
         <template v-if="$slots.toolbar" #toolbar><slot name="toolbar" /></template>
 
         <template #bulk>
-            <div v-if="selected.length > 0" class="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)] px-4 py-2 text-sm">
-                <span class="font-medium">{{ t('table.selected', { count: selected.length }) }}</span>
+            <div
+                v-if="selected.length > 0"
+                class="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--brand-soft-bg)] px-4 py-2 text-sm text-[var(--brand-soft-fg)]"
+            >
+                <span class="font-medium">{{
+                    t('table.selected', { count: selected.length })
+                }}</span>
                 <div class="ml-auto flex items-center gap-2">
                     <slot name="bulk-actions" :selected="selected" />
                 </div>
@@ -129,9 +136,11 @@ function sortBy(col: Column): void {
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-[var(--surface-sunken)] text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
+                <thead
+                    class="border-b border-[var(--border-subtle)] bg-[var(--surface-sunken)] text-[var(--text-muted)]"
+                >
                     <tr>
-                        <th v-if="selectable" class="w-9 px-3 py-2">
+                        <th v-if="selectable" class="w-12 px-4 py-2.5">
                             <Checkbox
                                 :model-value="allSelected"
                                 :indeterminate="someSelected"
@@ -143,27 +152,46 @@ function sortBy(col: Column): void {
                             :key="col.key"
                             :class="
                                 cn(
-                                    'px-3 py-2.5 text-xs font-semibold uppercase tracking-wider',
-                                    col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
-                                    col.sortable ? 'cursor-pointer select-none hover:text-[var(--text-default)] transition-colors' : '',
+                                    'px-4 py-2.5 text-xs font-semibold tracking-wider whitespace-nowrap uppercase',
+                                    col.align === 'right'
+                                        ? 'text-right'
+                                        : col.align === 'center'
+                                          ? 'text-center'
+                                          : 'text-left',
+                                    col.sortable
+                                        ? 'cursor-pointer transition-colors select-none hover:text-[var(--text-default)]'
+                                        : '',
                                     col.class,
                                 )
                             "
                             :style="col.width ? `width: ${col.width}` : ''"
                             @click="sortBy(col)"
                         >
-                            <span class="inline-flex items-center gap-1">
+                            <span class="inline-flex items-center gap-1.5">
                                 {{ col.label }}
                                 <span v-if="col.sortable" class="opacity-50">
-                                    <ArrowUp v-if="sort === col.key && direction === 'asc'" class="h-3 w-3" />
-                                    <ArrowDown v-else-if="sort === col.key && direction === 'desc'" class="h-3 w-3" />
+                                    <ArrowUp
+                                        v-if="sort === col.key && direction === 'asc'"
+                                        class="h-3 w-3"
+                                    />
+                                    <ArrowDown
+                                        v-else-if="sort === col.key && direction === 'desc'"
+                                        class="h-3 w-3"
+                                    />
                                     <ArrowUpDown v-else class="h-3 w-3" />
                                 </span>
                             </span>
                         </th>
                         <th
                             v-if="$slots.actions"
-                            :class="cn('px-3 py-2 text-right', actionStickyRight ? 'sticky right-0 bg-[var(--surface-sunken)] z-10' : '')"
+                            :class="
+                                cn(
+                                    'px-4 py-2.5 text-right',
+                                    actionStickyRight
+                                        ? 'sticky right-0 z-10 bg-[var(--surface-sunken)]'
+                                        : '',
+                                )
+                            "
                         >
                             <span class="sr-only">{{ t('common.actions') }}</span>
                         </th>
@@ -171,12 +199,22 @@ function sortBy(col: Column): void {
                 </thead>
                 <tbody class="divide-y divide-[var(--border-subtle)]">
                     <tr v-if="loading">
-                        <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)" class="px-3 py-3">
+                        <td
+                            :colspan="
+                                columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)
+                            "
+                            class="px-4 py-3.5"
+                        >
                             <Skeleton class="h-5 w-full" />
                         </td>
                     </tr>
                     <tr v-else-if="rows.length === 0">
-                        <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)" class="px-3 py-4">
+                        <td
+                            :colspan="
+                                columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)
+                            "
+                            class="px-4 py-6"
+                        >
                             <EmptyState
                                 v-if="hasActiveFilter"
                                 :icon="SearchX"
@@ -205,7 +243,7 @@ function sortBy(col: Column): void {
                         "
                         @click="emit('row-click', row)"
                     >
-                        <td v-if="selectable" class="w-9 px-3 py-2.5" @click.stop>
+                        <td v-if="selectable" class="w-12 px-4 py-3" @click.stop>
                             <Checkbox
                                 :model-value="safeSelected.includes(row[rowKey] as string | number)"
                                 @update:model-value="toggleRow(row)"
@@ -216,13 +254,21 @@ function sortBy(col: Column): void {
                             :key="col.key"
                             :class="
                                 cn(
-                                    'px-3 py-2.5 text-sm text-[var(--text-default)]',
-                                    col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
+                                    'px-4 py-3 align-middle text-sm text-[var(--text-default)]',
+                                    col.align === 'right'
+                                        ? 'text-right'
+                                        : col.align === 'center'
+                                          ? 'text-center'
+                                          : 'text-left',
                                     col.class,
                                 )
                             "
                         >
-                            <slot :name="`cell-${col.key}`" :row="row" :value="col.accessor ? col.accessor(row) : row[col.key]">
+                            <slot
+                                :name="`cell-${col.key}`"
+                                :row="row"
+                                :value="col.accessor ? col.accessor(row) : row[col.key]"
+                            >
                                 {{ col.accessor ? col.accessor(row) : row[col.key] }}
                             </slot>
                         </td>
@@ -230,9 +276,9 @@ function sortBy(col: Column): void {
                             v-if="$slots.actions"
                             :class="
                                 cn(
-                                    'px-3 py-2 text-right',
+                                    'px-4 py-3 text-right',
                                     actionStickyRight
-                                        ? 'sticky right-0 bg-[var(--surface-raised)] before:absolute before:inset-0 before:pointer-events-none before:bg-[var(--state-hover)] before:opacity-0 group-hover:before:opacity-100 before:transition-opacity'
+                                        ? 'sticky right-0 bg-[var(--surface-raised)] before:pointer-events-none before:absolute before:inset-0 before:bg-[var(--state-hover)] before:opacity-0 before:transition-opacity group-hover:before:opacity-100'
                                         : '',
                                 )
                             "

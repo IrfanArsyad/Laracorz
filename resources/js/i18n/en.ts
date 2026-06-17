@@ -190,7 +190,7 @@ export default {
         username: 'Username',
         emailOrUsername: 'Email or username',
         emailOrUsernameHint: 'You can use your email address or username.',
-        emailOrUsernamePlaceholder: 'admin@example.com or admin',
+        emailOrUsernamePlaceholder: "admin{'@'}example.com or admin",
         password: 'Password',
         newPassword: 'New password',
         passwordConfirmation: 'Confirm password',

@@ -9,6 +9,7 @@ const props = defineProps<{
     disabled?: boolean;
     error?: boolean | string;
     id?: string;
+    autocomplete?: string;
 }>();
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 
@@ -23,6 +24,7 @@ const show = ref(false);
         :placeholder="placeholder"
         :disabled="disabled"
         :error="error"
+        :autocomplete="autocomplete"
         @update:model-value="(v) => emit('update:modelValue', v)"
     >
         <template #suffix>

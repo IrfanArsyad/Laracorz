@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
 import { AlertTriangle, Trash2 } from 'lucide-vue-next';
 import { useConfirm } from '@/composables/useConfirm';
 import Modal from '../Modal/Modal.vue';
@@ -38,18 +38,6 @@ const Icon = computed(() => (isDestructive.value ? Trash2 : AlertTriangle));
 // Auto-focus tombol konfirmasi saat modal terbuka — UX: aksi paling
 // "dimaksudkan" oleh user (mereka memang mau hapus). Tetap ada cancel
 // untuk yang batal.
-watch(
-    () => state.open,
-    async (open) => {
-        if (open) {
-            await nextTick();
-            // Button component punya focus method, atau cari <button> di dalamnya.
-            const el = (confirmRef.value as unknown as { $el?: HTMLElement })?.$el ?? null;
-            (el?.querySelector('button') as HTMLButtonElement | null)?.focus();
-        }
-    },
-);
-
 function onKey(e: KeyboardEvent): void {
     if (!state.open) return;
     if (e.key === 'Enter') {
@@ -60,6 +48,25 @@ function onKey(e: KeyboardEvent): void {
         accept();
     }
 }
+
+// Listener Enter dipasang di window (bukan @keydown ke <Modal> yang root-nya
+// Teleport/fragment — listener DOM tak bisa diwariskan ke sana).
+watch(
+    () => state.open,
+    async (open) => {
+        if (open) {
+            window.addEventListener('keydown', onKey);
+            await nextTick();
+            // Button component punya focus method, atau cari <button> di dalamnya.
+            const el = (confirmRef.value as unknown as { $el?: HTMLElement })?.$el ?? null;
+            (el?.querySelector('button') as HTMLButtonElement | null)?.focus();
+        } else {
+            window.removeEventListener('keydown', onKey);
+        }
+    },
+);
+
+onUnmounted(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <template>
@@ -68,7 +75,6 @@ function onKey(e: KeyboardEvent): void {
         size="sm"
         :body-padding="false"
         @update:model-value="(v) => !v && cancel()"
-        @keydown="onKey"
     >
         <div class="p-5">
             <div class="flex items-start gap-3.5">

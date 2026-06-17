@@ -12,6 +12,7 @@ const props = withDefaults(
         error?: boolean | string;
         class?: string;
         id?: string;
+        autocomplete?: string;
     }>(),
     { type: 'text', disabled: false, readonly: false, error: false },
 );
@@ -58,6 +59,7 @@ function onInput(e: Event): void {
             :placeholder="placeholder"
             :disabled="disabled"
             :readonly="readonly"
+            :autocomplete="autocomplete"
             :aria-invalid="isError ? 'true' : undefined"
             :class="[
                 classes,

@@ -29,26 +29,51 @@ class UserController extends Controller
 
     public function index(Request $request): Response
     {
+        return Inertia::render('user-management::index', $this->listProps($request));
+    }
+
+    /**
+     * Detail user dirender sebagai modal di atas halaman index (component sama).
+     * Klik "lihat" memicu partial visit `only: ['detail', 'detailLogs']`, sedangkan
+     * akses URL langsung (/users/{id}) merender index penuh + modal terbuka.
+     */
+    public function show(Request $request, User $user): Response
+    {
+        return Inertia::render('user-management::index', [
+            ...$this->listProps($request),
+            'detail' => fn () => $user->load('role'),
+            'detailLogs' => fn () => AdminLog::query()
+                ->where('loggable_type', User::class)
+                ->where('loggable_id', $user->id)
+                ->orderByDesc('created_at')
+                ->limit(50)
+                ->get(),
+        ]);
+    }
+
+    /**
+     * Props daftar user. Closure (data/roles) supaya tidak dieksekusi saat
+     * partial visit detail — list lama di klien tetap dipertahankan.
+     *
+     * @return array<string, mixed>
+     */
+    private function listProps(Request $request): array
+    {
         $dto = SearchFilterDto::fromRequest($request);
         $trashed = (bool) $request->boolean('trashed');
-
-        $query = User::query()
-            ->with('role')
-            ->when($trashed, fn ($q) => $q->onlyTrashed())
-            ->search($dto->search)
-            ->sort($dto->sort ?? 'created_at', $dto->direction ?? 'desc');
-
         $filters = $dto->filters;
-        if (! empty($filters['role_id'])) {
-            $query->where('role_id', (int) $filters['role_id']);
-        }
-        if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
 
-        return Inertia::render('user-management::index', [
-            'data' => $query->paginate($dto->perPage)->withQueryString(),
-            'roles' => Role::query()->orderBy('display_name')->get(['id', 'name', 'display_name']),
+        return [
+            'data' => fn () => User::query()
+                ->with('role')
+                ->when($trashed, fn ($q) => $q->onlyTrashed())
+                ->search($dto->search)
+                ->sort($dto->sort ?? 'created_at', $dto->direction ?? 'desc')
+                ->when(! empty($filters['role_id']), fn ($q) => $q->where('role_id', (int) $filters['role_id']))
+                ->when(! empty($filters['status']), fn ($q) => $q->where('status', $filters['status']))
+                ->paginate($dto->perPage)
+                ->withQueryString(),
+            'roles' => fn () => Role::query()->orderBy('display_name')->get(['id', 'name', 'display_name']),
             'filters' => array_merge(
                 ['search' => $dto->search, 'sort' => $dto->sort, 'direction' => $dto->direction],
                 (array) $filters,
@@ -60,20 +85,7 @@ class UserController extends Controller
                 'inactive' => User::query()->where('status', User::STATUS_INACTIVE)->count(),
                 'banned' => User::query()->where('status', User::STATUS_BANNED)->count(),
             ]),
-        ]);
-    }
-
-    public function show(User $user): Response
-    {
-        return Inertia::render('user-management::show', [
-            'user' => $user->load('role'),
-            'logs' => AdminLog::query()
-                ->where('loggable_type', User::class)
-                ->where('loggable_id', $user->id)
-                ->orderByDesc('created_at')
-                ->limit(50)
-                ->get(),
-        ]);
+        ];
     }
 
     public function store(StoreUserRequest $request): RedirectResponse

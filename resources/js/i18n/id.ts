@@ -188,7 +188,7 @@ export default {
         username: 'Username',
         emailOrUsername: 'Email atau Username',
         emailOrUsernameHint: 'Bisa pakai alamat email atau username Anda.',
-        emailOrUsernamePlaceholder: 'admin@example.com atau admin',
+        emailOrUsernamePlaceholder: "admin{'@'}example.com atau admin",
         password: 'Kata Sandi',
         newPassword: 'Kata Sandi Baru',
         passwordConfirmation: 'Konfirmasi Kata Sandi',

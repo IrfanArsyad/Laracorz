@@ -43,7 +43,14 @@ const hasInfoBar = computed(() => Boolean(props.paginationMeta) || Boolean(props
 </script>
 
 <template>
-    <div :class="cn('rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-xs)] overflow-hidden', $props.class)">
+    <div
+        :class="
+            cn(
+                'overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-[var(--shadow-xs)]',
+                $props.class,
+            )
+        "
+    >
         <div v-if="$slots.toolbar" class="border-b border-[var(--border-subtle)] px-4 py-2.5">
             <slot name="toolbar" />
         </div>
@@ -51,10 +58,12 @@ const hasInfoBar = computed(() => Boolean(props.paginationMeta) || Boolean(props
         <!-- Info bar (count + per-page + nav) — ghost style, satu baris -->
         <div
             v-if="hasInfoBar"
-            class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-1.5"
+            class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-2"
         >
             <!-- Left: count -->
-            <p v-if="summary" class="text-xs text-[var(--text-muted)] tabular-nums">{{ summary }}</p>
+            <p v-if="summary" class="text-xs text-[var(--text-muted)] tabular-nums">
+                {{ summary }}
+            </p>
             <Pagination
                 v-else-if="paginationMeta"
                 :meta="paginationMeta"

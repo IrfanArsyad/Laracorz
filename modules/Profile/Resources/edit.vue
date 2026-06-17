@@ -127,13 +127,13 @@ async function deleteAccount(): Promise<void> {
                 <form @submit.prevent="savePassword">
                     <FormSection :title="t('profile.section.password')" :description="t('profile.section.passwordDesc')">
                         <FormField :label="t('profile.currentPassword')" :error="passwordForm.errors.current_password" required>
-                            <InputPassword v-model="passwordForm.current_password" />
+                            <InputPassword v-model="passwordForm.current_password" autocomplete="current-password" />
                         </FormField>
                         <FormField :label="t('profile.newPassword')" :error="passwordForm.errors.password" required>
-                            <InputPassword v-model="passwordForm.password" />
+                            <InputPassword v-model="passwordForm.password" autocomplete="new-password" />
                         </FormField>
                         <FormField :label="t('profile.passwordConfirmation')" required>
-                            <InputPassword v-model="passwordForm.password_confirmation" />
+                            <InputPassword v-model="passwordForm.password_confirmation" autocomplete="new-password" />
                         </FormField>
                     </FormSection>
                     <FormActions>
@@ -150,7 +150,7 @@ async function deleteAccount(): Promise<void> {
                             </li>
                         </ul>
                         <FormField :label="t('profile.password')" :error="sessionsForm.errors.password" required>
-                            <InputPassword v-model="sessionsForm.password" />
+                            <InputPassword v-model="sessionsForm.password" autocomplete="current-password" />
                         </FormField>
                     </FormSection>
                     <FormActions>
@@ -160,7 +160,7 @@ async function deleteAccount(): Promise<void> {
 
                 <FormSection :title="t('profile.section.deleteAccount')" :description="t('profile.section.deleteAccountDesc')">
                     <FormField :label="t('profile.password')" :error="deleteForm.errors.password" required>
-                        <InputPassword v-model="deleteForm.password" />
+                        <InputPassword v-model="deleteForm.password" autocomplete="current-password" />
                     </FormField>
                     <FormActions>
                         <Button variant="destructive" :loading="deleteForm.processing" @click="deleteAccount">

@@ -23,16 +23,18 @@ import { Select } from '@/components/ui/Select';
 import { FormField } from '@/components/ui/FormField';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
-import { FormModal } from '@/components/ui/Modal';
+import { FormModal, DetailModal } from '@/components/ui/Modal';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import { DescriptionList } from '@/components/ui/DescriptionList';
 import StatCard from '@/components/ui/StatCard/StatCard.vue';
 import UserForm from './components/UserForm.vue';
 import { useDataTable } from '@/composables/useDataTable';
 import { useConfirm } from '@/composables/useConfirm';
 import { useModal } from '@/composables/useModal';
 import { usePermission } from '@/composables/usePermission';
-import { USER_STATUS } from '@/types/enums';
+import { USER_STATUS, ADMIN_LOG_ACTIONS } from '@/types/enums';
 import type { Paginated, User } from '@/types';
-import { computed, ref } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
@@ -41,6 +43,8 @@ const props = defineProps<{
     filters: Record<string, unknown>;
     trashed: boolean;
     stats?: { total: number; active: number; inactive: number; banned: number };
+    detail?: User | null;
+    detailLogs?: Array<{ id: number; action: string; description: string; created_at: string }>;
 }>();
 
 const { t } = useI18n();
@@ -126,6 +130,56 @@ function submit(): void {
     } else {
         form.post('/users', opts);
     }
+}
+
+// ─── Modal Detail (URL /users/{id}) ─────────────────────────────────────
+const detailOpen = ref(false);
+const detailTab = ref('detail');
+
+const detailItems = computed(() => {
+    const u = props.detail;
+    if (!u) return [];
+    return [
+        { label: t('users.detailName'), value: u.name },
+        { label: t('users.detailEmail'), value: u.email },
+        { label: t('users.detailRole'), value: u.role?.display_name ?? '-' },
+        { label: t('users.detailStatus'), value: (USER_STATUS as any)[u.status]?.label ?? u.status },
+        { label: t('users.detailLastLogin'), value: u.last_login_at ?? '-' },
+        { label: t('users.detailCreated'), value: u.created_at },
+    ];
+});
+
+// Detail datang dari server (partial visit / deep-link) → buka modal.
+watch(
+    () => props.detail,
+    (u) => {
+        if (u) {
+            detailTab.value = 'detail';
+            detailOpen.value = true;
+        }
+    },
+);
+onMounted(() => {
+    if (props.detail) detailOpen.value = true;
+});
+
+function openDetail(row: User): void {
+    router.visit(`/users/${row.id}`, {
+        only: ['detail', 'detailLogs'],
+        preserveState: true,
+        preserveScroll: true,
+    });
+}
+
+function closeDetail(): void {
+    detailOpen.value = false;
+    // Kembalikan URL ke /users tanpa kehilangan daftar (refetch ringan `data` saja).
+    router.visit('/users', {
+        only: ['data'],
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
 }
 
 // ─── Aksi row ───────────────────────────────────────────────────────────
@@ -262,7 +316,7 @@ function resetFilters(): void {
                 </template>
                 <template #actions="{ row }">
                     <div class="flex justify-end gap-1">
-                        <Button as="link" :href="`/users/${row.id}`" variant="ghost" size="icon-xs" :aria-label="t('users.actionDetail')">
+                        <Button variant="ghost" size="icon-xs" :aria-label="t('users.actionDetail')" @click="openDetail(row)">
                             <Eye class="h-3.5 w-3.5" />
                         </Button>
                         <Button
@@ -316,5 +370,50 @@ function resetFilters(): void {
         >
             <UserForm :form="form" :roles="roles" :is-edit="!!formModal.data.value" />
         </FormModal>
+
+        <!-- Modal Detail Pengguna (URL /users/{id}) -->
+        <DetailModal
+            :model-value="detailOpen"
+            :title="detail?.name"
+            :description="detail?.email"
+            size="lg"
+            @update:model-value="(v: boolean) => { if (!v) closeDetail(); }"
+        >
+            <div class="flex items-center gap-4 mb-4">
+                <Avatar :src="detail?.avatar_url" :name="detail?.name ?? ''" size="xl" />
+                <div class="min-w-0">
+                    <p class="text-lg font-semibold text-[var(--text-strong)] truncate">{{ detail?.name }}</p>
+                    <p class="text-sm text-[var(--text-muted)] truncate">{{ detail?.email }}</p>
+                </div>
+            </div>
+
+            <Tabs v-model="detailTab">
+                <TabsList>
+                    <TabsTrigger value="detail">{{ t('users.tabDetail') }}</TabsTrigger>
+                    <TabsTrigger value="activity">{{ t('users.tabActivity') }}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="detail" class="pt-3">
+                    <DescriptionList :items="detailItems" />
+                </TabsContent>
+                <TabsContent value="activity" class="pt-3">
+                    <ul class="divide-y divide-[var(--border-subtle)]">
+                        <li
+                            v-for="log in detailLogs ?? []"
+                            :key="log.id"
+                            class="py-2 text-sm flex items-center gap-2"
+                        >
+                            <Badge :variant="(ADMIN_LOG_ACTIONS as any)[log.action]?.color ?? 'muted'">
+                                {{ (ADMIN_LOG_ACTIONS as any)[log.action]?.label ?? log.action }}
+                            </Badge>
+                            <span>{{ log.description }}</span>
+                            <span class="ml-auto text-xs text-[var(--text-muted)]">{{ log.created_at }}</span>
+                        </li>
+                        <li v-if="!(detailLogs?.length)" class="py-4 text-center text-sm text-[var(--text-muted)]">
+                            {{ t('users.emptyActivity') }}
+                        </li>
+                    </ul>
+                </TabsContent>
+            </Tabs>
+        </DetailModal>
     </AppLayout>
 </template>

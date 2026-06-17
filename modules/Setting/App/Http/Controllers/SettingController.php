@@ -24,7 +24,7 @@ class SettingController extends Controller
 
     public function index(): Response
     {
-        return Inertia::render('settings::index', [
+        return Inertia::render('setting::index', [
             'groups' => Setting::query()
                 ->orderBy('group')
                 ->orderBy('order')

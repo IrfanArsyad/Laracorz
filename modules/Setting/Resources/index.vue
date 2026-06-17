@@ -117,8 +117,8 @@ function submit(): void {
             <Card>
                 <CardContent class="!p-0">
                     <Tabs v-model="tab">
-                        <div class="border-b border-[var(--border-subtle)] px-4 pt-3">
-                            <TabsList>
+                        <div class="border-b border-[var(--border-subtle)] px-5 py-4">
+                            <TabsList class="max-w-full overflow-x-auto">
                                 <TabsTrigger v-for="g in tabsList" :key="g" :value="g">
                                     {{ settingsGroup(g) }}
                                 </TabsTrigger>
