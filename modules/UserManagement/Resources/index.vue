@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import {
     Pencil,
     Plus,
@@ -23,16 +23,14 @@ import { Select } from '@/components/ui/Select';
 import { FormField } from '@/components/ui/FormField';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu';
-import { FormModal, DetailModal } from '@/components/ui/Modal';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
-import { DescriptionList } from '@/components/ui/DescriptionList';
 import StatCard from '@/components/ui/StatCard/StatCard.vue';
-import UserForm from './components/UserForm.vue';
+import CreateUserModal from './components/create.vue';
+import EditUserModal from './components/edit.vue';
+import ShowUserModal from './components/show.vue';
 import { useDataTable } from '@/composables/useDataTable';
 import { useConfirm } from '@/composables/useConfirm';
-import { useModal } from '@/composables/useModal';
 import { usePermission } from '@/composables/usePermission';
-import { USER_STATUS, ADMIN_LOG_ACTIONS } from '@/types/enums';
+import { USER_STATUS } from '@/types/enums';
 import type { Paginated, User } from '@/types';
 import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -81,82 +79,30 @@ const columns = computed<Column[]>(() => [
 const roleOptions = computed(() => props.roles.map((r) => ({ label: r.display_name, value: r.id })));
 const statusOptions = Object.entries(USER_STATUS).map(([k, v]) => ({ label: v.label, value: k }));
 
-// ─── Modal Tambah / Ubah ────────────────────────────────────────────────
-const formModal = useModal<User | null>();
-
-const blankForm = {
-    role_id: null as number | null,
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    status: 'active' as 'active' | 'inactive' | 'banned',
-    avatar: null as File | null,
-};
-
-const form = useForm<typeof blankForm & { _method?: string }>({ ...blankForm });
+// ─── Modal Create / Edit ────────────────────────────────────────────────
+// State buka-tutup di sini; form & submit dienkapsulasi di komponen modal
+// masing-masing (components/CreateUserModal, EditUserModal).
+const createOpen = ref(false);
+const editOpen = ref(false);
+const editUser = ref<User | null>(null);
 
 function openCreate(): void {
-    form.reset();
-    Object.assign(form, blankForm);
-    delete (form as { _method?: string })._method;
-    formModal.open(null);
+    createOpen.value = true;
 }
 
 function openEdit(row: User): void {
-    form.reset();
-    Object.assign(form, {
-        ...blankForm,
-        _method: 'put',
-        role_id: row.role_id,
-        name: row.name,
-        username: row.username ?? '',
-        email: row.email,
-        status: row.status,
-    });
-    formModal.open(row);
+    editUser.value = row;
+    editOpen.value = true;
 }
 
-function submit(): void {
-    const editing = formModal.data.value;
-    const opts = {
-        preserveScroll: true,
-        forceFormData: true,
-        onSuccess: () => formModal.close(),
-    };
-    if (editing) {
-        form.post(`/users/${editing.id}`, opts);
-    } else {
-        form.post('/users', opts);
-    }
-}
-
-// ─── Modal Detail (URL /users/{id}) ─────────────────────────────────────
+// ─── Modal Detail (URL /users/{id}, deep-link friendly) ─────────────────
 const detailOpen = ref(false);
-const detailTab = ref('detail');
-
-const detailItems = computed(() => {
-    const u = props.detail;
-    if (!u) return [];
-    return [
-        { label: t('users.detailName'), value: u.name },
-        { label: t('users.detailEmail'), value: u.email },
-        { label: t('users.detailRole'), value: u.role?.display_name ?? '-' },
-        { label: t('users.detailStatus'), value: (USER_STATUS as any)[u.status]?.label ?? u.status },
-        { label: t('users.detailLastLogin'), value: u.last_login_at ?? '-' },
-        { label: t('users.detailCreated'), value: u.created_at },
-    ];
-});
 
 // Detail datang dari server (partial visit / deep-link) → buka modal.
 watch(
     () => props.detail,
     (u) => {
-        if (u) {
-            detailTab.value = 'detail';
-            detailOpen.value = true;
-        }
+        if (u) detailOpen.value = true;
     },
 );
 onMounted(() => {
@@ -358,62 +304,14 @@ function resetFilters(): void {
             </DataTable>
         </div>
 
-        <!-- Modal Tambah / Ubah Pengguna -->
-        <FormModal
-            v-model="formModal.isOpen.value"
-            :title="formModal.data.value ? t('users.modalEditTitle', { name: formModal.data.value.name }) : t('users.modalCreateTitle')"
-            :description="formModal.data.value ? t('users.modalEditDesc') : t('users.modalCreateDesc')"
-            size="lg"
-            :processing="form.processing"
-            @submit="submit"
-            @cancel="formModal.close()"
-        >
-            <UserForm :form="form" :roles="roles" :is-edit="!!formModal.data.value" />
-        </FormModal>
-
-        <!-- Modal Detail Pengguna (URL /users/{id}) -->
-        <DetailModal
+        <!-- Modal: Tambah / Ubah / Detail (tiap modal = 1 komponen di components/) -->
+        <CreateUserModal v-model="createOpen" :roles="roles" />
+        <EditUserModal v-model="editOpen" :user="editUser" :roles="roles" />
+        <ShowUserModal
             :model-value="detailOpen"
-            :title="detail?.name"
-            :description="detail?.email"
-            size="lg"
+            :detail="detail"
+            :logs="detailLogs"
             @update:model-value="(v: boolean) => { if (!v) closeDetail(); }"
-        >
-            <div class="flex items-center gap-4 mb-4">
-                <Avatar :src="detail?.avatar_url" :name="detail?.name ?? ''" size="xl" />
-                <div class="min-w-0">
-                    <p class="text-lg font-semibold text-[var(--text-strong)] truncate">{{ detail?.name }}</p>
-                    <p class="text-sm text-[var(--text-muted)] truncate">{{ detail?.email }}</p>
-                </div>
-            </div>
-
-            <Tabs v-model="detailTab">
-                <TabsList>
-                    <TabsTrigger value="detail">{{ t('users.tabDetail') }}</TabsTrigger>
-                    <TabsTrigger value="activity">{{ t('users.tabActivity') }}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="detail" class="pt-3">
-                    <DescriptionList :items="detailItems" />
-                </TabsContent>
-                <TabsContent value="activity" class="pt-3">
-                    <ul class="divide-y divide-[var(--border-subtle)]">
-                        <li
-                            v-for="log in detailLogs ?? []"
-                            :key="log.id"
-                            class="py-2 text-sm flex items-center gap-2"
-                        >
-                            <Badge :variant="(ADMIN_LOG_ACTIONS as any)[log.action]?.color ?? 'muted'">
-                                {{ (ADMIN_LOG_ACTIONS as any)[log.action]?.label ?? log.action }}
-                            </Badge>
-                            <span>{{ log.description }}</span>
-                            <span class="ml-auto text-xs text-[var(--text-muted)]">{{ log.created_at }}</span>
-                        </li>
-                        <li v-if="!(detailLogs?.length)" class="py-4 text-center text-sm text-[var(--text-muted)]">
-                            {{ t('users.emptyActivity') }}
-                        </li>
-                    </ul>
-                </TabsContent>
-            </Tabs>
-        </DetailModal>
+        />
     </AppLayout>
 </template>
