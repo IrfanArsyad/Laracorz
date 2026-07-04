@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 const form = useForm({ name: '' });
 
 function submit(): void {
-    form.post('/{{plural}}');
+    form.post('/{{kebabPlural}}');
 }
 </script>
 
@@ -26,7 +26,7 @@ function submit(): void {
                         <Input v-model="form.name" />
                     </FormField>
                     <FormActions>
-                        <Button as="link" href="/{{plural}}" variant="ghost">Batal</Button>
+                        <Button as="link" href="/{{kebabPlural}}" variant="ghost">Batal</Button>
                         <Button type="submit" :loading="form.processing">Simpan</Button>
                     </FormActions>
                 </form>

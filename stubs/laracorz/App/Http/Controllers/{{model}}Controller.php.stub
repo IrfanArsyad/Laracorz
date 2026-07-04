@@ -36,7 +36,7 @@ class {{model}}Controller extends Controller
         $data = $request->validate(['name' => ['required', 'string', 'max:255']]);
         {{model}}::query()->create($data);
 
-        return redirect()->route('{{plural}}.index')->with('success', '{{module}} berhasil dibuat.');
+        return redirect()->route('{{kebabPlural}}.index')->with('success', '{{module}} berhasil dibuat.');
     }
 
     public function edit({{model}} ${{snake}}): Response
@@ -49,7 +49,7 @@ class {{model}}Controller extends Controller
         $data = $request->validate(['name' => ['required', 'string', 'max:255']]);
         ${{snake}}->update($data);
 
-        return redirect()->route('{{plural}}.index')->with('success', '{{module}} berhasil diperbarui.');
+        return redirect()->route('{{kebabPlural}}.index')->with('success', '{{module}} berhasil diperbarui.');
     }
 
     public function destroy({{model}} ${{snake}}): RedirectResponse

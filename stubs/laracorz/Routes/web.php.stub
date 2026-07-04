@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\{{module}}\App\Http\Controllers\{{model}}Controller;
 
 Route::middleware(['auth', 'module.permission:{{slug}},read'])
-    ->prefix('{{plural}}')
-    ->name('{{plural}}.')
+    ->prefix('{{kebabPlural}}')
+    ->name('{{kebabPlural}}.')
     ->group(function (): void {
         Route::get('/', [{{model}}Controller::class, 'index'])->name('index');
         Route::get('/create', [{{model}}Controller::class, 'create'])->middleware('module.permission:{{slug}},create')->name('create');

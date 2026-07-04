@@ -19,7 +19,11 @@ class ModuleMakeCrudCommand extends Command
         $module = Str::studly($this->argument('module'));
         $model = Str::studly($this->argument('model'));
         $slug = Str::kebab($module);
-        $plural = Str::plural(Str::snake($module));
+        // Nama tabel/migration diturunkan dari MODEL agar cocok dengan tebakan Eloquent
+        // walau nama module != model (mis. module:make-crud Blog Post -> tabel posts).
+        $plural = Str::plural(Str::snake($model));
+        // URL/route/prefix pakai kebab-case dari MODULE agar konsisten dengan slug modul.
+        $kebabPlural = Str::kebab(Str::pluralStudly($module));
 
         $base = base_path("modules/{$module}");
         if (File::isDirectory($base)) {
@@ -33,6 +37,7 @@ class ModuleMakeCrudCommand extends Command
             '{{model}}' => $model,
             '{{slug}}' => $slug,
             '{{plural}}' => $plural,
+            '{{kebabPlural}}' => $kebabPlural,
             '{{snake}}' => Str::snake($module),
         ];
 

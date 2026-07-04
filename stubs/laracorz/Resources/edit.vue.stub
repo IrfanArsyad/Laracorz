@@ -12,7 +12,7 @@ const props = defineProps<{ item: { id: number; name: string } }>();
 const form = useForm({ name: props.item.name });
 
 function submit(): void {
-    form.put(`/{{plural}}/${props.item.id}`);
+    form.put(`/{{kebabPlural}}/${props.item.id}`);
 }
 </script>
 
@@ -27,7 +27,7 @@ function submit(): void {
                         <Input v-model="form.name" />
                     </FormField>
                     <FormActions>
-                        <Button as="link" href="/{{plural}}" variant="ghost">Batal</Button>
+                        <Button as="link" href="/{{kebabPlural}}" variant="ghost">Batal</Button>
                         <Button type="submit" :loading="form.processing">Simpan</Button>
                     </FormActions>
                 </form>
