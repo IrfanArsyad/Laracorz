@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
 use Modules\Auth\App\Http\Controllers\AuthenticatedSessionController;
 use Modules\Auth\App\Http\Controllers\ConfirmablePasswordController;
 use Modules\Auth\App\Http\Controllers\EmailVerificationNotificationController;
@@ -7,17 +10,9 @@ use Modules\Auth\App\Http\Controllers\EmailVerificationPromptController;
 use Modules\Auth\App\Http\Controllers\NewPasswordController;
 use Modules\Auth\App\Http\Controllers\PasswordController;
 use Modules\Auth\App\Http\Controllers\PasswordResetLinkController;
-use Modules\Auth\App\Http\Controllers\RegisteredUserController;
 use Modules\Auth\App\Http\Controllers\VerifyEmailController;
-use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1');
-
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
