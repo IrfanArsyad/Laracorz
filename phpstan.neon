@@ -12,5 +12,7 @@ parameters:
         - bootstrap/cache
     ignoreErrors:
         - '#PHPDoc tag @var#'
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
+        # PHPStan 2.x replacements for the removed `checkMissingIterableValueType`
+        # and `checkGenericClassInNonGenericObjectType` toggles (invalid since 2.0).
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
