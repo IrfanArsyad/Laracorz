@@ -39,10 +39,10 @@ const { state, sortBy } = useDataTable({
     initial: {
         search: (props.filters.search as string) ?? '',
         filters: {
-            action: props.filters.action,
-            module: props.filters.module,
-            from: props.filters.from,
-            to: props.filters.to,
+            action: (props.filters.action as string | null) ?? null,
+            module: (props.filters.module as string | null) ?? null,
+            from: (props.filters.from as string | null) ?? null,
+            to: (props.filters.to as string | null) ?? null,
         },
     },
 });
@@ -75,7 +75,7 @@ const actionOptions = Object.entries(ADMIN_LOG_ACTIONS).map(([k, v]) => ({ label
                 :filters-count="state.filters.action ? 1 : 0"
                 scope="admin-log"
                 :state="state"
-                @reset="state.filters.action = undefined; state.search = ''"
+                @reset="state.filters.action = null; state.search = ''"
             >
                 <div class="min-w-[180px]">
                     <Select v-model="state.filters.action" :options="actionOptions" :placeholder="t('logs.admin.filterAllActions')" clearable />

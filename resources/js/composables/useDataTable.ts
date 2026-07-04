@@ -3,22 +3,24 @@ import { reactive, watch } from 'vue';
 import { debounce } from '@/lib/utils';
 import { SEARCH_DEBOUNCE_MS, DEFAULT_PER_PAGE } from '@/lib/constants';
 
-export interface DataTableState {
+export interface DataTableState<F extends Record<string, unknown> = Record<string, unknown>> {
     search: string;
     sort: string | null;
     direction: 'asc' | 'desc';
     perPage: number;
     page: number;
-    filters: Record<string, unknown>;
+    filters: F;
 }
 
-interface UseDataTableOptions {
-    initial?: Partial<DataTableState>;
+interface UseDataTableOptions<F extends Record<string, unknown>> {
+    initial?: Partial<Omit<DataTableState<F>, 'filters'>> & { filters?: F };
     only?: string[];
     preserveScroll?: boolean;
 }
 
-export function useDataTable(opts: UseDataTableOptions = {}) {
+export function useDataTable<F extends Record<string, unknown> = Record<string, unknown>>(
+    opts: UseDataTableOptions<F> = {},
+) {
     const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
     const initialFilters: Record<string, unknown> = {};
     if (url) {
@@ -30,7 +32,7 @@ export function useDataTable(opts: UseDataTableOptions = {}) {
         });
     }
 
-    const state = reactive<DataTableState>({
+    const state = reactive<DataTableState<F>>({
         search: url?.searchParams.get('search') ?? opts.initial?.search ?? '',
         sort: url?.searchParams.get('sort') ?? opts.initial?.sort ?? null,
         direction:
@@ -40,7 +42,7 @@ export function useDataTable(opts: UseDataTableOptions = {}) {
             opts.initial?.perPage ||
             DEFAULT_PER_PAGE,
         page: Number(url?.searchParams.get('page')) || opts.initial?.page || 1,
-        filters: { ...initialFilters, ...(opts.initial?.filters ?? {}) },
+        filters: { ...initialFilters, ...(opts.initial?.filters ?? {}) } as F,
     });
 
     function buildQuery(): Record<string, unknown> {
@@ -107,7 +109,7 @@ export function useDataTable(opts: UseDataTableOptions = {}) {
         state.direction = 'asc';
         state.perPage = DEFAULT_PER_PAGE;
         state.page = 1;
-        state.filters = {};
+        state.filters = {} as typeof state.filters;
     }
 
     return { state, sortBy, reset, reload };

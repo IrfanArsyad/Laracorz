@@ -15,7 +15,7 @@ export function initials(name: string | null | undefined, max = 2): string {
         .join('');
 }
 
-export function debounce<T extends (...args: unknown[]) => void>(
+export function debounce<T extends (...args: never[]) => void>(
     fn: T,
     delay = 300,
 ): (...args: Parameters<T>) => void {

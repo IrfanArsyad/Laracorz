@@ -18,8 +18,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 
-const injectedError = inject<Ref<string | undefined>>('formFieldError', undefined);
-const injectedId = inject<Ref<string>>('formFieldId', undefined);
+const injectedError = inject<Ref<string | undefined>>('formFieldError');
+const injectedId = inject<Ref<string>>('formFieldId');
 const isError = computed(() => Boolean(props.error || injectedError?.value));
 
 const classes = computed(() =>
@@ -49,7 +49,7 @@ function onInput(e: Event): void {
 
 <template>
     <textarea
-        :id="id ?? injectedId?.value"
+        :id="id ?? injectedId"
         :value="modelValue ?? ''"
         :placeholder="placeholder"
         :rows="rows"

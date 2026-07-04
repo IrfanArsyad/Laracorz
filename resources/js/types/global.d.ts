@@ -11,6 +11,7 @@ declare global {
 }
 
 declare module '@inertiajs/core' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- declaration merging requires an interface to augment Inertia's PageProps
     interface PageProps extends AppPageProps {}
 }
 

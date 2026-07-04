@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends object">
 import { computed } from 'vue';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
@@ -9,23 +9,14 @@ import Skeleton from '../Skeleton/Skeleton.vue';
 import TableShell from '../TableShell/TableShell.vue';
 import { cn } from '@/lib/utils';
 import type { Paginated, PaginationMeta } from '@/types';
+import type { Column } from './types';
 
 const { t } = useI18n();
 
-export interface Column<T = unknown> {
-    key: string;
-    label: string;
-    sortable?: boolean;
-    align?: 'left' | 'center' | 'right';
-    class?: string;
-    width?: string;
-    accessor?: (row: T) => unknown;
-}
-
 const props = withDefaults(
     defineProps<{
-        data: Paginated<Record<string, unknown>>;
-        columns: Column[];
+        data: Paginated<T>;
+        columns: Column<T>[];
         rowKey?: string;
         loading?: boolean;
         sort?: string | null;
@@ -54,10 +45,17 @@ const props = withDefaults(
 const emit = defineEmits<{
     sort: [field: string];
     'update:selected': [v: Array<string | number>];
-    'row-click': [row: Record<string, unknown>];
+    'row-click': [row: T];
 }>();
 
-const rows = computed(() => props.data?.data ?? []);
+const rows = computed<T[]>(() => props.data?.data ?? []);
+
+// Read a cell value by column/row key. Rows are typed as the generic T, but the
+// table addresses fields by dynamic string keys, so we narrow through an indexable
+// view here in one place instead of scattering casts across the template.
+function field(row: T, key: string): unknown {
+    return (row as Record<string, unknown>)[key];
+}
 
 // Laravel ->paginate() langsung mengembalikan flat `{ data, current_page,
 // last_page, total, per_page, from, to, ... }` — TANPA wrapper meta. Resource
@@ -86,7 +84,7 @@ const safeSelected = computed<Array<string | number>>(() =>
 
 const allSelected = computed(() => {
     if (rows.value.length === 0) return false;
-    return rows.value.every((r) => safeSelected.value.includes(r[props.rowKey] as string | number));
+    return rows.value.every((r) => safeSelected.value.includes(field(r, props.rowKey) as string | number));
 });
 
 const someSelected = computed(() => !allSelected.value && safeSelected.value.length > 0);
@@ -97,20 +95,20 @@ function toggleAll(): void {
     } else {
         emit(
             'update:selected',
-            rows.value.map((r) => r[props.rowKey] as string | number),
+            rows.value.map((r) => field(r, props.rowKey) as string | number),
         );
     }
 }
 
-function toggleRow(row: Record<string, unknown>): void {
-    const key = row[props.rowKey] as string | number;
+function toggleRow(row: T): void {
+    const key = field(row, props.rowKey) as string | number;
     const set = new Set(safeSelected.value);
     if (set.has(key)) set.delete(key);
     else set.add(key);
     emit('update:selected', Array.from(set));
 }
 
-function sortBy(col: Column): void {
+function sortBy(col: Column<T>): void {
     if (!col.sortable) return;
     emit('sort', col.key);
 }
@@ -234,7 +232,7 @@ function sortBy(col: Column): void {
                     <tr
                         v-for="row in rows"
                         v-else
-                        :key="row[rowKey] as string | number"
+                        :key="field(row, rowKey) as PropertyKey"
                         :class="
                             cn(
                                 'group transition-colors hover:bg-[var(--state-hover)]',
@@ -245,7 +243,7 @@ function sortBy(col: Column): void {
                     >
                         <td v-if="selectable" class="w-12 px-4 py-3" @click.stop>
                             <Checkbox
-                                :model-value="safeSelected.includes(row[rowKey] as string | number)"
+                                :model-value="safeSelected.includes(field(row, rowKey) as string | number)"
                                 @update:model-value="toggleRow(row)"
                             />
                         </td>
@@ -267,9 +265,9 @@ function sortBy(col: Column): void {
                             <slot
                                 :name="`cell-${col.key}`"
                                 :row="row"
-                                :value="col.accessor ? col.accessor(row) : row[col.key]"
+                                :value="col.accessor ? col.accessor(row) : field(row, col.key)"
                             >
-                                {{ col.accessor ? col.accessor(row) : row[col.key] }}
+                                {{ col.accessor ? col.accessor(row) : field(row, col.key) }}
                             </slot>
                         </td>
                         <td

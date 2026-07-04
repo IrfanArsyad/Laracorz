@@ -21,8 +21,8 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 
 // Auto-inject error + id dari FormField parent — otomatis konsisten
 // tanpa harus eksplisit wire setiap form.
-const injectedError = inject<Ref<string | undefined>>('formFieldError', undefined);
-const injectedId = inject<Ref<string>>('formFieldId', undefined);
+const injectedError = inject<Ref<string | undefined>>('formFieldError');
+const injectedId = inject<Ref<string>>('formFieldId');
 
 const isError = computed(() => Boolean(props.error || injectedError?.value));
 
@@ -53,7 +53,7 @@ function onInput(e: Event): void {
             <slot name="prefix" />
         </span>
         <input
-            :id="id ?? injectedId?.value"
+            :id="id ?? injectedId"
             :type="type"
             :value="modelValue ?? ''"
             :placeholder="placeholder"

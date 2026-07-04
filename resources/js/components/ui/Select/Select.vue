@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 
 const { t } = useI18n();
 
-const injectedError = inject<Ref<string | undefined>>('formFieldError', undefined);
-const injectedId = inject<Ref<string>>('formFieldId', undefined);
+const injectedError = inject<Ref<string | undefined>>('formFieldError');
+const injectedId = inject<Ref<string>>('formFieldId');
 
 interface Option {
     label: string;
@@ -101,7 +101,7 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
 <template>
     <div ref="containerRef" class="relative" @keydown="onKey">
         <button
-            :id="id ?? injectedId?.value"
+            :id="id ?? injectedId"
             type="button"
             :disabled="disabled"
             :aria-invalid="isError ? 'true' : undefined"

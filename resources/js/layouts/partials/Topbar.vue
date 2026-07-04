@@ -25,6 +25,11 @@ const user = computed<User | null>(() => (page.props.auth as { user: User | null
 function logout(): void {
     router.post('/logout');
 }
+
+// Trigger the global Ctrl/⌘+K command palette shortcut (listener lives on window).
+function openSearch(): void {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+}
 </script>
 
 <template>
@@ -51,7 +56,7 @@ function logout(): void {
                 type="button"
                 class="hidden md:inline-flex h-8 items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-raised)] pl-2.5 pr-1.5 text-xs text-[var(--text-muted)] hover:border-[var(--border-default)] transition-colors"
                 :aria-label="t('common.search')"
-                @click="$el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))"
+                @click="openSearch"
             >
                 <Command class="h-3.5 w-3.5" />
                 <span>{{ t('topbar.search') }}</span>

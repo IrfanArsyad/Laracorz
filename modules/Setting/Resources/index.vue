@@ -33,9 +33,24 @@ const { settingsGroup, settingsField } = useNavLabel();
 
 const tab = ref(Object.keys(props.groups)[0] ?? 'general');
 
-const form = useForm({
-    values: { ...props.values } as Record<string, unknown>,
-    files: {} as Record<string, File | null>,
+// Nilai setting bertipe dinamis: input yang dirender ditentukan `row.type` saat
+// runtime (text/email/number/select/color → string|number, switch → boolean, dst),
+// sehingga tipe statik per-binding tak bisa dipersempit. `any` di sini disengaja
+// agar v-model tiap input valid tanpa cast per-baris di template.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SettingValue = any;
+
+// _method: 'put' → spoofing agar multipart (file upload) tetap sampai ke route PUT /settings.
+interface SettingsForm {
+    _method: 'put';
+    values: Record<string, SettingValue>;
+    files: Record<string, File | null>;
+}
+
+const form = useForm<SettingsForm>({
+    _method: 'put',
+    values: { ...props.values } as Record<string, SettingValue>,
+    files: {},
 });
 
 const filePreviews = ref<Record<string, string>>({});
@@ -104,7 +119,7 @@ function previewOf(key: string): string | null {
 const tabsList = computed(() => Object.keys(props.groups));
 
 function submit(): void {
-    form.post('/settings', { _method: 'put', forceFormData: true });
+    form.post('/settings', { forceFormData: true });
 }
 </script>
 

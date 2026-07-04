@@ -42,11 +42,10 @@ watch(
     () => page.props.flash,
     (flash) => {
         if (!flash) return;
-        const f = flash as Record<string, string | null>;
-        if (f.success) toast.success(f.success);
-        if (f.error) toast.error(f.error);
-        if (f.warning) toast.warning(f.warning);
-        if (f.info) toast.info(f.info);
+        if (flash.success) toast.success(flash.success);
+        if (flash.error) toast.error(flash.error);
+        if (flash.warning) toast.warning(flash.warning);
+        if (flash.info) toast.info(flash.info);
     },
     { deep: true, immediate: true },
 );

@@ -11,12 +11,12 @@ const change = inject<(v: string) => void>('tabsChange');
     <button
         type="button"
         role="tab"
-        :aria-selected="active?.value === value"
+        :aria-selected="active === value"
         :class="
             cn(
                 'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                active?.value === value ? 'bg-background text-foreground shadow-sm' : '',
+                active === value ? 'bg-background text-foreground shadow-sm' : '',
                 $props.class,
             )
         "

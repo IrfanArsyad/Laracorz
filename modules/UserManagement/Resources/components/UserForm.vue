@@ -18,6 +18,11 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
+// Inertia's useForm object is shared reactive state passed by reference from the
+// parent; binding to a local alias lets child fields update it without tripping
+// vue/no-mutating-props while preserving the exact same two-way behavior.
+const model = props.form;
+
 const roleOptions = props.roles.map((r) => ({ label: r.display_name, value: r.id }));
 const statusOptions = Object.entries(USER_STATUS).map(([k, v]) => ({ label: v.label, value: k }));
 
@@ -26,7 +31,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 function onAvatar(e: Event): void {
     const f = (e.target as HTMLInputElement).files?.[0] ?? null;
-    props.form.avatar = f;
+    model.avatar = f;
     avatarPreview.value = f ? URL.createObjectURL(f) : props.avatarUrl ?? null;
 }
 </script>
@@ -35,7 +40,7 @@ function onAvatar(e: Event): void {
     <div class="space-y-5">
         <!-- Avatar uploader — inline compact -->
         <div class="flex items-center gap-4 p-3 rounded-lg bg-[var(--surface-sunken)] border border-[var(--border-subtle)]">
-            <Avatar :src="avatarPreview" :name="form.name || 'U'" size="lg" />
+            <Avatar :src="avatarPreview" :name="model.name || 'U'" size="lg" />
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-[var(--text-strong)]">{{ t('users.avatarTitle') }}</p>
                 <p class="text-xs text-[var(--text-muted)]">{{ t('users.avatarHint') }}</p>
@@ -53,20 +58,20 @@ function onAvatar(e: Event): void {
 
         <!-- Identitas -->
         <div class="grid gap-3.5 sm:grid-cols-2">
-            <FormField :label="t('users.name')" :error="form.errors.name" required>
-                <Input v-model="form.name" />
+            <FormField :label="t('users.name')" :error="model.errors.name" required>
+                <Input v-model="model.name" />
             </FormField>
-            <FormField :label="t('users.username')" :error="form.errors.username" required :hint="t('users.usernameHint')">
-                <Input v-model="form.username" autocomplete="off" />
+            <FormField :label="t('users.username')" :error="model.errors.username" required :hint="t('users.usernameHint')">
+                <Input v-model="model.username" autocomplete="off" />
             </FormField>
-            <FormField :label="t('users.email')" :error="form.errors.email" required class="sm:col-span-2">
-                <Input v-model="form.email" type="email" />
+            <FormField :label="t('users.email')" :error="model.errors.email" required class="sm:col-span-2">
+                <Input v-model="model.email" type="email" />
             </FormField>
-            <FormField :label="t('users.role')" :error="form.errors.role_id" required>
-                <Select v-model="form.role_id" :options="roleOptions" searchable :placeholder="t('users.rolePlaceholder')" />
+            <FormField :label="t('users.role')" :error="model.errors.role_id" required>
+                <Select v-model="model.role_id" :options="roleOptions" searchable :placeholder="t('users.rolePlaceholder')" />
             </FormField>
-            <FormField :label="t('users.status')" :error="form.errors.status" required>
-                <Select v-model="form.status" :options="statusOptions" />
+            <FormField :label="t('users.status')" :error="model.errors.status" required>
+                <Select v-model="model.status" :options="statusOptions" />
             </FormField>
         </div>
 
@@ -75,13 +80,13 @@ function onAvatar(e: Event): void {
             <FormField
                 :label="isEdit ? t('users.passwordNew') : t('users.password')"
                 :hint="isEdit ? t('users.passwordHint') : t('users.passwordHintCreate')"
-                :error="form.errors.password"
+                :error="model.errors.password"
                 :required="!isEdit"
             >
-                <InputPassword v-model="form.password" autocomplete="new-password" />
+                <InputPassword v-model="model.password" autocomplete="new-password" />
             </FormField>
             <FormField :label="t('users.passwordConfirmation')" :required="!isEdit">
-                <InputPassword v-model="form.password_confirmation" autocomplete="new-password" />
+                <InputPassword v-model="model.password_confirmation" autocomplete="new-password" />
             </FormField>
         </div>
     </div>

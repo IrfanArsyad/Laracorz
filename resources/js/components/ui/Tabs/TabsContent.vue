@@ -8,7 +8,7 @@ const active = inject<Ref<string>>('tabsValue');
 
 <template>
     <div
-        v-if="active?.value === value"
+        v-if="active === value"
         :class="cn('mt-2 focus-visible:outline-none', $props.class)"
         role="tabpanel"
     >

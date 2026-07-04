@@ -40,8 +40,8 @@ const { state, sortBy } = useDataTable({
     initial: {
         search: (props.filters.search as string) ?? '',
         filters: {
-            level: props.filters.level,
-            date: props.filters.date,
+            level: (props.filters.level as string | null) ?? null,
+            date: (props.filters.date as string | null) ?? null,
         },
     },
 });
@@ -114,7 +114,7 @@ async function copyDetail(row: LogRow): Promise<void> {
                 :filters-count="(state.filters.level ? 1 : 0) + (state.filters.date ? 1 : 0)"
                 scope="system-log"
                 :state="state"
-                @reset="state.filters.level = undefined; state.filters.date = undefined; state.search = ''"
+                @reset="state.filters.level = null; state.filters.date = null; state.search = ''"
             >
                 <div class="min-w-[180px]">
                     <Select

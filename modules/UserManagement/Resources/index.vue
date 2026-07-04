@@ -52,7 +52,10 @@ const { state, sortBy } = useDataTable({
         search: (props.filters.search as string) ?? '',
         sort: (props.filters.sort as string) ?? null,
         direction: (props.filters.direction as 'asc' | 'desc') ?? 'desc',
-        filters: { role_id: props.filters.role_id, status: props.filters.status },
+        filters: {
+            role_id: (props.filters.role_id as number | null) ?? null,
+            status: (props.filters.status as string | null) ?? null,
+        },
     },
     only: ['data'],
 });
@@ -161,8 +164,8 @@ function toggleTrashed(): void {
 
 function resetFilters(): void {
     state.search = '';
-    state.filters.role_id = undefined;
-    state.filters.status = undefined;
+    state.filters.role_id = null;
+    state.filters.status = null;
 }
 </script>
 
@@ -253,8 +256,8 @@ function resetFilters(): void {
                     <Badge variant="muted">{{ row.role?.display_name ?? '—' }}</Badge>
                 </template>
                 <template #cell-status="{ value }">
-                    <Badge :variant="((USER_STATUS as any)[value]?.color ?? 'muted')">
-                        {{ (USER_STATUS as any)[value]?.label ?? value }}
+                    <Badge :variant="((USER_STATUS as any)[String(value)]?.color ?? 'muted')">
+                        {{ (USER_STATUS as any)[String(value)]?.label ?? value }}
                     </Badge>
                 </template>
                 <template #cell-last_login_at="{ value }">

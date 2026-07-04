@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component } from 'vue';
 import { Inbox } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
 import { cn } from '@/lib/utils';
@@ -9,7 +10,7 @@ withDefaults(
     defineProps<{
         title?: string;
         description?: string;
-        icon?: unknown;
+        icon?: Component;
         /** Padding compact untuk pakai dalam tabel/card kecil */
         compact?: boolean;
         class?: string;
