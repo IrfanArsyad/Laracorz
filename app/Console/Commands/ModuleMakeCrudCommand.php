@@ -12,7 +12,7 @@ class ModuleMakeCrudCommand extends Command
 {
     protected $signature = 'module:make-crud {module} {model}';
 
-    protected $description = 'Generate modul CRUD lengkap (Controller, Service, Repository, DTO, Request, Resource, Policy, Observer, Enum, migration, factory, seeder, routes, Vue pages, sass).';
+    protected $description = 'Generate scaffold modul CRUD (Model, Controller, migration, Config/menu, routes, Vue index/create/edit, css) dari stubs/laracorz.';
 
     public function handle(): int
     {
