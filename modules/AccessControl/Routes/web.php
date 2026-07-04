@@ -41,15 +41,9 @@ Route::middleware(['auth'])
     ->middleware('module.permission:role-management,read')
     ->group(function (): void {
         Route::get('/', [RoleController::class, 'index'])->name('index');
-        Route::get('/create', [RoleController::class, 'create'])
-            ->middleware('module.permission:role-management,create')
-            ->name('create');
         Route::post('/', [RoleController::class, 'store'])
             ->middleware('module.permission:role-management,create')
             ->name('store');
-        Route::get('/{role}/edit', [RoleController::class, 'edit'])
-            ->middleware('module.permission:role-management,update')
-            ->name('edit');
         Route::put('/{role}', [RoleController::class, 'update'])
             ->middleware('module.permission:role-management,update')
             ->name('update');
@@ -64,15 +58,9 @@ Route::middleware(['auth'])
     ->middleware('module.permission:module-management,read')
     ->group(function (): void {
         Route::get('/', [ModuleController::class, 'index'])->name('index');
-        Route::get('/create', [ModuleController::class, 'create'])
-            ->middleware('module.permission:module-management,create')
-            ->name('create');
         Route::post('/', [ModuleController::class, 'store'])
             ->middleware('module.permission:module-management,create')
             ->name('store');
-        Route::get('/{module}/edit', [ModuleController::class, 'edit'])
-            ->middleware('module.permission:module-management,update')
-            ->name('edit');
         Route::put('/{module}', [ModuleController::class, 'update'])
             ->middleware('module.permission:module-management,update')
             ->name('update');

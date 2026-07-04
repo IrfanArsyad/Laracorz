@@ -7,9 +7,12 @@ namespace Modules\AccessControl\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\ModuleGroup;
+use App\Models\Role;
 use App\Services\AdminLogService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -63,7 +66,7 @@ class ModuleController extends Controller
      */
     private function countRolesPerModule(): array
     {
-        $roles = \App\Models\Role::query()
+        $roles = Role::query()
             ->where('is_active', true)
             ->get(['id', 'read']);
 
@@ -93,14 +96,6 @@ class ModuleController extends Controller
         return $counts;
     }
 
-    public function create(): Response
-    {
-        return Inertia::render('access-control::Module/create', [
-            'groups' => ModuleGroup::query()->orderBy('order')->get(),
-            'modules' => Module::query()->orderBy('order')->get(),
-        ]);
-    }
-
     public function store(StoreModuleRequest $request): RedirectResponse
     {
         $data = $request->validated();
@@ -108,15 +103,6 @@ class ModuleController extends Controller
         $this->logger->log('created', "Membuat modul {$module->name}", $module, [], $data, 'module-management');
 
         return redirect()->route('modules.index')->with('success', 'Modul berhasil dibuat.');
-    }
-
-    public function edit(Module $module): Response
-    {
-        return Inertia::render('access-control::Module/edit', [
-            'module' => $module,
-            'groups' => ModuleGroup::query()->orderBy('order')->get(),
-            'modules' => Module::query()->where('id', '!=', $module->id)->orderBy('order')->get(),
-        ]);
     }
 
     public function update(UpdateModuleRequest $request, Module $module): RedirectResponse
@@ -143,9 +129,9 @@ class ModuleController extends Controller
     public function toggleActive(Module $module): RedirectResponse
     {
         abort_unless(
-    request()->user()?->hasPermission('update', 'module-management'),
-    403,
-);
+            request()->user()?->hasPermission('update', 'module-management'),
+            403,
+        );
         $module->update(['active' => ! $module->active]);
         $this->logger->log(
             action: 'updated',
@@ -170,7 +156,7 @@ class ModuleController extends Controller
      *   - Leaf rule (url+route harus dua-duanya ada atau dua-duanya kosong) tidak berubah,
      *     hanya posisi tree yang diubah
      */
-    public function reorder(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    public function reorder(Request $request): JsonResponse
     {
         abort_unless(
             request()->user()?->hasPermission('update', 'module-management'),
@@ -234,9 +220,9 @@ class ModuleController extends Controller
     public function move(Module $module, string $direction): RedirectResponse
     {
         abort_unless(
-    request()->user()?->hasPermission('update', 'module-management'),
-    403,
-);
+            request()->user()?->hasPermission('update', 'module-management'),
+            403,
+        );
 
         if (! in_array($direction, ['up', 'down'], true)) {
             return back()->with('error', 'Arah tidak valid.');
@@ -273,7 +259,6 @@ class ModuleController extends Controller
         return back()->with('success', 'Urutan modul diperbarui.');
     }
 
-
     public function storeGroup(StoreModuleGroupRequest $request): RedirectResponse
     {
         ModuleGroup::query()->create($request->validated());
@@ -299,7 +284,7 @@ class ModuleController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, Module>>  $byParent
+     * @param  Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, Module>>  $byParent
      * @param  array<int, int>  $rolesCount
      * @return array<string, mixed>
      */

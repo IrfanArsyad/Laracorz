@@ -12,11 +12,11 @@ use App\Services\AdminLogService;
 use App\Support\SearchFilterDto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Modules\AccessControl\App\Http\Requests\StoreRoleRequest;
-use Modules\AccessControl\App\Http\Requests\UpdateRoleRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\AccessControl\App\Http\Requests\StoreRoleRequest;
+use Modules\AccessControl\App\Http\Requests\UpdateRoleRequest;
 
 class RoleController extends Controller
 {
@@ -45,13 +45,6 @@ class RoleController extends Controller
         ]);
     }
 
-    public function create(): Response
-    {
-        return Inertia::render('access-control::Role/create', [
-            'matrix' => $this->matrix(),
-        ]);
-    }
-
     public function store(StoreRoleRequest $request): RedirectResponse
     {
         $data = $request->validated();
@@ -59,14 +52,6 @@ class RoleController extends Controller
         $this->logger->log('created', "Membuat role {$role->name}", $role, [], $data, 'role-management');
 
         return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat.');
-    }
-
-    public function edit(Role $role): Response
-    {
-        return Inertia::render('access-control::Role/edit', [
-            'role' => $role,
-            'matrix' => $this->matrix(),
-        ]);
     }
 
     public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
@@ -122,7 +107,7 @@ class RoleController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, Module>>  $byParent
+     * @param  Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, Module>>  $byParent
      * @return array<string, mixed>
      */
     private function buildNode(Module $m, $byParent): array
