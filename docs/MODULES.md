@@ -6,16 +6,26 @@ php artisan module:make-crud Product Product
 ```
 
 Otomatis membuat:
-- `modules/Product/App/{Models,Http/Controllers}/`
-- `modules/Product/Routes/web.php`
+- `modules/Product/App/Models/Product.php`
+- `modules/Product/App/Http/Controllers/ProductController.php`
+- `modules/Product/App/Http/Requests/{Store,Update}ProductRequest.php`
+- `modules/Product/Routes/{web,api}.php`
 - `modules/Product/Database/Migrations/create_products_table.php`
 - `modules/Product/Resources/{index,create,edit}.vue`
-- `modules/Product/Resources/components/` (komponen Vue khusus modul)
 - `modules/Product/assets/css/product.css` ⭐ ← style khusus modul
-- `modules/Product/Config/{config.php,menu.php}`
-- `modules/Product/module.json`
+- `modules/Product/Config/menu.php`
+
+Hasilnya langsung lolos Pint dan Larastan level 6 tanpa perlu diutak-atik.
 
 Setelah generate, command otomatis menjalankan `module:sync` sehingga modul muncul di tabel `modules` dan di sidebar (untuk role yang punya `read`).
+
+> Pakai `--no-sync` kalau belum mau mendaftarkan modul ke DB:
+> ```bash
+> php artisan module:make-crud Product Product --no-sync
+> ```
+> Berguna saat masih coba-coba — tanpa flag ini, modul yang batal dipakai lalu foldernya dihapus akan meninggalkan baris yatim di tabel `modules`.
+
+Isi `stubs/laracorz/` persis mencerminkan struktur satu modul. Mau semua modul baru punya file tertentu? Tambahkan saja file `.stub` di sana — command menyalin seisi folder, tidak ada daftar file yang di-hardcode. Token yang tersedia: `{{module}}`, `{{model}}`, `{{slug}}`, `{{plural}}`, `{{kebabPlural}}`, `{{snake}}` — berlaku di nama file maupun isinya.
 
 ## 2. Migrate
 ```bash
@@ -30,25 +40,25 @@ Buka halaman **Role > Edit** lalu centang Read/Create/Update/Delete untuk modul 
 modules/Product/
 ├── App/                                # Backend PHP
 │   ├── Http/Controllers/ProductController.php
+│   ├── Http/Requests/{Store,Update}ProductRequest.php
 │   ├── Models/Product.php
-│   ├── Services/, Repositories/, ...
-├── Routes/web.php                      # Route dengan module.permission
+│   └── Services/, Repositories/, ...   # kalau logikanya mulai tebal
+├── Routes/
+│   ├── web.php                         # Route dengan module.permission
+│   └── api.php                         # Auto-prefixed /api
 ├── Database/Migrations/                # Migrasi tabel modul
 ├── Resources/                          # Frontend Vue
 │   ├── index.vue                       # Halaman Inertia langsung di sini
 │   ├── create.vue
 │   ├── edit.vue
-│   ├── show.vue
 │   └── components/                     # Komponen khusus modul
-├── assets/                             # ⭐ Aset front-end khusus modul
-│   ├── css/product.css                 # Style hand-written (selector kompleks, print, dst)
-│   └── images/                         # Gambar/icon khusus modul (opsional)
-├── Config/
-│   ├── config.php
-│   └── menu.php                        # Definisi grup/modul yang dibaca module:sync
-├── Lang/                               # i18n khusus modul (opsional)
-└── module.json
+├── assets/
+│   └── css/product.css                 # Style hand-written, auto-load per halaman modul
+└── Config/
+    └── menu.php                        # Definisi grup/modul yang dibaca module:sync
 ```
+
+Tidak ada `module.json`, ServiceProvider, atau `composer.json` per modul — core ini tidak memakai nwidart/laravel-modules. Semua registrasi lewat glob (route web, route api, migration, halaman Vue, CSS) plus PSR-4 `Modules\`.
 
 - **Controller** tipis → Service → Repository (BaseRepository).
 - **Form Request** untuk validasi (`messages()`, `attributes()` bahasa Indonesia).

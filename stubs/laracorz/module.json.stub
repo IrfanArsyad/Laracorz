@@ -1,9 +1,0 @@
-{
-    "name": "{{module}}",
-    "alias": "{{slug}}",
-    "description": "Modul {{module}}.",
-    "keywords": [],
-    "priority": 0,
-    "providers": [],
-    "files": []
-}

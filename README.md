@@ -7,7 +7,7 @@ Core production-ready **Laravel 13 + Vue 3 + Inertia 2** dengan arsitektur modul
 - Vue 3 + Composition API + TypeScript
 - Inertia.js 2
 - Tailwind CSS 4 (token via CSS custom properties)
-- nwidart/laravel-modules
+- Sistem modul buatan sendiri (tanpa paket pihak ketiga)
 - tightenco/ziggy
 - lucide-vue-next, CVA, clsx, tailwind-merge
 - PostgreSQL (jsonb + GIN index)
@@ -35,8 +35,8 @@ Login admin awal:
 
 | Perintah | Kegunaan |
 |---|---|
-| `php artisan module:sync` | Sinkronisasi modul Nwidart ke tabel `module_groups` & `modules` (baca `Config/menu.php` tiap modul). |
-| `php artisan module:make-crud {Module} {Model}` | Generate modul CRUD lengkap dari stubs. |
+| `php artisan module:sync` | Sinkronisasi modul ke tabel `module_groups` & `modules` (baca `Config/menu.php` tiap modul). |
+| `php artisan module:make-crud {Module} {Model}` | Generate modul CRUD lengkap dari `stubs/laracorz/`. Tambah `--no-sync` untuk menunda pendaftaran ke DB. |
 | `php artisan logs:prune` | Pangkas `admin_logs` & `system_logs` sesuai retensi. |
 | `composer dev` | Jalankan server + queue + pail + vite paralel. |
 | `composer test` | Jalankan test Pest. |

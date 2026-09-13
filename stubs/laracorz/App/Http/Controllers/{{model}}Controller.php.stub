@@ -10,6 +10,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\{{module}}\App\Http\Requests\Store{{model}}Request;
+use Modules\{{module}}\App\Http\Requests\Update{{model}}Request;
 use Modules\{{module}}\App\Models\{{model}};
 
 class {{model}}Controller extends Controller
@@ -31,10 +33,9 @@ class {{model}}Controller extends Controller
         return Inertia::render('{{slug}}::create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Store{{model}}Request $request): RedirectResponse
     {
-        $data = $request->validate(['name' => ['required', 'string', 'max:255']]);
-        {{model}}::query()->create($data);
+        {{model}}::query()->create($request->validated());
 
         return redirect()->route('{{kebabPlural}}.index')->with('success', '{{module}} berhasil dibuat.');
     }
@@ -44,10 +45,9 @@ class {{model}}Controller extends Controller
         return Inertia::render('{{slug}}::edit', ['item' => ${{snake}}]);
     }
 
-    public function update(Request $request, {{model}} ${{snake}}): RedirectResponse
+    public function update(Update{{model}}Request $request, {{model}} ${{snake}}): RedirectResponse
     {
-        $data = $request->validate(['name' => ['required', 'string', 'max:255']]);
-        ${{snake}}->update($data);
+        ${{snake}}->update($request->validated());
 
         return redirect()->route('{{kebabPlural}}.index')->with('success', '{{module}} berhasil diperbarui.');
     }

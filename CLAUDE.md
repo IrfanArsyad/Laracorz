@@ -5,7 +5,9 @@ Core modular **Laravel 13 + Vue 3 + Inertia 2**. Permission 100% dari DB (module
 > Baca file ini dulu sebelum eksplorasi. Untuk detail, buka `docs/` (jangan grep buta) — pointer di bawah.
 
 ## Stack
-PHP 8.3+ · Laravel 13 · Inertia 2 · Vue 3 (Composition API + TS) · Tailwind 4 (token via CSS custom properties, bukan Sass) · nwidart/laravel-modules · Ziggy · PostgreSQL (jsonb + GIN) · Redis (cache menu) · Pest · Vitest · Pint · Larastan (lvl 6) · ESLint · Prettier · Telescope (dev).
+PHP 8.3+ · Laravel 13 · Inertia 2 · Vue 3 (Composition API + TS) · Tailwind 4 (token via CSS custom properties, bukan Sass) · Ziggy · PostgreSQL (jsonb + GIN) · Redis (cache menu) · Pest · Vitest · Pint · Larastan (lvl 6) · ESLint · Prettier · Telescope (dev).
+
+Sistem modul dibuat sendiri — **tidak pakai nwidart/laravel-modules**. Paket itu sudah dicopot karena tidak dipakai runtime dan command `module:make`-nya menghasilkan Blade, yang tidak sesuai core ini.
 
 ## Perintah
 | Aksi | Perintah |
@@ -38,9 +40,20 @@ PHP 8.3+ · Laravel 13 · Inertia 2 · Vue 3 (Composition API + TS) · Tailwind 
 
 Struktur tiap modul: `App/Http/{Controllers,Requests}`, `Resources/*.vue` (+ `Resources/components/`), `Routes/{web,api}.php`, `assets/css/{slug}.css` (auto-load saat halaman modul dibuka).
 
-Modul TIDAK pakai runtime nwidart (tanpa `module.json`/ServiceProvider). Registrasinya cuma tiga: glob `modules/*/Routes/web.php` di `routes/web.php`, PSR-4 `Modules\` → `modules/` di `composer.json`, dan glob Vite di `resources/js/app.ts`. Tambah modul = tambah folder, lalu `composer dump-autoload`.
+Modul tidak punya `module.json`, ServiceProvider, atau `composer.json`. Registrasinya cuma empat glob:
 
-> Bikin modul baru pakai `php artisan module:make-crud`, BUKAN `module:make`. `module:make` itu command bawaan nwidart yang menghasilkan Blade (lihat `config/modules.php` → `stubs.files` + generator `views`). `module:make-crud` baca `stubs/laracorz/` dan menghasilkan halaman Vue sesuai konvensi di atas.
+| Apa | Di mana |
+|---|---|
+| Route web | `routes/web.php` → `modules/*/Routes/web.php` |
+| Route api | `routes/api.php` → `modules/*/Routes/api.php` |
+| Migration | `AppServiceProvider::loadModuleMigrations()` → `modules/*/Database/Migrations` |
+| Halaman Vue + CSS | `resources/js/app.ts` → `modules/*/Resources/**/*.vue`, `modules/*/assets/css/*.css` |
+
+Plus PSR-4 `Modules\` → `modules/` di `composer.json`. Tambah modul = tambah folder, lalu `composer dump-autoload`.
+
+**Generator: `php artisan module:make-crud {Module} {Model}`** — satu-satunya cara bikin modul. Baca `stubs/laracorz/`, hasilnya langsung lolos Pint + Larastan. Tambah `--no-sync` kalau belum mau mendaftarkan modul ke tabel `modules` (tanpa flag itu `module:sync` langsung jalan; kalau modul batal dipakai dan foldernya dihapus, barisnya tertinggal jadi entri yatim di menu).
+
+Isi `stubs/laracorz/` = persis struktur satu modul. Tambah/hapus file di sana otomatis ikut ter-generate — command-nya menyalin seisi folder, tidak ada daftar file yang di-hardcode.
 
 **Inti `app/`:**
 - Models: `User, Role, Module, ModuleGroup, AdminLog, Setting` (+ `Concerns/`).

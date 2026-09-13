@@ -13,7 +13,6 @@
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^3.1",
-        "nwidart/laravel-modules": "^13.0",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
@@ -90,16 +89,6 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        },
-        "merge-plugin": {
-            "include": ["modules/*/composer.json"],
-            "recurse": true,
-            "replace": false,
-            "ignore-duplicates": false,
-            "merge-dev": true,
-            "merge-extra": false,
-            "merge-extra-deep": false,
-            "merge-scripts": false
         }
     },
     "config": {

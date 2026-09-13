@@ -16,7 +16,7 @@ class ModuleSyncCommand extends Command
 {
     protected $signature = 'module:sync';
 
-    protected $description = 'Sinkronisasi modul Nwidart ke tabel module_groups & modules dari Config/menu.php';
+    protected $description = 'Sinkronisasi modul ke tabel module_groups & modules dari modules/*/Config/menu.php';
 
     public function handle(ModuleRegistry $registry): int
     {

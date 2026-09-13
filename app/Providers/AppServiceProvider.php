@@ -55,5 +55,23 @@ class AppServiceProvider extends ServiceProvider
         Carbon::serializeUsing(fn (CarbonInterface $date) => $date->format('Y-m-d H:i:s'));
 
         MenuCacheObserver::bootstrap();
+
+        $this->loadModuleMigrations();
+    }
+
+    /**
+     * Daftarkan migration tiap modul: modules/{Module}/Database/Migrations.
+     *
+     * Modul tidak pakai ServiceProvider sendiri — registrasinya cukup tiga:
+     * glob route di routes/web.php, PSR-4 `Modules\` di composer.json, dan
+     * glob ini. Tambah modul = tambah folder.
+     */
+    private function loadModuleMigrations(): void
+    {
+        $paths = glob(base_path('modules/*/Database/Migrations'), GLOB_ONLYDIR) ?: [];
+
+        if ($paths !== []) {
+            $this->loadMigrationsFrom($paths);
+        }
     }
 }
