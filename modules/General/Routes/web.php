@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\Route;
 use Modules\General\App\Http\Controllers\DashboardController;
 use Modules\General\App\Http\Controllers\NotificationController;
 use Modules\General\App\Http\Controllers\ProfileController;
-use Modules\General\App\Http\Controllers\SettingController;
 
 /*
- * General: konsolidasi Dashboard + Profile + Notification + Setting.
- * Prefix, name, dan middleware dipertahankan persis seperti modul lama.
+ * General: halaman personal yang tidak punya entri permission sendiri
+ * (Dashboard, Profile, Notification). Fitur ber-permission sudah pindah
+ * ke modulnya masing-masing.
  */
 
 Route::middleware(['auth'])->group(function (): void {
@@ -36,15 +36,4 @@ Route::middleware(['auth'])
         Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
         Route::patch('/{id}/read', [NotificationController::class, 'markRead'])->name('mark-read');
         Route::post('/mark-all-read', [NotificationController::class, 'markAllRead'])->name('mark-all-read');
-    });
-
-Route::middleware(['auth'])
-    ->prefix('settings')
-    ->name('settings.')
-    ->middleware('module.permission:settings,read')
-    ->group(function (): void {
-        Route::get('/', [SettingController::class, 'index'])->name('index');
-        Route::put('/', [SettingController::class, 'update'])
-            ->middleware('module.permission:settings,update')
-            ->name('update');
     });

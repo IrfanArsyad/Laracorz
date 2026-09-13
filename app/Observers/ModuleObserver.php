@@ -7,7 +7,7 @@ namespace App\Observers;
 use App\Models\Module;
 use App\Models\Role;
 use App\Services\ModuleRegistry;
-use Illuminate\Support\Facades\Cache;
+use App\Support\MenuCache;
 
 class ModuleObserver
 {
@@ -78,6 +78,6 @@ class ModuleObserver
     private function flushAll(): void
     {
         $this->registry->flush();
-        Cache::flush();
+        MenuCache::flush();
     }
 }

@@ -1,0 +1,95 @@
+/* ========================================================================
+ * DARK MODE — dual-tuned (bukan invert)
+ * ======================================================================== */
+.dark {
+    --surface-base:    var(--neutral-900);             /* page bg */
+    --surface-raised:  oklch(0.235 0.018 260);         /* card sedikit lebih terang dari page */
+    --surface-sunken:  var(--neutral-950);             /* alternate row */
+    --surface-overlay: var(--neutral-900);
+    --surface-inverse: var(--neutral-50);
+
+    --text-strong:   oklch(0.99 0 0);
+    --text-default:  var(--neutral-200);
+    --text-muted:    var(--neutral-400);
+    --text-disabled: var(--neutral-600);
+    --text-inverse:  var(--neutral-900);
+    --text-link:     var(--brand-400);
+    --text-link-hover: var(--brand-300);
+
+    --border-subtle:  oklch(0.255 0.020 260);
+    --border-default: oklch(0.255 0.020 260);
+    --border-strong:  oklch(0.330 0.020 260);
+    --border-focus:   var(--brand-400);
+
+    --state-hover:    oklch(1 0 0 / 0.06);
+    --state-pressed:  oklch(1 0 0 / 0.10);
+    --state-selected: oklch(0.402 0.187 261 / 0.20);
+    --state-selected-fg: var(--brand-200);
+
+    --focus-ring:        var(--brand-400);
+
+    --status-success-bg:     oklch(0.310 0.082 161 / 0.25);
+    --status-success-border: oklch(0.448 0.130 161);
+    --status-success-fg:     var(--success-300);
+    --status-success-solid:  var(--success-500);
+
+    --status-warning-bg:     oklch(0.380 0.100 42 / 0.25);
+    --status-warning-border: oklch(0.520 0.140 47);
+    --status-warning-fg:     var(--warning-300);
+    --status-warning-solid:  var(--warning-500);
+
+    --status-danger-bg:      oklch(0.392 0.140 26 / 0.25);
+    --status-danger-border:  oklch(0.498 0.210 28);
+    --status-danger-fg:      var(--danger-300);
+    --status-danger-solid:   var(--danger-500);
+
+    --status-info-bg:        oklch(0.385 0.090 241 / 0.25);
+    --status-info-border:    oklch(0.500 0.132 243);
+    --status-info-fg:        var(--info-300);
+    --status-info-solid:     var(--info-500);
+
+    --brand-bg:          var(--brand-500);
+    --brand-bg-hover:    var(--brand-400);
+    --brand-bg-pressed:  var(--brand-300);
+    --brand-soft-bg:     oklch(0.402 0.187 261 / 0.18);
+    --brand-soft-fg:     var(--brand-300);
+
+    --sidebar-bg:           oklch(0.165 0.018 264);   /* sedikit lebih gelap dari surface-base */
+    --sidebar-fg:           var(--text-default);
+    --sidebar-border:       transparent;              /* no visible border */
+    --sidebar-item-hover:   oklch(1 0 0 / 0.05);
+    --sidebar-item-active-bg: oklch(0.402 0.187 261 / 0.22);
+    --sidebar-item-active-fg: var(--brand-300);
+
+    /* Legacy (dark) */
+    --background:           224 16% 7%;
+    --foreground:           220 15% 96%;
+    --card:                 224 16% 11%;
+    --card-foreground:      220 15% 96%;
+    --popover:              224 16% 11%;
+    --popover-foreground:   220 15% 96%;
+    --primary:              263 84% 68%;
+    --primary-foreground:   224 16% 7%;
+    --secondary:            220 13% 18%;
+    --secondary-foreground: 220 15% 96%;
+    --muted:                220 13% 18%;
+    --muted-foreground:     220 10% 65%;
+    --accent:               220 13% 18%;
+    --accent-foreground:    220 15% 96%;
+    --destructive:          0 70% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --success:              160 65% 50%;
+    --success-foreground:   0 0% 98%;
+    --warning:              40 88% 60%;
+    --warning-foreground:   0 0% 98%;
+    --info:                 210 85% 60%;
+    --info-foreground:      0 0% 98%;
+    --border:               220 13% 22%;
+    --input:                220 13% 22%;
+    --ring:                 263 84% 68%;
+    --sidebar:              224 16% 11%;
+    --sidebar-foreground:   220 15% 96%;
+    --sidebar-accent:       263 50% 25%;
+    --sidebar-accent-foreground: 263 95% 90%;
+    --sidebar-border:       220 13% 22%;
+}

@@ -7,9 +7,8 @@ namespace App\Services;
 use App\Models\Module;
 use App\Models\ModuleGroup;
 use App\Models\User;
-use App\Services\UserSessionService;
+use App\Support\MenuCache;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 
 class MenuService
 {
@@ -30,9 +29,9 @@ class MenuService
             }
         }
 
-        $cacheKey = "menu.role.{$user->role_id}";
+        $cacheKey = MenuCache::roleKey((int) $user->role_id);
 
-        return Cache::rememberForever($cacheKey, fn (): array => $this->build($user));
+        return MenuCache::store()->rememberForever($cacheKey, fn (): array => $this->build($user));
     }
 
     /**

@@ -14,7 +14,7 @@ LD_LIBRARY_PATH= composer analyse
 PAO_DISABLE=1 LD_LIBRARY_PATH= ./vendor/bin/phpstan analyse --memory-limit=2G
 
 # Scope to a single module / file
-PAO_DISABLE=1 LD_LIBRARY_PATH= ./vendor/bin/phpstan analyse modules/AccessControl
+PAO_DISABLE=1 LD_LIBRARY_PATH= ./vendor/bin/phpstan analyse modules/UserManagement
 ```
 
 A green run either prints `{"tool":"phpstan","result":"passed","errors":0}` (pao mode)
@@ -84,7 +84,7 @@ analyse`) to also silence composer's own boot warning.
 | Check | Result |
 |-------|--------|
 | `phpstan analyse` produces analysis output | yes (61 errors across `app` + `modules`) |
-| `modules/AccessControl` | analyses (7 real type errors surfaced) |
+| `modules/UserManagement` | analyses (real type errors surfaced) |
 | stubs generator `app/Console/Commands/ModuleMakeCrudCommand.php` | analyses (`[OK] No errors`) |
 | `stubs/laracorz/*.stub` | correctly outside `paths`, not analysed (templates contain `{{placeholders}}`) |
 | pao agent JSON output | `{"tool":"phpstan","result":"failed","errors":61,...}` |

@@ -1,0 +1,134 @@
+:root {
+    /* ========================================================================
+     * TIER 2 — SEMANTIC TOKENS (LIGHT MODE)
+     * Component-facing. Pakai ini, jangan langsung tier 1.
+     * ======================================================================== */
+
+    --surface-base:    oklch(1 0 0);              /* page bg = putih bersih */
+    --surface-raised:  oklch(1 0 0);              /* card/modal */
+    --surface-sunken:  var(--neutral-100);        /* alternate row, input bg */
+    --surface-overlay: oklch(1 0 0);
+    --surface-inverse: var(--neutral-900);
+
+    --text-strong:   var(--neutral-950);
+    --text-default:  var(--neutral-800);
+    --text-muted:    var(--neutral-500);
+    --text-disabled: var(--neutral-400);
+    --text-inverse:  var(--neutral-50);
+    --text-link:     var(--brand-600);
+    --text-link-hover: var(--brand-700);
+
+    --border-subtle:  var(--neutral-200);
+    --border-default: var(--neutral-200);
+    --border-strong:  var(--neutral-300);
+    --border-focus:   var(--brand-500);
+
+    --state-hover:    oklch(0 0 0 / 0.04);
+    --state-pressed:  oklch(0 0 0 / 0.08);
+    --state-selected: var(--brand-50);
+    --state-selected-fg: var(--brand-700);
+
+    --focus-ring:        var(--brand-500);
+    --focus-ring-error:  var(--danger-500);
+    --focus-ring-success: var(--success-500);
+
+    --status-success-bg:     var(--success-50);
+    --status-success-border: var(--success-200);
+    --status-success-fg:     var(--success-700);
+    --status-success-solid:  var(--success-600);
+    --status-success-solid-fg: oklch(0.99 0 0);
+
+    --status-warning-bg:     var(--warning-50);
+    --status-warning-border: var(--warning-200);
+    --status-warning-fg:     var(--warning-700);
+    --status-warning-solid:  var(--warning-500);
+    --status-warning-solid-fg: oklch(0.99 0 0);
+
+    --status-danger-bg:      var(--danger-50);
+    --status-danger-border:  var(--danger-200);
+    --status-danger-fg:      var(--danger-700);
+    --status-danger-solid:   var(--danger-600);
+    --status-danger-solid-fg: oklch(0.99 0 0);
+
+    --status-info-bg:        var(--info-50);
+    --status-info-border:    var(--info-200);
+    --status-info-fg:        var(--info-700);
+    --status-info-solid:     var(--info-500);
+    --status-info-solid-fg:  oklch(0.99 0 0);
+
+    --brand-bg:          var(--brand-500);
+    --brand-bg-hover:    var(--brand-600);
+    --brand-bg-pressed:  var(--brand-700);
+    --brand-fg:          oklch(0.99 0 0);
+    --brand-soft-bg:     var(--brand-50);
+    --brand-soft-fg:     var(--brand-700);
+
+    --sidebar-bg:           var(--neutral-50);            /* slightly off-white — beda dari page */
+    --sidebar-fg:           var(--text-default);
+    --sidebar-border:       transparent;                  /* no visible border, rely on bg differentiation */
+    --sidebar-item-hover:   oklch(0 0 0 / 0.04);
+    --sidebar-item-active-bg: var(--brand-50);
+    --sidebar-item-active-fg: var(--brand-700);
+
+    --chart-1: var(--brand-500);
+    --chart-2: var(--success-500);
+    --chart-3: var(--warning-500);
+    --chart-4: var(--danger-500);
+    --chart-5: var(--info-500);
+
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.375rem;
+    --radius:    0.5rem;
+    --radius-md: 0.625rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.08), 0 1px 2px -1px oklch(0 0 0 / 0.06);
+    --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.08), 0 2px 4px -2px oklch(0 0 0 / 0.06);
+    --shadow-lg: 0 10px 15px -3px oklch(0 0 0 / 0.08), 0 4px 6px -4px oklch(0 0 0 / 0.05);
+    --shadow-xl: 0 20px 25px -5px oklch(0 0 0 / 0.10), 0 8px 10px -6px oklch(0 0 0 / 0.05);
+    --shadow-overlay: 0 16px 32px -8px oklch(0 0 0 / 0.18);
+
+    --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-instant: 80ms;
+    --duration-fast:    140ms;
+    --duration-base:    200ms;
+    --duration-slow:    320ms;
+
+    /* ========================================================================
+     * LEGACY ALIASES (HSL) — Tailwind class lama (bg-primary, dst) tetap jalan.
+     * ======================================================================== */
+    --background:           220 14% 98%;
+    --foreground:           224 16% 13%;
+    --card:                 0 0% 100%;
+    --card-foreground:      224 16% 13%;
+    --popover:              0 0% 100%;
+    --popover-foreground:   224 16% 13%;
+    --primary:              263 71% 50%;
+    --primary-foreground:   0 0% 100%;
+    --secondary:            220 14% 96%;
+    --secondary-foreground: 224 16% 13%;
+    --muted:                220 14% 96%;
+    --muted-foreground:     220 10% 46%;
+    --accent:               220 14% 96%;
+    --accent-foreground:    224 16% 13%;
+    --destructive:          0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --success:              160 70% 38%;
+    --success-foreground:   0 0% 100%;
+    --warning:              40 90% 50%;
+    --warning-foreground:   0 0% 100%;
+    --info:                 210 85% 50%;
+    --info-foreground:      0 0% 100%;
+    --border:               220 13% 91%;
+    --input:                220 13% 91%;
+    --ring:                 263 71% 50%;
+    --sidebar:              0 0% 100%;
+    --sidebar-foreground:   224 16% 13%;
+    --sidebar-accent:       263 95% 96%;
+    --sidebar-accent-foreground: 263 60% 35%;
+    --sidebar-border:       220 13% 91%;
+}

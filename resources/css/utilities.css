@@ -1,0 +1,54 @@
+/* ============================================================================
+ * UTILITIES
+ * ============================================================================ */
+@layer utilities {
+    .scrollbar-thin { scrollbar-width: thin; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .text-balance { text-wrap: balance; }
+    .text-pretty  { text-wrap: pretty; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    .animate-fade-in   { animation: ui-fade-in var(--duration-fast) var(--ease-out); }
+    .animate-slide-up  { animation: ui-slide-up var(--duration-base) var(--ease-out); }
+    .animate-scale-in  { animation: ui-scale-in var(--duration-fast) var(--ease-out); }
+    .animate-shake     { animation: ui-shake 360ms var(--ease-in-out); }
+
+    /* State overlay hooks */
+    .hover-overlay { transition: background-color var(--duration-fast) var(--ease-out); }
+    .hover-overlay:hover  { background-color: var(--state-hover); }
+    .hover-overlay:active { background-color: var(--state-pressed); }
+}
+
+/* ============================================================================
+ * KEYFRAMES
+ * ============================================================================ */
+@keyframes ui-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes ui-slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ui-scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ui-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+/* ============================================================================
+ * REDUCED MOTION
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

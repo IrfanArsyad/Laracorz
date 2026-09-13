@@ -7,13 +7,13 @@ namespace App\Observers;
 use App\Models\Module;
 use App\Models\ModuleGroup;
 use App\Models\Role;
+use App\Support\MenuCache;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 /**
- * Flush cache `menu.role.{id}` dan `modules.summary` setiap kali ada
- * perubahan pada Module / ModuleGroup. Tidak pakai cache tags supaya
- * kompatibel dengan driver `database` / `file`.
+ * Flush cache `menu.role.{id}` setiap kali ada perubahan pada
+ * Module / ModuleGroup / Role. Tidak pakai cache tags supaya store menu
+ * tetap bisa dipindah ke driver non-tag (mis. `array` saat testing).
  */
 class MenuCacheObserver
 {
@@ -41,7 +41,7 @@ class MenuCacheObserver
     {
         // Flush per-role menu cache. Tanpa tags, kita iterate role IDs.
         Role::query()->pluck('id')->each(function ($roleId): void {
-            Cache::forget("menu.role.{$roleId}");
+            MenuCache::forgetRole($roleId);
         });
     }
 

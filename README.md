@@ -6,7 +6,7 @@ Core production-ready **Laravel 13 + Vue 3 + Inertia 2** dengan arsitektur modul
 - Laravel 13 (PHP 8.3+)
 - Vue 3 + Composition API + TypeScript
 - Inertia.js 2
-- Tailwind CSS 4 + Sass (sass-embedded)
+- Tailwind CSS 4 (token via CSS custom properties)
 - nwidart/laravel-modules
 - tightenco/ziggy
 - lucide-vue-next, CVA, clsx, tailwind-merge
@@ -61,17 +61,22 @@ app/
 ├── Policies/ModulePolicy.php
 ├── Providers/
 ├── Services/{MenuService,ModuleRegistry,AdminLogService,SystemLogService,SettingService,FileService}.php
-└── Support/{BaseRepository,SearchFilterDto,Traits/...}
-modules/
-├── RoleManagement/Resources/
-├── ModuleManagement/Resources/
-├── UserManagement/Resources/
-├── AdminLog/Resources/
-├── SystemLog/Resources/
-├── Setting/Resources/
-└── Notification/Resources/
+└── Support/{BaseRepository,SearchFilterDto,MenuCache,Traits/...}
+modules/                 ← satu folder per fitur, nama = modules.name di DB
+├── UserManagement/
+├── RoleManagement/
+├── ModuleManagement/
+├── AdminLog/
+├── SystemLog/
+├── Settings/
+├── General/             ← Dashboard, Profile, Notification
+└── Auth/
 resources/
-├── sass/{app.scss,_tokens.scss,_base.scss,_utilities.scss}
+├── css/
+│   ├── app.css          ← entry, hanya @import
+│   ├── tokens/{palette,semantic,dark}.css
+│   ├── {theme,base,utilities}.css
+│   └── brand.css        ← layer override, di-import paling akhir
 └── js/
     ├── app.ts (resolver modular)
     ├── layouts/{AppLayout,AuthLayout,partials}

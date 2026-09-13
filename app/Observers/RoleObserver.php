@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Models\Role;
-use Illuminate\Support\Facades\Cache;
+use App\Support\MenuCache;
 
 class RoleObserver
 {
     public function saved(Role $role): void
     {
-        Cache::forget("menu.role.{$role->id}");
+        MenuCache::forgetRole($role->id);
     }
 
     public function deleted(Role $role): void
     {
-        Cache::forget("menu.role.{$role->id}");
+        MenuCache::forgetRole($role->id);
     }
 }

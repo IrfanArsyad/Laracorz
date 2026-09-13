@@ -1,0 +1,37 @@
+/* ============================================================================
+ * BRAND OVERRIDE LAYER
+ *
+ * Satu-satunya file yang perlu disentuh untuk mengubah tampilan app.
+ * Di-import paling akhir di app.css, jadi apa pun yang ditulis di sini menang
+ * atas token bawaan tanpa perlu !important.
+ *
+ * Aturan main:
+ *   - Override token semantic (tier 2), bukan raw palette (tier 1).
+ *     Ganti --brand-bg, bukan --brand-500, kecuali memang mau menggeser
+ *     seluruh skala warna sekaligus.
+ *   - Nilai warna pakai OKLCH supaya konsisten dengan token lain.
+ *   - Kalau override hanya berlaku di dark mode, tulis di blok .dark.
+ *   - Karena ini CSS custom properties, semua bisa diganti saat runtime:
+ *     document.documentElement.style.setProperty('--brand-bg', '...').
+ *
+ * File ini sengaja kosong secara default — contoh di bawah tinggal dibuka.
+ * ============================================================================ */
+
+/*
+:root {
+    --brand-bg:         oklch(0.595 0.218 263);
+    --brand-bg-hover:   oklch(0.522 0.230 262);
+    --brand-bg-pressed: oklch(0.465 0.221 261);
+    --brand-fg:         oklch(0.99 0 0);
+
+    --radius: 0.5rem;
+
+    --sidebar-bg:             var(--neutral-50);
+    --sidebar-item-active-bg: var(--brand-50);
+    --sidebar-item-active-fg: var(--brand-700);
+}
+
+.dark {
+    --sidebar-bg: oklch(0.208 0.020 260);
+}
+*/

@@ -6,7 +6,7 @@ namespace App\Observers;
 
 use App\Models\ModuleGroup;
 use App\Services\ModuleRegistry;
-use Illuminate\Support\Facades\Cache;
+use App\Support\MenuCache;
 
 class ModuleGroupObserver
 {
@@ -25,6 +25,6 @@ class ModuleGroupObserver
     private function flush(): void
     {
         $this->registry->flush();
-        Cache::flush();
+        MenuCache::flush();
     }
 }

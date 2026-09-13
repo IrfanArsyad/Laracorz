@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Module;
-use Illuminate\Support\Facades\Cache;
+use App\Support\MenuCache;
 
 class ModuleRegistry
 {
-    private const string CACHE_KEY = 'modules.map';
+    private const string CACHE_KEY = MenuCache::MODULE_MAP_KEY;
 
     /**
      * @return array<string, int>
      */
     public function map(): array
     {
-        return Cache::rememberForever(
+        return MenuCache::store()->rememberForever(
             self::CACHE_KEY,
             fn (): array => Module::query()
                 ->withoutTrashed()
@@ -38,6 +38,6 @@ class ModuleRegistry
 
     public function flush(): void
     {
-        Cache::forget(self::CACHE_KEY);
+        MenuCache::store()->forget(self::CACHE_KEY);
     }
 }

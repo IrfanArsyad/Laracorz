@@ -5,7 +5,7 @@ Core modular **Laravel 13 + Vue 3 + Inertia 2**. Permission 100% dari DB (module
 > Baca file ini dulu sebelum eksplorasi. Untuk detail, buka `docs/` (jangan grep buta) — pointer di bawah.
 
 ## Stack
-PHP 8.3+ · Laravel 13 · Inertia 2 · Vue 3 (Composition API + TS) · Tailwind 4 + Sass · nwidart/laravel-modules · Ziggy · PostgreSQL (jsonb + GIN) · Pest · Vitest · Pint · Larastan (lvl 6) · ESLint · Prettier · Telescope (dev).
+PHP 8.3+ · Laravel 13 · Inertia 2 · Vue 3 (Composition API + TS) · Tailwind 4 (token via CSS custom properties, bukan Sass) · nwidart/laravel-modules · Ziggy · PostgreSQL (jsonb + GIN) · Redis (cache menu) · Pest · Vitest · Pint · Larastan (lvl 6) · ESLint · Prettier · Telescope (dev).
 
 ## Perintah
 | Aksi | Perintah |
@@ -23,24 +23,52 @@ PHP 8.3+ · Laravel 13 · Inertia 2 · Vue 3 (Composition API + TS) · Tailwind 
 ## Arsitektur
 **Backend:** Controller tipis → Service → Repository (`app/Support/BaseRepository`). Validasi via Form Request. Response API `{ success, data, message }`.
 
-**Modul** (`modules/`, nwidart) — HANYA 4 modul (README lama menyebut nama lain, abaikan):
-- `AccessControl` — User, Role, Module management.
-- `Activity` — AdminLog, SystemLog (SystemLog dibaca dari file log via `LaravelLogReader`).
-- `Auth` — login, register-less, password reset, verify email.
-- `General` — Dashboard, Notification, Profile, Setting.
+**Modul** (`modules/`) — 8 modul, satu folder per fitur. Nama folder sengaja dibuat sama dengan `modules.name` di DB supaya tidak ambigu:
 
-Struktur tiap modul: `App/Http/{Controllers,Requests}`, `Resources/{Page}/*.vue`, `Routes/{web,api}.php`, `assets/css/{module}.css` (auto-load saat halaman modul dibuka).
+| Folder | `modules.name` di DB | Isi |
+|---|---|---|
+| `UserManagement` | `user-management` | CRUD user |
+| `RoleManagement` | `role-management` | Role + permission matrix |
+| `ModuleManagement` | `module-management` | Module tree + group |
+| `AdminLog` | `admin-log` | Jejak aksi admin |
+| `SystemLog` | `system-log` | Baca file log via `LaravelLogReader` |
+| `Settings` | `settings` | Setting aplikasi |
+| `General` | `dashboard` (hanya Dashboard) | Dashboard, Profile, Notification — Profile & Notification tanpa permission |
+| `Auth` | — | Login, password reset, verify email (tanpa permission) |
+
+Struktur tiap modul: `App/Http/{Controllers,Requests}`, `Resources/*.vue` (+ `Resources/components/`), `Routes/{web,api}.php`, `assets/css/{slug}.css` (auto-load saat halaman modul dibuka).
+
+Modul TIDAK pakai runtime nwidart (tanpa `module.json`/ServiceProvider). Registrasinya cuma tiga: glob `modules/*/Routes/web.php` di `routes/web.php`, PSR-4 `Modules\` → `modules/` di `composer.json`, dan glob Vite di `resources/js/app.ts`. Tambah modul = tambah folder, lalu `composer dump-autoload`.
+
+> Bikin modul baru pakai `php artisan module:make-crud`, BUKAN `module:make`. `module:make` itu command bawaan nwidart yang menghasilkan Blade (lihat `config/modules.php` → `stubs.files` + generator `views`). `module:make-crud` baca `stubs/laracorz/` dan menghasilkan halaman Vue sesuai konvensi di atas.
 
 **Inti `app/`:**
 - Models: `User, Role, Module, ModuleGroup, AdminLog, Setting` (+ `Concerns/`).
 - Services: `MenuService, ModuleRegistry, AdminLogService, SettingService, FileService, LaravelLogReader, UserSessionService`.
-- Support: `BaseRepository, SearchFilterDto, Traits/{Searchable,Sortable,HasActiveScope,SerializesDates,LogsAdminActivity}`.
+- Support: `BaseRepository, SearchFilterDto, MenuCache, Traits/{Searchable,Sortable,HasActiveScope,SerializesDates,LogsAdminActivity}`.
 - Middleware: `EnsureModulePermission, HandleInertiaRequests, SecurityHeaders, SetLocale, TrackLastActivity`.
 - Policy: `ModulePolicy`. Command: `ModuleSync, ModuleMakeCrud, LogsPrune`.
 
 **Permission:** `module_groups` → `modules` (tree). Role menyimpan `read/create/update/delete` sebagai jsonb array of module ID. Enforce via `EnsureModulePermission` + `ModulePolicy`. Tidak ada Spatie/permission library.
 
-**Frontend:** resolver modular di `resources/js/app.ts` (`module::path`). Komponen UI hanya di `resources/js/components/ui/` (CVA + clsx + tailwind-merge, lucide-vue-next). Tokens style di `resources/sass/_tokens.scss`.
+**Cache menu:** menu per-role dan module map disimpan di Redis pada store terpisah (`config/cache.php` → `menu_store`, koneksi `menu` dengan database index sendiri). Semua akses lewat `App\Support\MenuCache` — jangan pakai facade `Cache` langsung untuk data menu. Store terpisah supaya observer bisa flush menu tanpa membuang cache aplikasi lain. Saat testing di-override ke driver `array` (`MENU_CACHE_STORE=array` di `phpunit.xml`).
+
+**Frontend:** resolver modular di `resources/js/app.ts` (`module::path`, mis. `user-management::index` → `modules/UserManagement/Resources/index.vue`). Komponen UI hanya di `resources/js/components/ui/` (CVA + clsx + tailwind-merge, lucide-vue-next).
+
+**Style** (`resources/css/`, tanpa Sass — token pakai CSS custom properties supaya bisa diganti saat runtime):
+
+```
+app.css                 entry, hanya @import + @source + @custom-variant
+tokens/palette.css      tier 1 — skala warna mentah (OKLCH)
+tokens/semantic.css     tier 2 — token yang dipakai komponen + alias legacy HSL
+tokens/dark.css         override token untuk .dark
+theme.css               expose token ke utility Tailwind (@theme)
+base.css                reset + elemen dasar
+utilities.css           utility custom, keyframes, reduced-motion
+brand.css               layer override aplikasi — di-import PALING AKHIR
+```
+
+Untuk mengubah tampilan, tulis di `brand.css` saja; karena di-import terakhir ia menang tanpa `!important`. Override token tier 2 (`--brand-bg`), bukan tier 1 (`--brand-500`), kecuali memang mau menggeser seluruh skala. Urutan `@import` di `app.css` = urutan cascade, jangan diacak.
 
 ## Konvensi
 - `declare(strict_types=1);` + PSR-12. Prefer Eloquent, Form Request, Service/Action, Resource.

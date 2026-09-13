@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Menu Cache Store
+    |--------------------------------------------------------------------------
+    |
+    | Store khusus untuk menu & module map. Dipisah dari cache aplikasi supaya
+    | invalidasi saat module tree berubah tidak ikut membuang cache lain.
+    | Diakses lewat App\Support\MenuCache. Set ke "array" saat testing.
+    |
+    */
+
+    'menu_store' => env('MENU_CACHE_STORE', 'menu'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------
     |
@@ -76,6 +89,12 @@ return [
                     'weight' => 100,
                 ],
             ],
+        ],
+
+        'menu' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_MENU_CONNECTION', 'menu'),
+            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
         ],
 
         'redis' => [
